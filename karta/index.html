@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Карта пар — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Карта пар</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Карта пар</h1>
+  <p>Все пары с 1 сентября по каждому предмету. Розовая клетка — дыра: тему не нашли, материала нет или к паре ещё нет урока. Дыры закрываются по субботам, по мере уроков.</p>
+  <p class="tiho">Материал — конспект, слайды или запись пары. Урок — страница на этом сайте, по которой садишься с тетрадью.</p>
+
+  <div class="karta-knopki">
+    <button class="knopka vtoraya" type="button" data-karta="otkryt">Раскрыть все</button>
+    <button class="knopka vtoraya" type="button" data-karta="zakryt">Свернуть все</button>
+  </div>
+
+  <div id="karta"><p class="tiho">Карта загружается…</p></div>
+
+  <p class="niz">Проектный практикум и научная работа идут делом, а не парами, поэтому их тут нет. Обновлено 20 октября.</p>
+</main>
+<script src="../assets/karta.js"></script>
+<script src="../assets/app.js"></script>
+</body>
+</html>

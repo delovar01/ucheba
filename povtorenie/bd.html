@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: БД — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · БД</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Базы данных: проверь себя</h1>
+  <p class="tiho">Сначала ответь вслух или в тетради, потом открой ответ и сверься.</p>
+
+  <h2>Основы: лекция 1 и твоя страница в тетради</h2>
+
+  <details class="vopros">
+    <summary>1. Чем база данных отличается от СУБД?</summary>
+    <div>
+      <p><b>База данных</b> — сами данные: таблицы, связанные между собой. <b>СУБД</b> (система управления базами данных) — программа, которая эти базы создаёт, хранит и выполняет запросы к ним: PostgreSQL, MySQL, SQLite.</p>
+      <p>Ты пишешь запрос на SQL, СУБД его выполняет и достаёт строки из базы. В DBeaver <code>ml_tracker</code> — это база, а PostgreSQL, к которому DBeaver подключён, — СУБД. Сам DBeaver ни то ни другое: это окно, через которое ты пишешь запросы.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>2. Какие три части у SQL и чем они отличаются?</summary>
+    <div>
+      <ul>
+        <li><b>DDL</b> (определение данных) меняет устройство таблиц: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>.</li>
+        <li><b>DML</b> (работа с данными) работает со строками: <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.</li>
+        <li><b>DCL</b> (управление доступом) раздаёт права: <code>GRANT</code>, <code>REVOKE</code>.</li>
+      </ul>
+      <p>Как запомнить: трогает устройство таблицы — DDL, строки — DML, права — DCL.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>3. К какой части относятся ALTER TABLE и UPDATE? Почему к разным?</summary>
+    <div>
+      <p><code>ALTER TABLE</code> — DDL: он меняет саму таблицу, например добавляет столбец. <code>UPDATE</code> — DML: таблица остаётся той же, меняются значения в строках.</p>
+      <p>Оба слова похожи на «изменить», поэтому их и путают. Спрашивай себя: меняется форма таблицы или её содержимое?</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>4. Что такое первичный ключ и внешний ключ?</summary>
+    <div>
+      <p><b>Первичный ключ</b> — столбец, по которому строка отличается от всех остальных. Он не пустой и не повторяется, у таблицы он один. Обычно это <code>id</code>.</p>
+      <p><b>Внешний ключ</b> — столбец, значение которого обязано совпасть с первичным ключом строки в другой таблице. Так таблицы связываются. В уроке это <code>orders.student_id</code>, он ссылается на <code>students.id</code>. В твоей базе — <code>experiments.researcher_id</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>5. Какие три вида целостности проверяет СУБД?</summary>
+    <div>
+      <ul>
+        <li><b>Целостность сущностей</b>: первичный ключ не пустой и уникальный. Две строки с одним <code>id</code> база не пустит.</li>
+        <li><b>Ссылочная</b>: внешний ключ указывает на существующую строку. Заказ студента номер 9, когда такого студента нет, не вставится.</li>
+        <li><b>Доменная</b>: значение из допустимых. Сюда входят правильный тип, <code>NOT NULL</code> (значение обязательно, пустым быть не может) и <code>CHECK</code> (своё условие). Например, <code>CHECK (price &gt; 0)</code> не пустит цену −50.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>6. Какая целостность нарушится: (а) студент с id = NULL; (б) заказ с student_id = 999, а такого студента нет; (в) цена −3 при CHECK (price &gt; 0)?</summary>
+    <div>
+      <p>(а) целостность сущностей: первичный ключ не бывает пустым.</p>
+      <p>(б) ссылочная: внешний ключ ссылается на строку, которой нет.</p>
+      <p>(в) доменная: значение вне допустимых.</p>
+      <p>Во всех трёх случаях база откажется вставлять строку и покажет ошибку. В этом смысл целостности: правила живут в самой базе, а не в голове у того, кто вставляет данные.</p>
+    </div>
+  </details>
+
+  <h2>После урока «LEFT JOIN и GROUP BY»</h2>
+  <p class="tiho">Таблицы те же: студенты Аня, Борис, Вика, Гоша и пять заказов. У Гоши заказов нет.</p>
+
+  <details class="vopros">
+    <summary>7. Какая таблица в запросе левая, а какая правая?</summary>
+    <div>
+      <p>Левая — та, что после <code>FROM</code>, правая — та, что после <code>JOIN</code>. В <code>FROM students s LEFT JOIN orders o</code> левая <code>students</code>, правая <code>orders</code>.</p>
+      <p><code>LEFT JOIN</code> сохраняет все строки левой. Поменяешь таблицы местами — сохранится другая.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>8. Когда LEFT JOIN выдаёт то же самое, что обычный JOIN?</summary>
+    <div>
+      <p>Когда у каждой строки левой таблицы нашлась пара. Терять некого, и <code>NULL</code> не появляется. Так было 16.10 в твоей базе: у всех исследователей были запуски.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>9. Как найти студентов без заказов? И почему нельзя писать = NULL?</summary>
+    <div>
+<pre><code class="sql">SELECT s.name
+FROM students s
+LEFT JOIN orders o
+  ON o.student_id = s.id
+WHERE o.id IS NULL;</code></pre>
+      <p><code>NULL</code> ничему не равен, даже другому <code>NULL</code>, поэтому <code>= NULL</code> не пропустит ни одной строки. Пустоту проверяют только через <code>IS NULL</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>10. У Гоши ноль заказов. Что даст COUNT(*), а что COUNT(o.id) после LEFT JOIN?</summary>
+    <div>
+      <p><code>COUNT(*)</code> даст 1: после <code>LEFT JOIN</code> у Гоши одна строка, пусть и с <code>NULL</code>. <code>COUNT(o.id)</code> даст 0: он пропускает <code>NULL</code>.</p>
+      <p>Правило: при <code>LEFT JOIN</code> считай <code>COUNT(id правой таблицы)</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>11. Что можно писать в SELECT, если в запросе есть GROUP BY?</summary>
+    <div>
+      <p>Только столбцы из <code>GROUP BY</code> и агрегатные функции: <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>. Любой другой столбец даст ошибку: в кучке у него несколько разных значений, и одну строку из них не сделать.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>12. Чем WHERE отличается от HAVING?</summary>
+    <div>
+      <p><code>WHERE</code> отбирает строки до раскладки по кучкам. <code>HAVING</code> отбирает кучки после, по их итогу. Условие с <code>COUNT</code> или <code>SUM</code> пишут только в <code>HAVING</code>.</p>
+      <p>Порядок работы базы: <code>FROM</code> и <code>JOIN</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>HAVING</code> → <code>SELECT</code>.</p>
+    </div>
+  </details>
+
+  <p class="niz"><a href="./">← Повторение</a> · <a href="../uroki/bd-left-join-group-by.html">Урок: LEFT JOIN и GROUP BY</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

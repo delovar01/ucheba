@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>LEFT JOIN и GROUP BY — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-left-join-group-by">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · LEFT JOIN и GROUP BY</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>LEFT JOIN и GROUP BY</h1>
+  <p class="tiho">Базы данных · под самостоятельную 2, задания 8–11 · около 50 минут</p>
+
+  <p>Ты уже умеешь доставать строки через <code>SELECT</code>, фильтровать через <code>WHERE</code>, сортировать через <code>ORDER BY</code> и склеивать две таблицы через <code>JOIN</code>. Сегодня две новые вещи: как не потерять строки при склейке и как считать по группам. Девять шагов, в каждом одна новая мелочь.</p>
+  <p>Как проходить: читаешь шаг, переписываешь жёлтую рамку в тетрадь, решаешь «сделай сам» на бумаге и только потом открываешь ответ. Если в шаге что-то непонятно, дальше не иди: напиши, какой шаг и что именно.</p>
+  <p>Большие и маленькие буквы в командах SQL не важны: <code>SELECT</code> и <code>select</code> — одно и то же. В уроке команды большими, чтобы их было видно в тексте. Ты пишешь маленькими, это правильно.</p>
+
+  <h2>Наши таблицы</h2>
+  <p>Студенты заказывают в буфете. Таблиц две, строк мало, чтобы любой ответ можно было проверить глазами.</p>
+
+  <div class="ryadom">
+    <div class="tablica">
+      <div class="imya">students</div>
+      <table>
+        <tr><th>id</th><th>name</th></tr>
+        <tr><td>1</td><td>Аня</td></tr>
+        <tr><td>2</td><td>Борис</td></tr>
+        <tr><td>3</td><td>Вика</td></tr>
+        <tr><td>4</td><td>Гоша</td></tr>
+      </table>
+    </div>
+    <div class="tablica">
+      <div class="imya">orders</div>
+      <table>
+        <tr><th>id</th><th>student_id</th><th>item</th><th>price</th></tr>
+        <tr><td>1</td><td>1</td><td>кофе</td><td>120</td></tr>
+        <tr><td>2</td><td>1</td><td>пирожок</td><td>60</td></tr>
+        <tr><td>3</td><td>2</td><td>кофе</td><td>120</td></tr>
+        <tr><td>4</td><td>3</td><td>сок</td><td>90</td></tr>
+        <tr><td>5</td><td>1</td><td>сок</td><td>90</td></tr>
+      </table>
+    </div>
+  </div>
+  <p><code>student_id</code> в заказе — номер студента, то есть его <code>id</code> из первой таблицы. Такой столбец называется внешним ключом: он ссылается на строку другой таблицы. Посчитай сам: у Ани три заказа (номера 1, 2 и 5), у Бориса и Вики по одному, у Гоши ни одного. Гоша нам ещё понадобится.</p>
+
+  <div class="tetrad">
+    <p>Перерисуй обе таблицы в тетрадь целиком. Все задачи урока будут на них.</p>
+  </div>
+
+  <details class="vopros">
+    <summary>Хочешь проверять каждый шаг в DBeaver? Вот скрипт</summary>
+    <div>
+      <p>Скрипт создаёт эти две таблицы и заполняет их. <code>CREATE TABLE</code> и <code>INSERT</code> ты писал в самостоятельной 1. Напомню слова: <code>INT</code> — целое число, <code>TEXT</code> — текст, <code>PRIMARY KEY</code> — первичный ключ, <code>REFERENCES</code> — внешний ключ, ссылка на другую таблицу.</p>
+<pre><code class="sql">CREATE TABLE students (
+  id   INT PRIMARY KEY,
+  name TEXT
+);
+CREATE TABLE orders (
+  id         INT PRIMARY KEY,
+  student_id INT REFERENCES students(id),
+  item       TEXT,
+  price      INT
+);
+INSERT INTO students VALUES
+  (1, 'Аня'),
+  (2, 'Борис'),
+  (3, 'Вика'),
+  (4, 'Гоша');
+INSERT INTO orders VALUES
+  (1, 1, 'кофе', 120),
+  (2, 1, 'пирожок', 60),
+  (3, 2, 'кофе', 120),
+  (4, 3, 'сок', 90),
+  (5, 1, 'сок', 90);</code></pre>
+      <p>В DBeaver вставь всё в редактор SQL и нажми <b>Alt+X</b>: так выполнится весь скрипт, а не одна строка, как по Ctrl+Enter.</p>
+      <p>Когда пройдёшь урок, убери эти таблицы, чтобы не мешали в самостоятельной 2: <code>DROP TABLE orders; DROP TABLE students;</code> Сначала <code>orders</code>: она ссылается на <code>students</code>, и база не даст удалить таблицу, на которую кто-то ссылается.</p>
+    </div>
+  </details>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>Обычный JOIN теряет тех, у кого нет пары</h2>
+    <p>Начнём с того, что ты уже знаешь. Склеим студентов с их заказами:</p>
+<pre><code class="sql">SELECT s.name, o.item
+FROM students s
+JOIN orders o
+  ON o.student_id = s.id;</code></pre>
+    <p><code>s</code> и <code>o</code> — короткие имена таблиц. Их пишут сразу после названия таблицы, чтобы дальше писать <code>s.name</code> вместо <code>students.name</code>. <code>ON</code> — правило склейки: строку заказа приклеиваем к студенту, если номер студента в заказе равен его <code>id</code>.</p>
+    <p class="novoe"><code>JOIN</code> оставляет только строки, для которых нашлась пара. Студент без заказов в результат не попадёт.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Не запуская запрос, напиши в тетради, что он выдаст: сколько строк и какие. Кого из студентов в ответе не будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <div class="tablica"><table>
+            <tr><th>name</th><th>item</th></tr>
+            <tr><td>Аня</td><td>кофе</td></tr>
+            <tr><td>Аня</td><td>пирожок</td></tr>
+            <tr><td>Борис</td><td>кофе</td></tr>
+            <tr><td>Вика</td><td>сок</td></tr>
+            <tr><td>Аня</td><td>сок</td></tr>
+          </table></div>
+          <p>Пять строк, по одной на каждый заказ. Гоши нет: для него в <code>orders</code> не нашлось ни одной строки, склеивать не с чем. Порядок строк база может выдать любой, если не написать <code>ORDER BY</code>.</p>
+          <p class="oshibka">Ответить «4 строки», по числу студентов. Строк столько, сколько нашлось пар, а у Ани пар три.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>JOIN</code> = только пары. У кого нет пары, тот выпадает из результата.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>LEFT JOIN сохраняет всех из левой таблицы</h2>
+    <p>Часто терять нельзя: нужен список всех студентов, даже тех, кто ничего не заказал. Для этого меняем одно слово:</p>
+<pre><code class="sql">SELECT s.name, o.item
+FROM students s
+LEFT JOIN orders o
+  ON o.student_id = s.id;</code></pre>
+    <p>Откуда «левая» и «правая». Запиши середину запроса в одну строку: <code>students LEFT JOIN orders</code>. Слева от слова <code>JOIN</code> стоит <code>students</code>, это левая таблица. Справа <code>orders</code>, это правая. То есть левая — та, что после <code>FROM</code>, правая — та, что после <code>JOIN</code>.</p>
+    <p>Ещё понадобится слово <code>NULL</code>. Оно значит «значения нет»: это не ноль и не пустая строка, это пустота в клетке.</p>
+    <p class="novoe"><code>LEFT JOIN</code> оставляет все строки левой таблицы. Если пары нет, в столбцах правой таблицы ставится <code>NULL</code>.</p>
+    <p>Вот что выдаст запрос. <code>NULL</code> выделен цветом:</p>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>item</th></tr>
+      <tr><td>Аня</td><td>кофе</td></tr>
+      <tr><td>Аня</td><td>пирожок</td></tr>
+      <tr><td>Аня</td><td>сок</td></tr>
+      <tr><td>Борис</td><td>кофе</td></tr>
+      <tr><td>Вика</td><td>сок</td></tr>
+      <tr class="vydelit"><td>Гоша</td><td class="null">NULL</td></tr>
+    </table></div>
+    <p>Те же пять пар, что в шаге 1, и шестая строка — Гоша. Ему не с чем склеиться, поэтому вместо товара пусто.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос: все студенты и цена каждого их заказа (столбцы <code>name</code> и <code>price</code>). Потом нарисуй, что он выдаст.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT s.name, o.price
+FROM students s
+LEFT JOIN orders o
+  ON o.student_id = s.id;</code></pre>
+          <p>Шесть строк: у Ани 120, 60 и 90, у Бориса 120, у Вики 90, у Гоши <code>NULL</code>.</p>
+          <p class="oshibka">Начать с <code>FROM orders</code> и приклеивать студентов. Тогда левой таблицей станут заказы, и Гоша пропадёт, хотя написано <code>LEFT JOIN</code>. Про это следующий шаг.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Левая таблица — после <code>FROM</code>, правая — после <code>JOIN</code>.</p>
+      <p><code>LEFT JOIN</code>: левая остаётся вся. Нет пары → в столбцах правой <code>NULL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>Какая таблица слева, ту и сохраняем</h2>
+    <p>Поменяем таблицы местами, <code>LEFT JOIN</code> оставим:</p>
+<pre><code class="sql">SELECT s.name, o.item
+FROM orders o
+LEFT JOIN students s
+  ON o.student_id = s.id;</code></pre>
+    <p class="novoe">Теперь левая таблица — <code>orders</code>. Сохраняются все заказы, а не все студенты.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько строк выдаст этот запрос? Будет ли в нём <code>NULL</code>? Будет ли Гоша?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Пять строк, по одной на заказ, и ни одного <code>NULL</code>: у каждого заказа есть студент, пара нашлась всегда. Гоши нет: сохраняли заказы, а у Гоши заказов нет. Результат совпал с обычным <code>JOIN</code> из шага 1.</p>
+          <p class="oshibka">Думать, что <code>LEFT JOIN</code> всегда даёт <code>NULL</code> и всех людей. Он сохраняет только левую таблицу. Если у всех её строк есть пара, он ничем не отличается от <code>JOIN</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Кого нельзя потерять, ту таблицу и пишу после <code>FROM</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>Найти тех, у кого нет пары</h2>
+    <p>Это задание 10 из самостоятельной: «записи без пары». Берём результат шага 2 и оставляем только строки, где заказа не нашлось:</p>
+<pre><code class="sql">SELECT s.name
+FROM students s
+LEFT JOIN orders o
+  ON o.student_id = s.id
+WHERE o.id IS NULL;</code></pre>
+    <p>Результат — одна строка: Гоша.</p>
+    <p class="novoe"><code>IS NULL</code> проверяет, что значения нет. Писать <code>= NULL</code> нельзя: <code>NULL</code> ничему не равен, даже другому <code>NULL</code>, поэтому такое сравнение не проходит ни для одной строки.</p>
+    <p>Проверяем <code>o.id</code>, потому что у настоящего заказа <code>id</code> заполнен всегда. Если он пустой, значит заказа нет вообще.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что выдаст тот же запрос, если вместо <code>LEFT JOIN</code> написать обычный <code>JOIN</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Ноль строк. Обычный <code>JOIN</code> выкинул Гошу ещё до <code>WHERE</code> (шаг 1), и строк с пустым заказом просто не осталось.</p>
+          <p class="oshibka">Написать <code>WHERE o.id = NULL</code>. Ошибки база не покажет, просто вернёт пустой результат, и покажется, что людей без заказов нет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Кто без пары: <code>LEFT JOIN</code> + <code>WHERE &lt;id правой таблицы&gt; IS NULL</code>.</p>
+      <p>Только <code>IS NULL</code>, никогда <code>= NULL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>Агрегатная функция: много строк → одно число</h2>
+    <p>Теперь вторая тема, подсчёты. Пока без склеек, только таблица <code>orders</code>:</p>
+<pre><code class="sql">SELECT COUNT(*) FROM orders;   -- 5
+SELECT SUM(price) FROM orders; -- 480</code></pre>
+    <p>Серый текст после <code>--</code> — комментарий. База его не читает, это пометка для человека. Здесь в комментарии записан ответ.</p>
+    <p class="novoe">Агрегатная функция берёт много строк и отдаёт одно число. <code>COUNT(*)</code> считает строки, <code>SUM</code> складывает, <code>AVG</code> считает среднее, <code>MIN</code> и <code>MAX</code> находят наименьшее и наибольшее.</p>
+    <p>Проверь глазами: заказов пять, 120 + 60 + 120 + 90 + 90 = 480.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос, который выдаст цену самого дорогого заказа и среднюю цену заказа, оба числа в одной строке. Посчитай ответ руками.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT MAX(price), AVG(price)
+FROM orders;</code></pre>
+          <p>120 и 96, потому что 480 / 5 = 96. Две функции через запятую дают одну строку с двумя столбцами. В DBeaver среднее покажется как <code>96.0000000000000000</code>: это то же число 96, просто база пишет дробную часть.</p>
+          <p class="oshibka">Добавить к функции обычный столбец: <code>SELECT item, COUNT(*) FROM orders;</code> PostgreSQL ответит ошибкой <code>column "orders.item" must appear in the GROUP BY clause</code>. <code>COUNT</code> сворачивает пять строк в одну, а товар в каждой строке свой. Какой из них поставить рядом с числом, база не знает. Это чинит следующий шаг.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>COUNT(*)</code> — сколько строк. <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code> — по столбцу. Без группировки итог всегда одна строка.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>GROUP BY: раскладываем строки по кучкам</h2>
+    <p>Хотим знать не «сколько заказов всего», а «сколько у каждого студента». Для этого строки сначала раскладывают по кучкам:</p>
+<pre><code class="sql">SELECT student_id, COUNT(*)
+FROM orders
+GROUP BY student_id;</code></pre>
+    <p class="novoe"><code>GROUP BY student_id</code> собирает в одну кучку строки с одинаковым <code>student_id</code>. Агрегатная функция считается внутри каждой кучки отдельно, и на каждую кучку выходит одна строка результата.</p>
+    <p>Вот как база раскладывает <code>orders</code>. Цвет — это кучка:</p>
+    <div class="ryadom">
+      <div class="tablica"><table>
+        <tr><th>id</th><th>student_id</th><th>item</th><th>price</th></tr>
+        <tr class="kuchka-1"><td>1</td><td>1</td><td>кофе</td><td>120</td></tr>
+        <tr class="kuchka-1"><td>2</td><td>1</td><td>пирожок</td><td>60</td></tr>
+        <tr class="kuchka-1"><td>5</td><td>1</td><td>сок</td><td>90</td></tr>
+        <tr class="kuchka-2"><td>3</td><td>2</td><td>кофе</td><td>120</td></tr>
+        <tr class="kuchka-3"><td>4</td><td>3</td><td>сок</td><td>90</td></tr>
+      </table></div>
+      <div class="strelka" aria-hidden="true"></div>
+      <div class="tablica"><table>
+        <tr><th>student_id</th><th>count</th></tr>
+        <tr class="kuchka-1"><td>1</td><td>3</td></tr>
+        <tr class="kuchka-2"><td>2</td><td>1</td></tr>
+        <tr class="kuchka-3"><td>3</td><td>1</td></tr>
+      </table></div>
+    </div>
+    <p>Столбец <code>count</code> в результате PostgreSQL называет сам, по имени функции. Гоши тут нет и быть не может: таблица <code>orders</code> про него ничего не знает.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос: для каждого <code>student_id</code> сумма его заказов. Посчитай результат руками.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT student_id, SUM(price)
+FROM orders
+GROUP BY student_id;</code></pre>
+          <p>1 → 270 (120 + 60 + 90), 2 → 120, 3 → 90.</p>
+          <p class="oshibka">Добавить в <code>SELECT</code> столбец, которого нет в <code>GROUP BY</code>: <code>SELECT student_id, item, COUNT(*) … GROUP BY student_id</code>. В кучке <code>student_id = 1</code> три разных товара, и одну строку из них не сделать. Будет та же ошибка, что в шаге 5.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>GROUP BY x</code>: одна кучка на каждое значение <code>x</code>, одна строка результата на кучку.</p>
+      <p>В <code>SELECT</code> можно только то, что стоит в <code>GROUP BY</code>, и агрегатные функции.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>Кучки по имени: GROUP BY после JOIN</h2>
+    <p>Номера студентов читать неудобно, хочется имена. Имена лежат в другой таблице, поэтому сначала склеиваем, потом раскладываем по кучкам:</p>
+<pre><code class="sql">SELECT s.name, COUNT(*)
+FROM students s
+JOIN orders o
+  ON o.student_id = s.id
+GROUP BY s.name;</code></pre>
+    <p class="novoe">Группировать можно по столбцу любой из склеенных таблиц. База работает по порядку: <code>FROM</code> и <code>JOIN</code> собирают большую таблицу, <code>GROUP BY</code> режет её на кучки, <code>SELECT</code> считает в каждой.</p>
+    <p>Вот эти два действия по очереди. Слева склейка из шага 1, разложенная по именам. Справа то, что выдаст запрос:</p>
+    <div class="ryadom">
+      <div class="tablica">
+        <div class="podpis">1. склеили (<code>JOIN</code>)</div>
+        <table>
+          <tr><th>s.name</th><th>o.item</th></tr>
+          <tr class="kuchka-1"><td>Аня</td><td>кофе</td></tr>
+          <tr class="kuchka-1"><td>Аня</td><td>пирожок</td></tr>
+          <tr class="kuchka-1"><td>Аня</td><td>сок</td></tr>
+          <tr class="kuchka-2"><td>Борис</td><td>кофе</td></tr>
+          <tr class="kuchka-3"><td>Вика</td><td>сок</td></tr>
+        </table>
+      </div>
+      <div class="strelka" aria-hidden="true"></div>
+      <div class="tablica">
+        <div class="podpis">2. кучки и счёт</div>
+        <table>
+          <tr><th>name</th><th>count</th></tr>
+          <tr class="kuchka-1"><td>Аня</td><td>3</td></tr>
+          <tr class="kuchka-2"><td>Борис</td><td>1</td></tr>
+          <tr class="kuchka-3"><td>Вика</td><td>1</td></tr>
+        </table>
+      </div>
+    </div>
+    <p>Заметь: <code>SELECT</code> пишется первым, а выполняется последним. Поэтому в нём можно считать то, что приготовили <code>JOIN</code> и <code>GROUP BY</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос: имя студента и сколько он потратил. Почему в ответе не будет Гоши?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT s.name, SUM(o.price)
+FROM students s
+JOIN orders o
+  ON o.student_id = s.id
+GROUP BY s.name;</code></pre>
+          <p>Аня 270, Борис 120, Вика 90. Гоши нет, потому что обычный <code>JOIN</code> выкинул его ещё на склейке, до кучек. Как его вернуть — следующий шаг.</p>
+          <p class="oshibka">Группировать только по имени, когда в базе бывают тёзки. Два разных Бориса сольются в одну кучку. Надёжнее <code>GROUP BY s.id, s.name</code>: <code>id</code> не повторяется. В нашем примере тёзок нет, но в своей базе помни про это.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Порядок работы базы: <code>FROM</code> и <code>JOIN</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>SELECT</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>Всех со счётом, даже с нулём: COUNT(столбец)</h2>
+    <p>Соединим шаг 2 и шаг 7: всех студентов, и у каждого число заказов. Первая попытка:</p>
+<pre><code class="sql">SELECT s.name, COUNT(*)
+FROM students s
+LEFT JOIN orders o
+  ON o.student_id = s.id
+GROUP BY s.name;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>count</th></tr>
+      <tr><td>Аня</td><td>3</td></tr>
+      <tr><td>Борис</td><td>1</td></tr>
+      <tr><td>Вика</td><td>1</td></tr>
+      <tr class="vydelit"><td>Гоша</td><td>1</td></tr>
+    </table></div>
+    <p>У Гоши 1, хотя заказов у него нет. Посмотри, из чего база считала. Это склейка из шага 2, только вместо товара номер заказа <code>o.id</code>:</p>
+    <div class="tablica"><table>
+      <tr><th>s.name</th><th>o.id</th></tr>
+      <tr class="kuchka-1"><td>Аня</td><td>1</td></tr>
+      <tr class="kuchka-1"><td>Аня</td><td>2</td></tr>
+      <tr class="kuchka-1"><td>Аня</td><td>5</td></tr>
+      <tr class="kuchka-2"><td>Борис</td><td>3</td></tr>
+      <tr class="kuchka-3"><td>Вика</td><td>4</td></tr>
+      <tr class="kuchka-4"><td>Гоша</td><td class="null">NULL</td></tr>
+    </table></div>
+    <p>В кучке Гоши одна строка. <code>COUNT(*)</code> считает строки и честно насчитал одну. Ему всё равно, что в строке пусто.</p>
+    <p class="novoe"><code>COUNT(столбец)</code> считает только заполненные значения и пропускает <code>NULL</code>. <code>COUNT(o.id)</code> у Гоши даст 0.</p>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>COUNT(*)</th><th>COUNT(o.id)</th></tr>
+      <tr><td>Аня</td><td>3</td><td>3</td></tr>
+      <tr><td>Борис</td><td>1</td><td>1</td></tr>
+      <tr><td>Вика</td><td>1</td><td>1</td></tr>
+      <tr class="vydelit"><td>Гоша</td><td>1</td><td>0</td></tr>
+    </table></div>
+    <p>Почему именно <code>o.id</code>: это столбец правой таблицы, который у настоящего заказа заполнен всегда. Значит, он пустой только там, где заказа нет. Тот же приём, что в шаге 4.</p>
+    <p>Остальные функции на пустой кучке дают не 0, а <code>NULL</code>: <code>SUM(o.price)</code> у Гоши будет <code>NULL</code>. Ноль умеет давать только <code>COUNT</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Закрой экран и напиши в тетради с нуля, не подсматривая: все студенты и число их заказов, у Гоши должен быть 0. Потом сверь с ответом каждую строку: откуда берём (<code>FROM</code>), что приклеиваем, по какому правилу, по чему кучки, что считаем.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT s.name, COUNT(o.id)
+-- левая таблица: все студенты
+FROM students s
+-- приклеиваем заказы по номеру студента
+LEFT JOIN orders o
+  ON o.student_id = s.id
+-- одна кучка на студента
+GROUP BY s.name;</code></pre>
+          <p>Аня 3, Борис 1, Вика 1, Гоша 0.</p>
+          <p class="oshibka">Оставить <code>COUNT(*)</code>. Запрос работает без ошибки, только у всех, у кого ноль, будет стоять 1. Заметить такое можно, только если знаешь, что в данных есть человек без заказов.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Считаю с <code>LEFT JOIN</code> → <code>COUNT(&lt;id правой таблицы&gt;)</code>, а не <code>COUNT(*)</code>.</p>
+      <p><code>COUNT(*)</code> считает строки, <code>COUNT(столбец)</code> — непустые значения.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>HAVING: фильтр по кучкам</h2>
+    <p>Это задание 11 из самостоятельной. Нужны только те студенты, у кого два заказа и больше:</p>
+<pre><code class="sql">SELECT s.name, COUNT(o.id)
+FROM students s
+LEFT JOIN orders o
+  ON o.student_id = s.id
+GROUP BY s.name
+HAVING COUNT(o.id) >= 2;</code></pre>
+    <p>Результат — одна строка: Аня, 3.</p>
+    <p class="novoe"><code>HAVING</code> отбирает кучки по их итогу. Он работает после <code>GROUP BY</code>, когда числа уже посчитаны. <code>WHERE</code> работает раньше, со строками, и итогов кучек ещё не знает.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос: студенты, которые потратили больше 100 рублей, и сколько именно. Сначала посчитай руками, кто пройдёт.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT s.name, SUM(o.price)
+FROM students s
+JOIN orders o
+  ON o.student_id = s.id
+GROUP BY s.name
+HAVING SUM(o.price) > 100;</code></pre>
+          <p>Аня 270 и Борис 120. Вика с 90 не прошла. Тут хватит обычного <code>JOIN</code>: кто ничего не заказывал, больше 100 всё равно не потратил.</p>
+          <p class="oshibka">Написать условие на сумму в <code>WHERE</code>: <code>WHERE SUM(o.price) &gt; 100</code>. PostgreSQL ответит <code>aggregate functions are not allowed in WHERE</code>. Условие на обычный столбец пишут в <code>WHERE</code>, на итог кучки — в <code>HAVING</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Порядок записи запроса целиком:</p>
+      <p><code>SELECT … FROM … JOIN … ON … WHERE … GROUP BY … HAVING … ORDER BY … LIMIT …</code></p>
+      <p><code>WHERE</code> — до кучек, про строки. <code>HAVING</code> — после, про итоги.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на самостоятельную 2</h2>
+    <p>Твоя база <code>ml_tracker</code> устроена так же: <code>researchers</code> — как студенты, <code>experiments</code> — как заказы, связь через <code>researcher_id</code>.</p>
+    <ul>
+      <li>Задание 8, подсчёт по группам — шаги 6 и 7.</li>
+      <li>Задание 9, агрегаты по группам — шаги 5–7, несколько функций в одном <code>SELECT</code>.</li>
+      <li>Задание 10, записи без пары — шаг 4.</li>
+      <li>Задание 11, фильтр после группировки — шаг 9.</li>
+      <li>Задания 13, 14, 16 тоже стоят на <code>GROUP BY</code>, к ним будет следующий урок.</li>
+    </ul>
+
+    <h3>Почему 16.10 JOIN и LEFT JOIN выдали одно и то же</h3>
+    <p>В твоей базе у каждого исследователя есть запуски. Гоши там нет, терять некого, и оба запроса дают одинаковый ответ. Это шаг 3: когда у всех есть пара, <code>LEFT JOIN</code> ничем не отличается от <code>JOIN</code>.</p>
+    <p>Чтобы увидеть разницу на своей базе, нужен свой Гоша — человек без запусков. Добавим его одной строкой:</p>
+<pre><code class="sql">INSERT INTO researchers
+  (full_name, email, grp)
+VALUES
+  ('Петров Иван',
+   'petrov@example.com',
+   'РИ-250932');</code></pre>
+    <p><code>INSERT INTO</code> добавляет в таблицу одну строку: в скобках после имени таблицы — какие столбцы заполняем, после <code>VALUES</code> — что в них пишем, в том же порядке. <code>email</code> в твоей таблице обязателен и не может повторяться, поэтому даём выдуманный. 16.10 его в строке не было, и база такую строку не пустила бы.</p>
+    <p>Запусков у Петрова нет. Теперь запрос из шага 8 на твоей базе покажет его с нулём, а запрос с обычным <code>JOIN</code> его потеряет. Если база ругнётся на какой-то другой столбец, посмотри, какие столбцы есть: <code>SELECT * FROM researchers;</code></p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: LEFT JOIN и GROUP BY">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Первые четыре на тех же двух таблицах, последняя на твоей базе. Ответов здесь нет: решай в тетради, впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю на твоих же запросах и разберу, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Для каждого товара: сколько раз его заказали и на какую сумму.
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Все студенты и сколько каждый потратил, от большего к меньшему (<code>ORDER BY … DESC</code> ты писал 16.10). Что будет стоять у Гоши, 0 или <code>NULL</code>, и почему?
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Товары, которые заказали больше одного раза.
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Не запуская, скажи, что выдаст этот запрос: сколько строк и будет ли в нём Гоша. Объясни почему.
+<pre><code class="sql">SELECT s.name, COUNT(*)
+FROM orders o
+LEFT JOIN students s
+  ON o.student_id = s.id
+GROUP BY s.name;</code></pre>
+      <textarea name="z4" placeholder="Сколько строк, есть ли Гоша, почему" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> В своей базе <code>ml_tracker</code> найди исследователей, у которых нет ни одного запуска. Запусти в DBeaver, пришли запрос и скрин результата. Если результат пустой, напиши, почему так может быть.
+      <textarea name="z5" placeholder="SELECT …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="./">← Все уроки</a> · <a href="../povtorenie/bd.html">Повторение по БД</a> · <a href="../karta/">Карта пар</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>
