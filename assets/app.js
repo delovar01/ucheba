@@ -135,7 +135,7 @@
       return 'через ' + dney + ' ' + slovo;
     };
     const spisok = window.SROKI
-      .filter(s => !s.do || new Date(s.do).getTime() > seychas - den)
+      .filter(s => !s.sdano && (!s.do || new Date(s.do).getTime() > seychas - den))
       .sort((a, b) => (a.do ? new Date(a.do) : Infinity) - (b.do ? new Date(b.do) : Infinity));
     gorit.innerHTML = spisok.map(s => {
       // срок «1.11 00:00» показываем как последний день — 31.10

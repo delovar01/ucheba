@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>CASE и даты — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-case-daty">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · CASE и даты</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>CASE и даты</h1>
+  <p class="tiho">Базы данных · лаба 14.10 · под самостоятельную 2, задания 12, 13 и 15 · около 50 минут</p>
+
+  <p>Ты уже умеешь фильтровать через <code>WHERE</code>, считать через <code>COUNT</code> и <code>SUM</code> и делить строки на кучки через <code>GROUP BY</code>. Если это ещё плывёт, сначала пройди <a href="bd-left-join-group-by.html">урок про LEFT JOIN и GROUP BY</a>. Сегодня две новые темы: как поставить строке метку по условию и как достать из даты месяц или день недели. Девять шагов, в каждом одна новая вещь.</p>
+  <p>Как проходить: читаешь шаг, переписываешь жёлтую рамку в тетрадь, решаешь «сделай сам» на бумаге и только потом открываешь ответ. Непонятно — дальше не иди, напиши номер шага.</p>
+
+  <h2>Наша таблица</h2>
+  <p>Одна таблица, шесть строк. Это запуски обучения моделей, как в твоей базе <code>ml_tracker</code>, только проще.</p>
+
+  <div class="tablica">
+    <div class="imya">runs</div>
+    <table>
+      <tr><th>id</th><th>researcher</th><th>started_at</th><th>status</th><th>accuracy</th></tr>
+      <tr><td>1</td><td>Аня</td><td>2026-09-14</td><td>done</td><td>0.91</td></tr>
+      <tr><td>2</td><td>Аня</td><td>2026-09-28</td><td>failed</td><td class="null">NULL</td></tr>
+      <tr><td>3</td><td>Борис</td><td>2026-10-03</td><td>done</td><td>0.78</td></tr>
+      <tr><td>4</td><td>Вика</td><td>2026-10-05</td><td>done</td><td>0.85</td></tr>
+      <tr><td>5</td><td>Борис</td><td>2026-10-12</td><td>done</td><td>0.62</td></tr>
+      <tr><td>6</td><td>Аня</td><td>2026-10-14</td><td>running</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+  <p><code>status</code> — что с запуском: <code>done</code> закончился, <code>failed</code> упал, <code>running</code> ещё идёт. <code>accuracy</code> — доля верных ответов модели, от 0 до 1. У упавшего и идущего запуска её нет, там <code>NULL</code>, то есть пустая клетка. Дата пишется год-месяц-день: <code>2026-10-03</code> — это 3 октября.</p>
+
+  <div class="tetrad">
+    <p>Перерисуй таблицу в тетрадь целиком. Все задачи урока на ней.</p>
+  </div>
+
+  <details class="vopros">
+    <summary>Хочешь проверять каждый шаг в DBeaver? Вот скрипт</summary>
+    <div>
+      <p><code>DATE</code> — тип «дата без времени». <code>NUMERIC(4,2)</code> — число, в котором всего 4 цифры, из них 2 после точки.</p>
+<pre><code class="sql">CREATE TABLE runs (
+  id         INT PRIMARY KEY,
+  researcher TEXT,
+  started_at DATE,
+  status     TEXT,
+  accuracy   NUMERIC(4,2)
+);
+INSERT INTO runs VALUES
+  (1, 'Аня',   '2026-09-14', 'done',    0.91),
+  (2, 'Аня',   '2026-09-28', 'failed',  NULL),
+  (3, 'Борис', '2026-10-03', 'done',    0.78),
+  (4, 'Вика',  '2026-10-05', 'done',    0.85),
+  (5, 'Борис', '2026-10-12', 'done',    0.62),
+  (6, 'Аня',   '2026-10-14', 'running', NULL);</code></pre>
+      <p>В DBeaver вставь всё и нажми <b>Alt+X</b>. После урока убери таблицу: <code>DROP TABLE runs;</code></p>
+    </div>
+  </details>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>CASE ставит строке метку</h2>
+    <p>Хотим рядом с каждым запуском написать словами, хороший он или нет. Хорошим считаем <code>accuracy</code> от 0.8.</p>
+<pre><code class="sql">SELECT id, accuracy,
+  CASE
+    WHEN accuracy >= 0.8 THEN 'хорошо'
+    ELSE 'слабо'
+  END AS ocenka
+FROM runs;</code></pre>
+    <p>Читается как обычная фраза: «в случае (<code>CASE</code>), когда (<code>WHEN</code>) точность от 0.8, тогда (<code>THEN</code>) пиши „хорошо“, иначе (<code>ELSE</code>) пиши „слабо“, конец (<code>END</code>)». <code>AS ocenka</code> — имя нового столбца, ты так уже называл столбцы с <code>COUNT</code>.</p>
+    <p class="novoe"><code>CASE</code> — это новый столбец, который считается для каждой строки отдельно по условию. Строки он не отбрасывает, в отличие от <code>WHERE</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Выпиши в тетрадь <code>id</code> и метку для всех шести строк.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <div class="tablica"><table>
+            <tr><th>id</th><th>accuracy</th><th>ocenka</th></tr>
+            <tr><td>1</td><td>0.91</td><td>хорошо</td></tr>
+            <tr><td>2</td><td class="null">NULL</td><td>слабо</td></tr>
+            <tr><td>3</td><td>0.78</td><td>слабо</td></tr>
+            <tr><td>4</td><td>0.85</td><td>хорошо</td></tr>
+            <tr><td>5</td><td>0.62</td><td>слабо</td></tr>
+            <tr><td>6</td><td class="null">NULL</td><td>слабо</td></tr>
+          </table></div>
+          <p>Шесть строк, ни одна не пропала. Почему у пустых 2 и 6 вышло «слабо», разберём в шаге 3.</p>
+          <p class="oshibka">Поставить Борису с 0.78 «хорошо», потому что «почти 0.8». База сравнивает точно: 0.78 меньше 0.8, условие не выполнено, срабатывает <code>ELSE</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>CASE WHEN условие THEN 'метка' ELSE 'другая' END AS имя</code></p>
+      <p>Новый столбец по условию, строки не теряются. Не забудь <code>END</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>Несколько веток: порядок решает</h2>
+    <p>Меток может быть больше двух. Это задание 12 из самостоятельной.</p>
+<pre><code class="sql">SELECT id, accuracy,
+  CASE
+    WHEN accuracy >= 0.9 THEN 'отлично'
+    WHEN accuracy >= 0.8 THEN 'хорошо'
+    WHEN accuracy >= 0.7 THEN 'средне'
+    ELSE 'слабо'
+  END AS ocenka
+FROM runs;</code></pre>
+    <p class="novoe">База проверяет ветки <code>WHEN</code> сверху вниз и берёт <b>первую</b>, где условие выполнилось. Остальные ветки для этой строки уже не смотрит.</p>
+    <p>Возьмём 0.91. Первая ветка: 0.91 ≥ 0.9, да. Метка «отлично», дальше не проверяем, хотя 0.91 ≥ 0.8 тоже верно.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Переставь ветки в обратном порядке: сначала <code>&gt;= 0.7</code>, потом <code>&gt;= 0.8</code>, потом <code>&gt;= 0.9</code>. Какие метки получат запуски 1, 3 и 4?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Все три получат «средне». 0.91, 0.78 и 0.85 — каждое ≥ 0.7, первая же ветка срабатывает, до «хорошо» и «отлично» база не доходит. Метки «отлично» не будет ни у кого.</p>
+          <p class="oshibka">Думать, что база выберет «самую подходящую» ветку. Она берёт первую подходящую. Поэтому ветки пишут от самой строгой к самой мягкой.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Ветки проверяются сверху вниз, срабатывает первая подходящая. Пиши от строгого условия к мягкому: 0.9 → 0.8 → 0.7.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>NULL и CASE без ELSE</h2>
+    <p>Вернёмся к шагу 1. У запуска 2 точности нет. Условие <code>NULL &gt;= 0.8</code> база не может назвать ни верным, ни неверным, она считает его «неизвестно». Ветка срабатывает только на «верно», поэтому дошло до <code>ELSE</code>.</p>
+    <p>Теперь уберём <code>ELSE</code> совсем:</p>
+<pre><code class="sql">SELECT id, status,
+  CASE
+    WHEN status = 'done'   THEN 'готово'
+    WHEN status = 'failed' THEN 'упал'
+  END AS po_russki
+FROM runs;</code></pre>
+    <p class="novoe">Если ни одна ветка не подошла, а <code>ELSE</code> нет, <code>CASE</code> выдаёт <code>NULL</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что будет в столбце <code>po_russki</code> у запуска 6? Допиши запрос так, чтобы там стояло «идёт».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>У запуска 6 статус <code>running</code>, ни одна ветка не подходит, будет <code>NULL</code>. Чтобы было «идёт», добавь перед <code>END</code> строку <code>ELSE 'идёт'</code>. Тогда у всех шести строк будет метка.</p>
+          <p class="oshibka">Написать <code>WHEN status = NULL THEN 'нет'</code>. Сравнение с <code>NULL</code> через <code>=</code> никогда не срабатывает. Для пустоты есть только <code>IS NULL</code>: <code>WHEN accuracy IS NULL THEN 'нет точности'</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Нет подходящей ветки и нет <code>ELSE</code> → <code>NULL</code>.</p>
+      <p>Условие с <code>NULL</code> не срабатывает. Пустоту ловят только <code>IS NULL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>Посчитать «особые» строки в кучке</h2>
+    <p>Это задание 13. Для каждого исследователя нужно два числа: сколько всего запусков и сколько из них закончились (<code>done</code>).</p>
+<pre><code class="sql">SELECT researcher,
+  COUNT(*) AS vsego,
+  SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS gotovo
+FROM runs
+GROUP BY researcher;</code></pre>
+    <p class="novoe"><code>CASE</code> превращает каждую строку в 1 (подходит) или 0 (не подходит). <code>SUM</code> складывает эти единицы и нули по кучке. Сумма единиц и есть количество подходящих строк.</p>
+    <p>Кучка Ани: запуски 1, 2, 6. Статусы <code>done</code>, <code>failed</code>, <code>running</code> → 1, 0, 0 → сумма 1.</p>
+    <div class="tablica"><table>
+      <tr><th>researcher</th><th>vsego</th><th>gotovo</th></tr>
+      <tr><td>Аня</td><td>3</td><td>1</td></tr>
+      <tr><td>Борис</td><td>2</td><td>2</td></tr>
+      <tr><td>Вика</td><td>1</td><td>1</td></tr>
+    </table></div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос: у каждого исследователя сколько запусков с <code>accuracy</code> от 0.8. Сначала посчитай руками.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT researcher,
+  SUM(CASE WHEN accuracy >= 0.8 THEN 1 ELSE 0 END) AS horoshih
+FROM runs
+GROUP BY researcher;</code></pre>
+          <p>Аня 1 (только 0.91), Борис 0 (0.78 и 0.62), Вика 1 (0.85). Пустые точности Ани дают 0: условие с <code>NULL</code> не срабатывает, идёт <code>ELSE 0</code>.</p>
+          <p class="oshibka">Написать <code>COUNT(CASE … THEN 1 ELSE 0 END)</code>. <code>COUNT</code> считает все непустые значения, а 0 тоже непустой. Получится просто число запусков: Аня 3, Борис 2, Вика 1. С <code>COUNT</code> работает только вариант без <code>ELSE</code>, но проще запомнить связку <code>SUM</code> + 1 и 0.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Сколько особых в кучке:</p>
+      <p><code>SUM(CASE WHEN условие THEN 1 ELSE 0 END)</code></p>
+      <p>С <code>SUM</code>, не с <code>COUNT</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>EXTRACT достаёт из даты кусок</h2>
+    <p>Переходим к датам. Иногда нужна не вся дата, а только месяц.</p>
+<pre><code class="sql">SELECT id, started_at,
+  EXTRACT(MONTH FROM started_at) AS mesyac
+FROM runs;</code></pre>
+    <p class="novoe"><code>EXTRACT(часть FROM дата)</code> вынимает из даты одно число. Часть пишется по-английски: <code>YEAR</code> — год, <code>MONTH</code> — месяц, <code>DAY</code> — день месяца.</p>
+    <p>Запуски 1 и 2 сентябрьские, получат 9. Остальные октябрьские, получат 10.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос, который выдаст для каждого запуска только число месяца, без месяца и года. Что будет у запуска 3?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id, EXTRACT(DAY FROM started_at) AS den
+FROM runs;</code></pre>
+          <p>У запуска 3 дата <code>2026-10-03</code>, будет 3. Всего: 14, 28, 3, 5, 12, 14.</p>
+          <p class="oshibka">Перепутать месяц и день, потому что в тетради мы пишем «3.10». В базе дата всегда год-месяц-день, поэтому <code>2026-10-03</code> — 3 октября, а не 10 марта.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>EXTRACT(MONTH FROM дата)</code> → номер месяца.</p>
+      <p><code>YEAR</code> год, <code>MONTH</code> месяц, <code>DAY</code> день.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>Кучки по месяцам</h2>
+    <p>Это задание 15: сколько запусков было в каждом месяце. Склеиваем шаг 5 с <code>GROUP BY</code>.</p>
+<pre><code class="sql">SELECT EXTRACT(MONTH FROM started_at) AS mesyac,
+  COUNT(*) AS zapuskov
+FROM runs
+GROUP BY EXTRACT(MONTH FROM started_at)
+ORDER BY mesyac;</code></pre>
+    <p class="novoe">В <code>GROUP BY</code> можно писать не только столбец, но и выражение. Строки с одинаковым месяцем попадут в одну кучку.</p>
+    <div class="tablica"><table>
+      <tr><th>mesyac</th><th>zapuskov</th></tr>
+      <tr><td>9</td><td>2</td></tr>
+      <tr><td>10</td><td>4</td></tr>
+    </table></div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько запусков сделал каждый исследователь в октябре? Подсказка: октябрь отбираем в <code>WHERE</code>, кучки — по исследователю.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT researcher, COUNT(*)
+FROM runs
+WHERE EXTRACT(MONTH FROM started_at) = 10
+GROUP BY researcher;</code></pre>
+          <p>Аня 1, Борис 2, Вика 1. <code>WHERE</code> оставил строки 3–6, дальше обычные кучки.</p>
+          <p class="oshibka">Написать в <code>WHERE</code> <code>started_at = 10</code>. Дата целиком — не число месяца, такое сравнение база не примет. Сначала вынь месяц через <code>EXTRACT</code>, потом сравнивай.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Кучки по месяцам: <code>GROUP BY EXTRACT(MONTH FROM дата)</code>.</p>
+      <p>Только один месяц: <code>WHERE EXTRACT(MONTH FROM дата) = 10</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>День недели</h2>
+    <p>На лабе 14.10 спрашивали про <code>EXTRACT(isodow FROM …)</code>. Это номер дня недели.</p>
+<pre><code class="sql">SELECT EXTRACT(ISODOW FROM DATE '2026-10-14');  -- 3
+SELECT EXTRACT(ISODOW FROM DATE '2026-10-18');  -- 7
+SELECT EXTRACT(DOW    FROM DATE '2026-10-18');  -- 0</code></pre>
+    <p><code>DATE '2026-10-14'</code> — так пишут дату прямо в запросе, без таблицы. 14 октября 2026 — среда, 18-е — воскресенье.</p>
+    <p class="novoe"><code>ISODOW</code> считает по-нашему: понедельник 1, воскресенье 7. <code>DOW</code> считает по-американски: воскресенье 0, понедельник 1, суббота 6. Отличаются только у воскресенья.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько запусков в нашей таблице сделано в выходные? Напиши запрос с <code>ISODOW</code> и проверь ответ по календарю: 3 октября 2026 — суббота.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT COUNT(*)
+FROM runs
+WHERE EXTRACT(ISODOW FROM started_at) IN (6, 7);</code></pre>
+          <p>Один, запуск 3 (суббота). Остальные: 14.09, 28.09, 5.10, 12.10 — понедельники, 14.10 — среда.</p>
+          <p class="oshibka">Взять <code>DOW</code> и написать <code>IN (6, 7)</code>. В <code>DOW</code> воскресенье — 0, а 7 не бывает вообще, воскресные запуски потеряются. С <code>DOW</code> выходные — это <code>IN (0, 6)</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>ISODOW</code>: пн 1 … вс 7. <code>DOW</code>: вс 0, пн 1 … сб 6.</p>
+      <p>Выходные: <code>ISODOW IN (6, 7)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>TO_CHAR: дата в привычном виде</h2>
+    <p>Тоже с лабы 14.10. Дата <code>2026-10-03</code> читается неудобно. Хочется <code>03.10.2026</code>.</p>
+<pre><code class="sql">SELECT id, TO_CHAR(started_at, 'DD.MM.YYYY') AS data
+FROM runs;</code></pre>
+    <p class="novoe"><code>TO_CHAR(дата, 'шаблон')</code> превращает дату в текст по шаблону. В шаблоне <code>DD</code> — день двумя цифрами, <code>MM</code> — месяц двумя цифрами, <code>YYYY</code> — год четырьмя. Точки и всё остальное копируются как есть.</p>
+    <p>Результат: <code>14.09.2026</code>, <code>28.09.2026</code>, <code>03.10.2026</code>, <code>05.10.2026</code>, <code>12.10.2026</code>, <code>14.10.2026</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой шаблон даст для запуска 3 текст <code>2026/10</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>TO_CHAR(started_at, 'YYYY/MM')</code>. Сначала год, потом косая черта как есть, потом месяц.</p>
+          <p class="oshibka">Написать <code>MI</code> вместо <code>MM</code>, потому что «минуты» и «месяц» оба на М. <code>MI</code> — минуты, у даты без времени выйдет <code>2026/00</code>. Месяц — только <code>MM</code>. В MySQL этой функции нет, там <code>DATE_FORMAT(дата, '%Y/%m')</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>TO_CHAR(дата, 'DD.MM.YYYY')</code> → текст <code>03.10.2026</code>.</p>
+      <p>Результат — текст, а не дата: считать по нему нельзя, только показывать.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>Всё вместе: месяц, всего и удачных</h2>
+    <p>Здесь ничего нового, только сборка шагов 4 и 6 в один запрос. Для каждого месяца: сколько запусков и сколько закончились.</p>
+<pre><code class="sql">SELECT EXTRACT(MONTH FROM started_at) AS mesyac,
+  COUNT(*) AS vsego,
+  SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS gotovo
+FROM runs
+GROUP BY EXTRACT(MONTH FROM started_at)
+ORDER BY mesyac;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>mesyac</th><th>vsego</th><th>gotovo</th></tr>
+      <tr><td>9</td><td>2</td><td>1</td></tr>
+      <tr><td>10</td><td>4</td><td>3</td></tr>
+    </table></div>
+    <p>Сентябрь: запуски 1 (<code>done</code>) и 2 (<code>failed</code>) → 2 и 1. Октябрь: 3, 4, 5 готовы, 6 идёт → 4 и 3.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Поменяй запрос так, чтобы вместо удачных считались упавшие (<code>failed</code>). Что будет в октябре?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Меняем одно слово в <code>CASE</code>: <code>WHEN status = 'failed'</code>. Сентябрь 2 и 1, октябрь 4 и 0. Ноль в октябре — нормальный ответ: упавших не было, все строки дали 0.</p>
+          <p class="oshibka">Отобрать упавшие в <code>WHERE status = 'failed'</code>. Тогда пропадёт счёт «всего»: в кучки попадут только упавшие, и октябрь исчезнет совсем. <code>WHERE</code> выкидывает строки, <code>CASE</code> внутри <code>SUM</code> только решает, считать ли их.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>«Всего и сколько из них особых» в одной строке: <code>COUNT(*)</code> рядом с <code>SUM(CASE … 1 ELSE 0 END)</code>, без <code>WHERE</code> на признак.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на самостоятельную 2</h2>
+    <p>В твоей базе <code>ml_tracker</code> есть всё нужное: у <code>experiments</code> столбцы <code>status</code> и <code>started_at</code>, у <code>researchers</code> — <code>created_at</code>.</p>
+    <ul>
+      <li>Задание 12, метки по условию — шаги 1–3. Пороги подбери под свои числа, чтобы в ответе встретились все метки.</li>
+      <li>Задание 13, особые в кучке — шаг 4. На твоей базе это кучки по <code>researcher_id</code> в таблице <code>experiments</code>.</li>
+      <li>Задание 15, аналитика по датам — шаги 5–7.</li>
+      <li><code>started_at</code> у тебя <code>TIMESTAMP</code>, то есть дата со временем. <code>EXTRACT</code> и <code>TO_CHAR</code> работают с ним точно так же.</li>
+      <li>Задания 14, 16 — тот же <code>GROUP BY</code>, что в прошлом уроке. Задание 17 — оконные функции, к нему следующий урок.</li>
+    </ul>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: CASE и даты">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Первые четыре на таблице <code>runs</code>, последняя на твоей базе. Ответов здесь нет: решай в тетради, впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю и разберу, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Для каждого запуска выведи <code>id</code> и метку: «нет данных», если точности нет, «зачёт», если от 0.75, иначе «незачёт». Какая метка у запуска 3?
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Для каждого исследователя: сколько у него запусков и сколько из них не закончились (статус не <code>done</code>).
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Сколько запусков было по каждому дню недели? Выведи номер дня по <code>ISODOW</code> и количество.
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Не запуская, скажи, что выдаст запрос и почему:
+<pre><code class="sql">SELECT COUNT(CASE WHEN status = 'done' THEN 1 END)
+FROM runs;</code></pre>
+      <textarea name="z4" placeholder="Что выдаст и почему" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> В своей базе <code>ml_tracker</code>: сколько запусков по месяцам и сколько из них упали (<code>failed</code>). Запусти в DBeaver, пришли запрос и скрин результата.
+      <textarea name="z5" placeholder="SELECT …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="./">← Все уроки</a> · <a href="../povtorenie/bd.html">Повторение по БД</a> · <a href="../karta/">Карта пар</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>
