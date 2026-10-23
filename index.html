@@ -21,23 +21,38 @@
 </header>
 <main>
   <h1>С чего начать сегодня</h1>
-  <p class="tiho">Полтора часа в день: урок с тетрадью и десять минут повторения.</p>
+  <p class="tiho">Урок по шагам, в конце мини-самостоятельная, ответы в чат.</p>
 
   <div class="vhody">
-    <a class="vhod glavnyy" href="uroki/bd-left-join-group-by.html" data-urok-status="bd-left-join-group-by" data-shagov="9">
-      <b>Сажусь с тетрадью</b>
-      <span>Сейчас: LEFT JOIN и GROUP BY, под самостоятельную по БД. 9 шагов, около 50 минут.</span>
+    <a class="vhod glavnyy" href="uroki/sa-process.html" data-urok-status="sa-process" data-shagov="9">
+      <b>Сажусь учиться</b>
+      <span>Сейчас: системная аналитика под тест до 25.10, два урока подряд. Начни с этого, 9 шагов.</span>
     </a>
     <a class="vhod" href="povtorenie/">
       <b>Повторение</b>
       <span>Вопросы с ответами под кнопкой. Перед парой и перед сдачей.</span>
+    </a>
+    <a class="vhod" href="matan/">
+      <b>Матан</b>
+      <span>База под алгоритмы, теорвер и ML, по твоей тетради.</span>
     </a>
     <a class="vhod" href="karta/">
       <b>Карта пар</b>
       <span>Все пары с 1 сентября: где есть тема, материал и урок, а где дыра.</span>
     </a>
   </div>
-  <p><a href="uroki/">Все уроки →</a></p>
+
+  <h2>Все уроки</h2>
+  <ul class="spisok-urokov">
+    <li data-urok-status="sa-process" data-shagov="9"><a href="uroki/sa-process.html"><b>Сист. аналитика: цикл, роли, модели</b></a><span class="tiho">тест до 25.10</span></li>
+    <li data-urok-status="sa-trebovaniya" data-shagov="10"><a href="uroki/sa-trebovaniya.html"><b>Сист. аналитика: требования и диаграммы</b></a><span class="tiho">тест до 25.10</span></li>
+    <li data-urok-status="ach-nauchnaya-kommunikaciya" data-shagov="8"><a href="uroki/ach-nauchnaya-kommunikaciya.html"><b>Академ. чтение: научная коммуникация</b></a><span class="tiho">ПР5 до 28.10</span></li>
+    <li data-urok-status="matan-baza" data-shagov="10"><a href="matan/baza.html"><b>Матан: логарифмы, пределы, производные, суммы</b></a><span class="tiho">с тетрадью</span></li>
+    <li data-urok-status="tv-nezavisimost" data-shagov="8"><a href="uroki/tv-nezavisimost.html"><b>Теорвер: дерево, Байес, независимость</b></a><span class="tiho">с тетрадью</span></li>
+    <li data-urok-status="bd-left-join-group-by" data-shagov="9"><a href="uroki/bd-left-join-group-by.html"><b>БД: LEFT JOIN и GROUP BY</b></a></li>
+    <li data-urok-status="bd-case-daty" data-shagov="9"><a href="uroki/bd-case-daty.html"><b>БД: CASE и даты</b></a></li>
+  </ul>
+  <p><a href="uroki/">Все уроки по предметам →</a></p>
 
   <h2>Горит</h2>
   <ul class="gorit" id="gorit"><li><div class="kogda">…</div><div>Сроки загружаются</div></li></ul>

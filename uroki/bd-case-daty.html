@@ -23,7 +23,7 @@
   <p class="tiho">Базы данных · лаба 14.10 · под самостоятельную 2, задания 12, 13 и 15 · около 50 минут</p>
 
   <p>Ты уже умеешь фильтровать через <code>WHERE</code>, считать через <code>COUNT</code> и <code>SUM</code> и делить строки на кучки через <code>GROUP BY</code>. Если это ещё плывёт, сначала пройди <a href="bd-left-join-group-by.html">урок про LEFT JOIN и GROUP BY</a>. Сегодня две новые темы: как поставить строке метку по условию и как достать из даты месяц или день недели. Девять шагов, в каждом одна новая вещь.</p>
-  <p>Как проходить: читаешь шаг, переписываешь жёлтую рамку в тетрадь, решаешь «сделай сам» на бумаге и только потом открываешь ответ. Непонятно — дальше не иди, напиши номер шага.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Рамка «Главное из шага» — главное, к ней возвращайся перед самостоятельной. Непонятно — дальше не иди, напиши номер шага.</p>
 
   <h2>Наша таблица</h2>
   <p>Одна таблица, шесть строк. Это запуски обучения моделей, как в твоей базе <code>ml_tracker</code>, только проще.</p>
@@ -42,8 +42,8 @@
   </div>
   <p><code>status</code> — что с запуском: <code>done</code> закончился, <code>failed</code> упал, <code>running</code> ещё идёт. <code>accuracy</code> — доля верных ответов модели, от 0 до 1. У упавшего и идущего запуска её нет, там <code>NULL</code>, то есть пустая клетка. Дата пишется год-месяц-день: <code>2026-10-03</code> — это 3 октября.</p>
 
-  <div class="tetrad">
-    <p>Перерисуй таблицу в тетрадь целиком. Все задачи урока на ней.</p>
+  <div class="glavnoe">
+    <p>Все задачи урока на этой таблице. Возвращайся к ней, когда нужно проверить ответ.</p>
   </div>
 
   <details class="vopros">
@@ -83,7 +83,7 @@ FROM runs;</code></pre>
     <p class="novoe"><code>CASE</code> — это новый столбец, который считается для каждой строки отдельно по условию. Строки он не отбрасывает, в отличие от <code>WHERE</code>.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> Выпиши в тетрадь <code>id</code> и метку для всех шести строк.
+      <b>Сделай сам.</b> Выпиши <code>id</code> и метку для всех шести строк.
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
           <div class="tablica"><table>
@@ -101,7 +101,7 @@ FROM runs;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>CASE WHEN условие THEN 'метка' ELSE 'другая' END AS имя</code></p>
       <p>Новый столбец по условию, строки не теряются. Не забудь <code>END</code>.</p>
     </div>
@@ -133,7 +133,7 @@ FROM runs;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Ветки проверяются сверху вниз, срабатывает первая подходящая. Пиши от строгого условия к мягкому: 0.9 → 0.8 → 0.7.</p>
     </div>
   </section>
@@ -162,7 +162,7 @@ FROM runs;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Нет подходящей ветки и нет <code>ELSE</code> → <code>NULL</code>.</p>
       <p>Условие с <code>NULL</code> не срабатывает. Пустоту ловят только <code>IS NULL</code>.</p>
     </div>
@@ -201,7 +201,7 @@ GROUP BY researcher;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Сколько особых в кучке:</p>
       <p><code>SUM(CASE WHEN условие THEN 1 ELSE 0 END)</code></p>
       <p>С <code>SUM</code>, не с <code>COUNT</code>.</p>
@@ -226,12 +226,12 @@ FROM runs;</code></pre>
 <pre><code class="sql">SELECT id, EXTRACT(DAY FROM started_at) AS den
 FROM runs;</code></pre>
           <p>У запуска 3 дата <code>2026-10-03</code>, будет 3. Всего: 14, 28, 3, 5, 12, 14.</p>
-          <p class="oshibka">Перепутать месяц и день, потому что в тетради мы пишем «3.10». В базе дата всегда год-месяц-день, поэтому <code>2026-10-03</code> — 3 октября, а не 10 марта.</p>
+          <p class="oshibka">Перепутать месяц и день, потому что в жизни мы пишем «3.10». В базе дата всегда год-месяц-день, поэтому <code>2026-10-03</code> — 3 октября, а не 10 марта.</p>
         </div>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>EXTRACT(MONTH FROM дата)</code> → номер месяца.</p>
       <p><code>YEAR</code> год, <code>MONTH</code> месяц, <code>DAY</code> день.</p>
     </div>
@@ -268,7 +268,7 @@ GROUP BY researcher;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Кучки по месяцам: <code>GROUP BY EXTRACT(MONTH FROM дата)</code>.</p>
       <p>Только один месяц: <code>WHERE EXTRACT(MONTH FROM дата) = 10</code>.</p>
     </div>
@@ -298,7 +298,7 @@ WHERE EXTRACT(ISODOW FROM started_at) IN (6, 7);</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>ISODOW</code>: пн 1 … вс 7. <code>DOW</code>: вс 0, пн 1 … сб 6.</p>
       <p>Выходные: <code>ISODOW IN (6, 7)</code>.</p>
     </div>
@@ -324,7 +324,7 @@ FROM runs;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>TO_CHAR(дата, 'DD.MM.YYYY')</code> → текст <code>03.10.2026</code>.</p>
       <p>Результат — текст, а не дата: считать по нему нельзя, только показывать.</p>
     </div>
@@ -358,7 +358,7 @@ ORDER BY mesyac;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>«Всего и сколько из них особых» в одной строке: <code>COUNT(*)</code> рядом с <code>SUM(CASE … 1 ELSE 0 END)</code>, без <code>WHERE</code> на признак.</p>
     </div>
   </section>
@@ -377,7 +377,7 @@ ORDER BY mesyac;</code></pre>
 
   <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: CASE и даты">
     <h2>Мини-самостоятельная</h2>
-    <p>Пять задач. Первые четыре на таблице <code>runs</code>, последняя на твоей базе. Ответов здесь нет: решай в тетради, впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю и разберу, где споткнулся.</p>
+    <p>Пять задач. Первые четыре на таблице <code>runs</code>, последняя на твоей базе. Ответов здесь нет: впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю и разберу, где споткнулся.</p>
 
     <div class="zadacha">
       <b>1.</b> Для каждого запуска выведи <code>id</code> и метку: «нет данных», если точности нет, «зачёт», если от 0.75, иначе «незачёт». Какая метка у запуска 3?

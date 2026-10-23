@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: матан — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · матан</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Матан: проверь себя</h1>
+  <p class="tiho">Сначала ответь в тетради, потом открой ответ. 10 минут.</p>
+  <p>Урок к этим вопросам — <a href="../matan/baza.html">логарифмы, пределы, производные, суммы</a>.</p>
+
+  <h2>Формулы одной таблицей</h2>
+  <div class="tablica"><table>
+    <tr><th>что</th><th>формула</th></tr>
+    <tr><td>логарифм</td><td><code>log_b x = y ⇔ b^y = x</code></td></tr>
+    <tr><td>правила</td><td><code>log xy = log x + log y</code>, <code>log x^k = k log x</code></td></tr>
+    <tr><td>смена основания</td><td><code>log_a x = log_b x / log_b a</code></td></tr>
+    <tr><td>прикидка</td><td><code>2¹⁰ ≈ 10³</code>, <code>log₂ 10⁶ ≈ 20</code></td></tr>
+    <tr><td>лестница</td><td><code>log n ≪ √n ≪ n ≪ n log n ≪ n² ≪ 2ⁿ ≪ n!</code></td></tr>
+    <tr><td>Лопиталь</td><td>∞/∞ или 0/0: <code>lim f/g = lim f'/g'</code></td></tr>
+    <tr><td>производные</td><td><code>(x^k)' = kx^(k−1)</code>, <code>(eˣ)' = eˣ</code>, <code>(ln x)' = 1/x</code></td></tr>
+    <tr><td>арифметическая</td><td><code>1 + … + n = n(n+1)/2 = Θ(n²)</code></td></tr>
+    <tr><td>геометрическая</td><td><code>1 + 2 + … + 2ᵏ = 2ᵏ⁺¹ − 1</code></td></tr>
+    <tr><td>гармоническая</td><td><code>1 + 1/2 + … + 1/n ≈ ln n</code></td></tr>
+  </table></div>
+
+  <h2>Вопросы</h2>
+  <details class="vopros">
+    <summary>1. Что значит log₂ n простыми словами?</summary>
+    <div><p>Сколько раз можно поделить n пополам, пока не останется 1. Поэтому бинарный поиск по n элементам делает около <code>log₂ n</code> шагов.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>2. Почему в O(log n) не пишут основание?</summary>
+    <div><p>По формуле смены основания логарифмы отличаются только множителем-числом: <code>log₄ n = log₂ n / 2</code>. А множители в O не учитывают.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>3. Сколько примерно log₂ миллиарда?</summary>
+    <div><p>Около 30: <code>2¹⁰ ≈ 10³</code>, у миллиарда три тройки нулей, <code>3 · 10 = 30</code>.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>4. Как через предел понять, что растёт быстрее?</summary>
+    <div><p>Смотрим <code>lim f/g</code> при <code>n → ∞</code>. 0 — быстрее g, ∞ — быстрее f, конечное число больше нуля — одинаково.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>5. Когда работает правило Лопиталя и что в нём дифференцируют?</summary>
+    <div><p>Когда числитель и знаменатель оба уходят в ∞ или оба в 0. Производную берут отдельно от числителя и отдельно от знаменателя, не по формуле производной частного.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>6. Производная 4x³ − 2x + 9?</summary>
+    <div><p><code>12x² − 2</code>. Степень падает на один, константа 9 даёт 0.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>7. Что говорит знак производной?</summary>
+    <div><p>Больше нуля — функция растёт, меньше — падает, ноль — точка, где может быть минимум или максимум. Градиентный спуск ищет точку, где производная функции ошибки равна нулю.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>8. Цикл «каждый с каждым» — сколько шагов?</summary>
+    <div><p><code>(n−1) + … + 1 + 0 = n(n−1)/2</code>, это <code>Θ(n²)</code>.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>9. Почему добавление в конец списка Python в среднем O(1)?</summary>
+    <div><p>При переполнении массив удваивается. Все копирования вместе — геометрическая сумма <code>1 + 2 + 4 + … + n &lt; 2n</code>, то есть в среднем меньше двух копирований на одно добавление.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>10. Внутренний цикл идёт с шагом i. Почему это n log n, а не n²?</summary>
+    <div><p>Внутренний цикл делает примерно <code>n/i</code> шагов. Всего <code>n(1 + 1/2 + … + 1/n) = n · H_n ≈ n ln n</code>.</p></div>
+  </details>
+
+  <p class="niz"><a href="./">← Всё повторение</a> · <a href="../matan/">Раздел «Матан»</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

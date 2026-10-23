@@ -23,7 +23,7 @@
   <p class="tiho">Базы данных · под самостоятельную 2, задания 8–11 · около 50 минут</p>
 
   <p>Ты уже умеешь доставать строки через <code>SELECT</code>, фильтровать через <code>WHERE</code>, сортировать через <code>ORDER BY</code> и склеивать две таблицы через <code>JOIN</code>. Сегодня две новые вещи: как не потерять строки при склейке и как считать по группам. Девять шагов, в каждом одна новая мелочь.</p>
-  <p>Как проходить: читаешь шаг, переписываешь жёлтую рамку в тетрадь, решаешь «сделай сам» на бумаге и только потом открываешь ответ. Если в шаге что-то непонятно, дальше не иди: напиши, какой шаг и что именно.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Рамка «Главное из шага» — главное, к ней возвращайся перед самостоятельной. Если в шаге что-то непонятно, дальше не иди: напиши, какой шаг и что именно.</p>
   <p>Большие и маленькие буквы в командах SQL не важны: <code>SELECT</code> и <code>select</code> — одно и то же. В уроке команды большими, чтобы их было видно в тексте. Ты пишешь маленькими, это правильно.</p>
 
   <h2>Наши таблицы</h2>
@@ -54,8 +54,8 @@
   </div>
   <p><code>student_id</code> в заказе — номер студента, то есть его <code>id</code> из первой таблицы. Такой столбец называется внешним ключом: он ссылается на строку другой таблицы. Посчитай сам: у Ани три заказа (номера 1, 2 и 5), у Бориса и Вики по одному, у Гоши ни одного. Гоша нам ещё понадобится.</p>
 
-  <div class="tetrad">
-    <p>Перерисуй обе таблицы в тетрадь целиком. Все задачи урока будут на них.</p>
+  <div class="glavnoe">
+    <p>Все задачи урока будут на этих двух таблицах. Возвращайся к ним, когда нужно проверить ответ.</p>
   </div>
 
   <details class="vopros">
@@ -101,7 +101,7 @@ JOIN orders o
     <p class="novoe"><code>JOIN</code> оставляет только строки, для которых нашлась пара. Студент без заказов в результат не попадёт.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> Не запуская запрос, напиши в тетради, что он выдаст: сколько строк и какие. Кого из студентов в ответе не будет?
+      <b>Сделай сам.</b> Не запуская запрос, скажи, что он выдаст: сколько строк и какие. Кого из студентов в ответе не будет?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
           <div class="tablica"><table>
@@ -118,7 +118,7 @@ JOIN orders o
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>JOIN</code> = только пары. У кого нет пары, тот выпадает из результата.</p>
     </div>
   </section>
@@ -161,7 +161,7 @@ LEFT JOIN orders o
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Левая таблица — после <code>FROM</code>, правая — после <code>JOIN</code>.</p>
       <p><code>LEFT JOIN</code>: левая остаётся вся. Нет пары → в столбцах правой <code>NULL</code>.</p>
     </div>
@@ -188,7 +188,7 @@ LEFT JOIN students s
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Кого нельзя потерять, ту таблицу и пишу после <code>FROM</code>.</p>
     </div>
   </section>
@@ -217,7 +217,7 @@ WHERE o.id IS NULL;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Кто без пары: <code>LEFT JOIN</code> + <code>WHERE &lt;id правой таблицы&gt; IS NULL</code>.</p>
       <p>Только <code>IS NULL</code>, никогда <code>= NULL</code>.</p>
     </div>
@@ -246,7 +246,7 @@ FROM orders;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>COUNT(*)</code> — сколько строк. <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code> — по столбцу. Без группировки итог всегда одна строка.</p>
     </div>
   </section>
@@ -293,7 +293,7 @@ GROUP BY student_id;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p><code>GROUP BY x</code>: одна кучка на каждое значение <code>x</code>, одна строка результата на кучку.</p>
       <p>В <code>SELECT</code> можно только то, что стоит в <code>GROUP BY</code>, и агрегатные функции.</p>
     </div>
@@ -351,7 +351,7 @@ GROUP BY s.name;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Порядок работы базы: <code>FROM</code> и <code>JOIN</code> → <code>WHERE</code> → <code>GROUP BY</code> → <code>SELECT</code>.</p>
     </div>
   </section>
@@ -396,7 +396,7 @@ GROUP BY s.name;</code></pre>
     <p>Остальные функции на пустой кучке дают не 0, а <code>NULL</code>: <code>SUM(o.price)</code> у Гоши будет <code>NULL</code>. Ноль умеет давать только <code>COUNT</code>.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> Закрой экран и напиши в тетради с нуля, не подсматривая: все студенты и число их заказов, у Гоши должен быть 0. Потом сверь с ответом каждую строку: откуда берём (<code>FROM</code>), что приклеиваем, по какому правилу, по чему кучки, что считаем.
+      <b>Сделай сам.</b> Закрой шаги выше и напиши запрос с нуля, не подсматривая: все студенты и число их заказов, у Гоши должен быть 0. Потом сверь с ответом каждую строку: откуда берём (<code>FROM</code>), что приклеиваем, по какому правилу, по чему кучки, что считаем.
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
 <pre><code class="sql">SELECT s.name, COUNT(o.id)
@@ -413,7 +413,7 @@ GROUP BY s.name;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Считаю с <code>LEFT JOIN</code> → <code>COUNT(&lt;id правой таблицы&gt;)</code>, а не <code>COUNT(*)</code>.</p>
       <p><code>COUNT(*)</code> считает строки, <code>COUNT(столбец)</code> — непустые значения.</p>
     </div>
@@ -449,7 +449,7 @@ HAVING SUM(o.price) > 100;</code></pre>
       </details>
     </div>
 
-    <div class="tetrad">
+    <div class="glavnoe">
       <p>Порядок записи запроса целиком:</p>
       <p><code>SELECT … FROM … JOIN … ON … WHERE … GROUP BY … HAVING … ORDER BY … LIMIT …</code></p>
       <p><code>WHERE</code> — до кучек, про строки. <code>HAVING</code> — после, про итоги.</p>
@@ -482,7 +482,7 @@ VALUES
 
   <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: LEFT JOIN и GROUP BY">
     <h2>Мини-самостоятельная</h2>
-    <p>Пять задач. Первые четыре на тех же двух таблицах, последняя на твоей базе. Ответов здесь нет: решай в тетради, впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю на твоих же запросах и разберу, где споткнулся.</p>
+    <p>Пять задач. Первые четыре на тех же двух таблицах, последняя на твоей базе. Ответов здесь нет: впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю на твоих же запросах и разберу, где споткнулся.</p>
 
     <div class="zadacha">
       <b>1.</b> Для каждого товара: сколько раз его заказали и на какую сумму.

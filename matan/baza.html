@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Матан для алгоритмов: логарифмы, пределы, производные, суммы — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="matan-baza">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Матан · логарифмы, пределы, суммы</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Матан для алгоритмов</h1>
+  <p class="tiho">Логарифмы, пределы и Лопиталь, производные, суммы · по твоей тетради · около 60 минут</p>
+
+  <p>Это первые страницы твоей тетради по матану, разложенные по шагам. На них держится оценка сложности в алгоритмах и градиентный спуск в машинном обучении (ML). Десять шагов, в каждом одна новая вещь. Калькулятор не нужен.</p>
+  <p>Как проходить: читаешь шаг, переписываешь жёлтую рамку в тетрадь (если уже есть — сверь), решаешь «сделай сам» на бумаге и только потом открываешь ответ.</p>
+  <p>Значки: <code>log₂ n</code> — логарифм по основанию 2, <code>n²</code> — n в квадрате, <code>→</code> — «стремится к». Когда в алгоритмах пишут <code>log n</code> без основания, имеют в виду основание 2.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>Что такое логарифм</h2>
+    <p>Вопрос: в какую степень надо возвести 2, чтобы получить 8? Ответ 3, потому что <code>2³ = 8</code>. Это число 3 и называют логарифмом 8 по основанию 2.</p>
+    <p class="novoe"><code>log_b x = y</code> значит ровно <code>b^y = x</code>. Логарифм — это показатель степени.</p>
+    <p>Главный смысл для алгоритмов: <code>log₂ n</code> — сколько раз можно поделить n пополам, пока не останется 1. Пример: 16 → 8 → 4 → 2 → 1, четыре деления, и <code>log₂ 16 = 4</code>.</p>
+    <p>Поэтому бинарный поиск (ищем в отсортированном массиве, каждый раз смотрим в середину) в массиве из 16 элементов за 4 шага сужает поиск до одного элемента: каждый шаг выкидывает половину.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Посчитай <code>log₂ 32</code>, <code>log₂ 1</code> и <code>log₁₀ 1000</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>log₂ 32 = 5</code> (2⁵ = 32). <code>log₂ 1 = 0</code> (любое число в нулевой степени — 1). <code>log₁₀ 1000 = 3</code>.</p>
+          <p class="oshibka">Ответить <code>log₂ 32 = 16</code>, поделив 32 на 2. Логарифм — не деление, а число делений пополам: 32 → 16 → 8 → 4 → 2 → 1, пять раз.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>log_b x = y ⇔ b^y = x</code></p>
+      <p><code>log₂ n</code> = сколько раз делим n пополам до 1.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>Три правила логарифмов</h2>
+    <p>Логарифм — это показатель степени, а показатели при умножении складываются: <code>2³ · 2⁴ = 2⁷</code>. Отсюда правила.</p>
+    <p class="novoe"><code>log(x·y) = log x + log y</code>, <code>log(x / y) = log x − log y</code>, <code>log(x^k) = k · log x</code>.</p>
+    <p>Примеры: <code>log₂(8 · 4) = 3 + 2 = 5</code>, и правда <code>log₂ 32 = 5</code>. <code>log₂(n / 2) = log₂ n − 1</code>: поделили пополам — логарифм уменьшился на один. <code>log₂(n²) = 2 log₂ n</code>.</p>
+    <p>Ещё одно правило, смена основания: <code>log_a x = log_b x / log_b a</code>. Например, <code>log₄ n = log₂ n / log₂ 4 = log₂ n / 2</code>. Логарифмы по разным основаниям отличаются только множителем-числом. Сложность алгоритма записывают через <code>O(…)</code> («о большое»): эта запись говорит, как растёт число шагов, и постоянные множители в ней отбрасывают. Поэтому в <code>O(log n)</code> основание не пишут.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Посчитай <code>log₂(1024 · 2)</code> и упрости <code>log₂(n³)</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>log₂ 1024 = 10</code>, <code>log₂ 2 = 1</code>, вместе 11. <code>log₂(n³) = 3 log₂ n</code>.</p>
+          <p class="oshibka">Написать <code>log(x·y) = log x · log y</code>. Логарифм произведения — сумма, а не произведение: <code>log₂(8·4)</code> равно 5, а <code>3 · 2 = 6</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>log(xy) = log x + log y</code>, <code>log(x/y) = log x − log y</code>, <code>log x^k = k log x</code></p>
+      <p><code>log_a x = log_b x / log_b a</code> — основание в O не важно.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>Прикидки в уме</h2>
+    <p>На собеседованиях и в задачах часто нужно быстро понять, сколько это — <code>log₂</code> миллиона.</p>
+    <p class="novoe"><code>2¹⁰ = 1024 ≈ 1000</code>. Значит, каждые три нуля дают примерно 10 к логарифму: <code>log₂ 10³ ≈ 10</code>, <code>log₂ 10⁶ ≈ 20</code>, <code>log₂ 10⁹ ≈ 30</code>.</p>
+    <p>Что из этого следует. Бинарный поиск по миллиарду записей — около 30 шагов. А перебор всего миллиарда — миллиард шагов. Вот почему <code>O(log n)</code> считают почти бесплатным.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько примерно шагов сделает бинарный поиск в отсортированном списке из миллиона телефонных номеров?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Около 20: <code>log₂ 10⁶ ≈ 2 · 10 = 20</code>.</p>
+          <p class="oshibka">Ответить «около 6», взяв <code>log₁₀</code>. Деление идёт пополам, значит основание 2.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>2¹⁰ ≈ 10³</code> → <code>log₂ 10⁶ ≈ 20</code>, <code>log₂ 10⁹ ≈ 30</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>Предел отношения: кто растёт быстрее</h2>
+    <p>Есть два алгоритма. Первый делает <code>f(n)</code> шагов, второй <code>g(n)</code>. Какой хуже на больших данных? Смотрим, что происходит с дробью <code>f(n) / g(n)</code>, когда n становится огромным.</p>
+    <p>Предел <code>lim f(n)/g(n)</code> при <code>n → ∞</code> — число, к которому дробь приближается при росте n.</p>
+    <p class="novoe">Предел 0 — g растёт быстрее. Предел ∞ — f растёт быстрее. Конечное число больше нуля — растут одинаково, с точностью до множителя.</p>
+    <p>Пример: <code>f = 3n²</code>, <code>g = n²</code>. Дробь всегда равна 3, предел 3, растут одинаково. Пример: <code>f = n</code>, <code>g = n²</code>. Дробь <code>1/n</code>: при n = 10 это 0.1, при n = 1000 это 0.001, предел 0. Значит <code>n²</code> растёт быстрее.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сравни через предел <code>f = n² + n</code> и <code>g = n²</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>(n² + n) / n² = 1 + 1/n</code>. При росте n слагаемое <code>1/n</code> уходит в 0, предел 1. Растут одинаково: младшее слагаемое n на скорость не влияет.</p>
+          <p class="oshibka">Решить, что f быстрее, «потому что там больше слагаемых». Для скорости роста важен только самый быстрый член, остальные при больших n теряются.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>lim f/g</code>: 0 → g быстрее; ∞ → f быстрее; число &gt; 0 → одинаково.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>Лестница скоростей роста</h2>
+    <p>Чтобы не считать предел каждый раз, запоминают лестницу. Каждая следующая ступень растёт быстрее любой предыдущей.</p>
+    <p class="novoe"><code>1 ≪ log n ≪ √n ≪ n ≪ n log n ≪ n² ≪ n³ ≪ 2ⁿ ≪ n!</code>. Знак <code>≪</code> значит «растёт намного медленнее».</p>
+    <p>Прочувствуй на n = 20:</p>
+    <div class="tablica"><table>
+      <tr><th>log₂ n</th><th>n</th><th>n log₂ n</th><th>n²</th><th>2ⁿ</th></tr>
+      <tr><td>≈ 4.3</td><td>20</td><td>≈ 86</td><td>400</td><td>1 048 576</td></tr>
+    </table></div>
+    <p>Два правила из лестницы. Любая степень n медленнее любой показательной функции (где n стоит в показателе: <code>2ⁿ</code>, <code>3ⁿ</code>): <code>n¹⁰⁰</code> в итоге проиграет <code>2ⁿ</code>. Логарифм медленнее любой степени: даже <code>√n</code> обгонит <code>log n</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Расставь по скорости роста, от медленного: <code>n²</code>, <code>log n</code>, <code>2ⁿ</code>, <code>n log n</code>, <code>n</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>log n</code>, <code>n</code>, <code>n log n</code>, <code>n²</code>, <code>2ⁿ</code>.</p>
+          <p class="oshibka">Поставить <code>n²</code> после <code>2ⁿ</code>, глядя на маленькие n: при n = 2 оба равны 4, а при n = 3 даже <code>n² = 9</code> больше <code>2³ = 8</code>. Скорость роста решается на больших n, а там <code>2ⁿ</code> улетает вверх.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>1 ≪ log n ≪ √n ≪ n ≪ n log n ≪ n² ≪ n³ ≪ 2ⁿ ≪ n!</code></p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>Производная: скорость изменения</h2>
+    <p>Производная <code>f'(x)</code> показывает, как быстро меняется функция в точке x. Положительная — функция растёт, отрицательная — падает, ноль — в этой точке ни растёт, ни падает (там бывает минимум или максимум).</p>
+    <p>Обозначения: <code>e ≈ 2,718</code> — особое число, <code>ln x</code> — логарифм по основанию e (натуральный).</p>
+    <p class="novoe">Таблица минимума: <code>(x^k)' = k·x^(k−1)</code>, <code>(eˣ)' = eˣ</code>, <code>(ln x)' = 1/x</code>, число-константа даёт 0. Производная суммы — сумма производных, число-множитель выносится.</p>
+    <p>Пример: <code>f(x) = 3x² + 5x + 7</code>. Каждое слагаемое отдельно: <code>3 · 2x = 6x</code>, <code>5 · 1 = 5</code>, <code>7 → 0</code>. Итого <code>f'(x) = 6x + 5</code>. В точке x = 1 скорость 11.</p>
+    <p>Ещё два правила для сложных случаев: произведение <code>(f·g)' = f'·g + f·g'</code>, сложная функция <code>(f(g(x)))' = f'(g(x)) · g'(x)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Найди производную <code>f(x) = x³ − 4x</code> и её значение в точке x = 2.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>f'(x) = 3x² − 4</code>. В точке 2: <code>3 · 4 − 4 = 8</code>, функция там растёт.</p>
+          <p class="oshibka">Написать <code>(x³)' = 3x³</code>, забыв уменьшить степень. Степень всегда падает на один: <code>x³ → 3x²</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>(x^k)' = k x^(k−1)</code>, <code>(eˣ)' = eˣ</code>, <code>(ln x)' = 1/x</code>, <code>(c)' = 0</code></p>
+      <p><code>(fg)' = f'g + fg'</code>, <code>(f(g))' = f'(g)·g'</code></p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>Правило Лопиталя</h2>
+    <p>Иногда предел дроби считать трудно: и верх, и низ уходят в бесконечность. Например, <code>ln n / n</code>. Кто победит?</p>
+    <p class="novoe">Правило Лопиталя: если верх и низ оба уходят в ∞ (или оба в 0), то <code>lim f/g = lim f'/g'</code>. Берём производную отдельно от верха и отдельно от низа.</p>
+    <p>Пример: <code>lim ln n / n</code>. Верх <code>(ln n)' = 1/n</code>, низ <code>(n)' = 1</code>. Новая дробь <code>(1/n) / 1 = 1/n → 0</code>. Предел 0, значит <code>n</code> растёт быстрее <code>ln n</code>. Это ровно ступенька лестницы из шага 5.</p>
+    <p>Если после одного раза снова ∞/∞, правило применяют ещё раз.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Найди по Лопиталю <code>lim n² / eⁿ</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Первый раз: <code>2n / eⁿ</code>, снова ∞/∞. Второй раз: <code>2 / eⁿ → 0</code>. Предел 0: показательная <code>eⁿ</code> растёт быстрее <code>n²</code>.</p>
+          <p class="oshibka">Взять производную от всей дроби как от частного, по правилу <code>(f/g)'</code>. Лопиталь — это отдельно производная числителя и отдельно знаменателя, без формулы частного.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Лопиталь: ∞/∞ или 0/0 → <code>lim f/g = lim f'/g'</code>. Верх и низ дифференцируем отдельно.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>Сумма 1 + 2 + … + n и вложенные циклы</h2>
+    <p>Знак <code>Σ</code> (сигма) значит «сложить». <code>Σ i</code> от 1 до n — это <code>1 + 2 + … + n</code>.</p>
+    <p class="novoe"><code>1 + 2 + … + n = n(n+1)/2</code>. Растёт как <code>n²</code>.</p>
+    <p>Откуда: сложим первое с последним <code>1 + n</code>, второе с предпоследним <code>2 + (n−1)</code> — каждый раз <code>n + 1</code>, а пар <code>n/2</code>. Для n = 100: <code>100 · 101 / 2 = 5050</code>.</p>
+    <p>Где это в коде. Сравнить каждый элемент с каждым следующим:</p>
+<pre><code>for i in range(n):
+    for j in range(i + 1, n):
+        сравнить(a[i], a[j])</code></pre>
+    <p>При i = 0 внутренний цикл делает <code>n − 1</code> шагов, при i = 1 — <code>n − 2</code>, …, в конце 0. Всего <code>(n−1) + (n−2) + … + 0 = n(n−1)/2</code>, это <code>Θ(n²)</code>. Запись <code>Θ(n²)</code> («тета») значит «растёт ровно как n², с точностью до множителя»: предел отношения к n² — конечное число больше нуля, как в шаге 4. Здесь он равен 1/2.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько раз сработает <code>сравнить</code> при n = 5? И при n = 1000 примерно?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>n = 5: <code>4 + 3 + 2 + 1 + 0 = 10 = 5 · 4 / 2</code>. n = 1000: <code>1000 · 999 / 2 ≈ 500 000</code>.</p>
+          <p class="oshibka">Сказать «раз внутренний цикл короче, это быстрее, чем n²». Он короче в среднем вдвое, а половина от <code>n²</code> — всё ещё <code>Θ(n²)</code>: множитель 1/2 в сложности не важен.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>1 + 2 + … + n = n(n+1)/2 = Θ(n²)</code></p>
+      <p>Цикл в цикле «каждый с каждым» → <code>Θ(n²)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>Геометрическая сумма: 1 + 2 + 4 + … + n</h2>
+    <p>Геометрическая прогрессия — каждое следующее число в одно и то же число раз больше: 1, 2, 4, 8, 16.</p>
+    <p class="novoe">Сумма геометрической прогрессии примерно равна своему самому большому члену. <code>1 + 2 + 4 + … + 2ᵏ = 2ᵏ⁺¹ − 1</code>, то есть меньше удвоенного последнего.</p>
+    <p>Проверка: <code>1 + 2 + 4 + 8 = 15 = 16 − 1</code>. Самое большое слагаемое 8, сумма меньше 16.</p>
+    <p>Где это в коде. Динамический массив (список в Python) при переполнении удваивается и копирует всё. Копирования за всю жизнь: <code>1 + 2 + 4 + … + n &lt; 2n</code>. Поэтому добавление в конец в среднем <code>O(1)</code>, хотя иногда бывает дорогое копирование.</p>
+    <p>А цикл, где i удваивается, делает мало шагов:</p>
+<pre><code>i = 1
+while i &lt; n:
+    i = i * 2</code></pre>
+    <p>i проходит 1, 2, 4, …, пока меньше n. Это <code>log₂ n</code> шагов из шага 1.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Чему равна <code>1 + 2 + 4 + … + 64</code>? И сколько раз выполнится тело цикла выше при n = 64?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сумма <code>128 − 1 = 127</code>. Цикл: i было 1, 2, 4, 8, 16, 32 — шесть раз, на 64 условие <code>64 &lt; 64</code> ложно. Шесть = <code>log₂ 64</code>.</p>
+          <p class="oshibka">Посчитать сумму как <code>64 · 7</code> или складывать вручную до ошибки. Сумма степеней двойки — всегда следующая степень минус один.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Геометрическая сумма ≈ самый большой член. <code>1 + 2 + … + 2ᵏ = 2ᵏ⁺¹ − 1</code>.</p>
+      <p>i удваивается до n → <code>Θ(log n)</code> шагов.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>Гармоническая сумма: 1 + 1/2 + … + 1/n</h2>
+    <p>Сумму <code>H_n = 1 + 1/2 + 1/3 + … + 1/n</code> называют гармонической.</p>
+    <p class="novoe"><code>H_n ≈ ln n</code>. Растёт, но очень медленно, как логарифм.</p>
+    <p>Почему так: сумму можно оценить площадью под кривой <code>1/x</code>, а площадь от 1 до n равна <code>ln n</code> (из шага 6: производная <code>ln x</code> равна <code>1/x</code>). Так в тетради и оценивают суммы интегралом. Проверка на n = 4: <code>1 + 0.5 + 0.33 + 0.25 ≈ 2.08</code>, а <code>ln 4 ≈ 1.39</code>. Разница около 0.7, и с ростом n она не растёт, а приближается к 0.58. Постоянная добавка на скорость роста не влияет.</p>
+    <p>Где это в коде. Внутренний цикл идёт с шагом i:</p>
+<pre><code>for i in range(1, n + 1):
+    for j in range(0, n, i):
+        работа()</code></pre>
+    <p>При i = 1 внутренний цикл делает n шагов, при i = 2 — n/2, при i = 3 — n/3. Всего <code>n · (1 + 1/2 + … + 1/n) = n · H_n ≈ n ln n</code>. Это <code>Θ(n log n)</code>, а не <code>n²</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Тот же цикл, но внутренний всегда идёт с шагом 1: <code>for j in range(n)</code>. Какая сложность? Во сколько раз медленнее при n = 1000, грубо?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>n · n = Θ(n²)</code>. При n = 1000: <code>n² = 10⁶</code>, а цикл с шагом i делает около 8000 шагов (<code>n · H_n ≈ 1000 · 7,5 = 7500</code>, остальное — округления вверх, ведь при n/i с остатком внутренний цикл делает лишний шаг). Разница больше чем в 100 раз.</p>
+          <p class="oshibka">Видеть два вложенных цикла и сразу писать <code>n²</code>. Сложность считают по числу шагов внутреннего цикла, а оно зависит от шага. С шагом i это гармоническая сумма.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>H_n = 1 + 1/2 + … + 1/n ≈ ln n</code></p>
+      <p>Внутренний цикл с шагом i → <code>n · H_n = Θ(n log n)</code>.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Где пригодится в алгоритмах и ML</h2>
+    <div class="tablica"><table>
+      <tr><th>тема</th><th>в алгоритмах</th><th>в ML</th></tr>
+      <tr><td>логарифм (шаги 1–3)</td><td>бинарный поиск, высота дерева, сортировка слиянием <code>n log n</code></td><td>функция потерь log-loss (логарифмическая: штраф модели за ошибку); логарифм превращает произведение вероятностей в сумму (правило шага 2), так модели и обучают</td></tr>
+      <tr><td>пределы и лестница (4–5, 7)</td><td>сравнить два алгоритма и доказать, что один быстрее</td><td>понять, почему внимание в трансформере (нейросеть, на которой построены языковые модели) дорогое: <code>L²</code>, где L — длина текста</td></tr>
+      <tr><td>производная (6)</td><td>проверить, что функция растёт</td><td>градиентный спуск: шаг против производной, <code>w ← w − η · f'(w)</code>, где η («эта») — размер шага</td></tr>
+      <tr><td>суммы (8–10)</td><td>сложность вложенных циклов, амортизация массива</td><td>средняя ошибка по датасету — это сумма по всем примерам, делённая на их число</td></tr>
+    </table></div>
+    <p>Градиентный спуск на числах. Функция ошибки <code>f(w) = (w − 3)²</code>, лучшая точка w = 3. Стоим в w = 5, шаг <code>η = 0.1</code>. Производная <code>f'(w) = 2(w − 3) = 4</code>. Новый <code>w = 5 − 0.1 · 4 = 4.6</code>, ближе к 3. Повторяем — и модель «учится».</p>
+    <p>Повторить вопросами: <a href="../povtorenie/matan.html">повторение по матану</a>. Дальше в тетради — индукция, округления и случайные величины, они пойдут отдельным уроком.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: матан для алгоритмов">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Реши в тетради, впиши ответы с ходом решения, нажми кнопку внизу и пришли в чат. Можно прислать фото страницы тетради.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Посчитай: <code>log₂ 64</code>, <code>log₂(1024 · 8)</code>, <code>log₃ 81</code>.
+      <textarea name="z1" placeholder="…" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Что растёт быстрее: <code>n log n</code> или <code>n · √n</code>? Докажи через предел отношения.
+      <textarea name="z2" placeholder="lim … = …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Найди по Лопиталю <code>lim n / eⁿ</code> при <code>n → ∞</code>.
+      <textarea name="z3" placeholder="…" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Какая сложность у каждого куска и почему?
+<pre><code># а
+for i in range(n):
+    for j in range(i):
+        x += 1
+# б
+i = n
+while i &gt; 1:
+    i = i // 2</code></pre>
+      <textarea name="z4" placeholder="а) … б) …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Функция ошибки <code>f(w) = (w − 1)²</code>. Найди <code>f'(w)</code> и сделай один шаг градиентного спуска из <code>w = 3</code> с шагом <code>η = 0.25</code>. Каким стал w?
+      <textarea name="z5" placeholder="f'(w) = … новый w = …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="./">← Раздел «Матан»</a> · <a href="../uroki/">Все уроки</a> · <a href="../povtorenie/matan.html">Повторение по матану</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

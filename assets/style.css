@@ -199,6 +199,16 @@ li { margin: var(--o1) 0; }
 .tetrad p:first-child, .tetrad ul:first-child { margin-top: 0; }
 .tetrad p:last-child { margin-bottom: 0; }
 
+/* Уроки без тетради (код, гуманитарка): то же место, но «запомни», а не «перепиши» */
+.glavnoe {
+  background: var(--fon-2);
+  border: 1px solid var(--linia); border-left: 4px solid var(--akcent);
+  border-radius: var(--r); padding: var(--o3) var(--o4); margin: var(--o4) 0;
+}
+.glavnoe::before { content: "Главное из шага"; display: block; font-weight: 700; color: var(--akcent); margin-bottom: var(--o1); }
+.glavnoe p:first-child, .glavnoe ul:first-child { margin-top: 0; }
+.glavnoe p:last-child, .glavnoe ul:last-child { margin-bottom: 0; }
+
 .sam {
   border: 1px solid var(--linia); border-left: 4px solid var(--ok);
   border-radius: var(--r); padding: var(--o3) var(--o4); margin: var(--o4) 0; background: var(--fon-2);
