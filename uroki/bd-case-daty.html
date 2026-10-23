@@ -365,12 +365,12 @@ ORDER BY mesyac;</code></pre>
 
   <section class="shag" id="posle-shagov">
     <h2>Как это ложится на самостоятельную 2</h2>
-    <p>В твоей базе <code>ml_tracker</code> есть всё нужное: у <code>experiments</code> столбцы <code>status</code> и <code>started_at</code>, у <code>researchers</code> — <code>created_at</code>.</p>
+    <p>В твоей базе <code>ml_tracker</code> есть всё нужное: у <code>experiments</code> столбцы <code>status</code> и <code>created_at</code> (дата запуска), у <code>researchers</code> тоже есть <code>created_at</code>. Столбца <code>started_at</code> в твоей базе нет, он только в учебной таблице <code>runs</code>.</p>
     <ul>
       <li>Задание 12, метки по условию — шаги 1–3. Пороги подбери под свои числа, чтобы в ответе встретились все метки.</li>
       <li>Задание 13, особые в кучке — шаг 4. На твоей базе это кучки по <code>researcher_id</code> в таблице <code>experiments</code>.</li>
       <li>Задание 15, аналитика по датам — шаги 5–7.</li>
-      <li><code>started_at</code> у тебя <code>TIMESTAMP</code>, то есть дата со временем. <code>EXTRACT</code> и <code>TO_CHAR</code> работают с ним точно так же.</li>
+      <li><code>created_at</code> у тебя <code>TIMESTAMP</code>, то есть дата со временем. <code>EXTRACT</code> и <code>TO_CHAR</code> работают с ним точно так же.</li>
       <li>Задания 14, 16 — тот же <code>GROUP BY</code>, что в прошлом уроке. Задание 17 — оконные функции, к нему следующий урок.</li>
     </ul>
   </section>

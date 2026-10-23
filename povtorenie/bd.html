@@ -134,7 +134,61 @@ WHERE o.id IS NULL;</code></pre>
     </div>
   </details>
 
-  <p class="niz"><a href="./">← Повторение</a> · <a href="../uroki/bd-left-join-group-by.html">Урок: LEFT JOIN и GROUP BY</a></p>
+  <h2>После урока «CASE и даты»</h2>
+  <p>Таблица та же: шесть запусков <code>runs</code>, у запусков 2 и 6 точности нет.</p>
+
+  <details class="vopros">
+    <summary>13. Как устроен CASE и что он делает со строками?</summary>
+    <div>
+<pre><code class="sql">CASE
+  WHEN accuracy &gt;= 0.8 THEN 'хорошо'
+  ELSE 'слабо'
+END AS ocenka</code></pre>
+      <p>Это новый столбец, который считается для каждой строки по условию. Строки он не выкидывает, в отличие от <code>WHERE</code>. Без <code>END</code> запрос не выполнится.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>14. Веток WHEN несколько. Какая сработает? И что будет, если не подошла ни одна, а ELSE нет?</summary>
+    <div>
+      <p>Первая сверху, где условие выполнилось, остальные база уже не смотрит. Поэтому ветки пишут от строгой к мягкой: 0.9 → 0.8 → 0.7. Не подошла ни одна и нет <code>ELSE</code> — в клетке будет <code>NULL</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>15. У запуска точность NULL. Какую метку он получит в CASE WHEN accuracy &gt;= 0.8 THEN 'хорошо' ELSE 'слабо' END?</summary>
+    <div>
+      <p>«слабо». Условие с <code>NULL</code> не бывает верным, поэтому ветка не срабатывает и идёт <code>ELSE</code>. Если пустую точность нужно пометить отдельно, первой веткой пишут <code>WHEN accuracy IS NULL THEN 'нет данных'</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>16. Как посчитать в каждой кучке, сколько строк подходят под условие? Почему не COUNT?</summary>
+    <div>
+<pre><code class="sql">SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END)</code></pre>
+      <p>Подходящая строка даёт 1, остальные 0, сумма единиц и есть количество. <code>COUNT</code> с <code>ELSE 0</code> посчитал бы все строки: 0 тоже непустое значение.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>17. Как сгруппировать запуски по месяцам? А взять только октябрь?</summary>
+    <div>
+<pre><code class="sql">SELECT EXTRACT(MONTH FROM started_at) AS mesyac, COUNT(*)
+FROM runs
+GROUP BY EXTRACT(MONTH FROM started_at);</code></pre>
+      <p>Только октябрь: <code>WHERE EXTRACT(MONTH FROM started_at) = 10</code>. Написать <code>started_at = 10</code> нельзя: дата целиком не число, PostgreSQL ответит ошибкой.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>18. Чем ISODOW отличается от DOW? Как отобрать выходные?</summary>
+    <div>
+      <p><code>ISODOW</code>: понедельник 1, воскресенье 7. <code>DOW</code>: воскресенье 0, понедельник 1, суббота 6. Выходные: <code>EXTRACT(ISODOW FROM дата) IN (6, 7)</code>, а с <code>DOW</code> это <code>IN (0, 6)</code>.</p>
+      <p>Красиво показать дату: <code>TO_CHAR(дата, 'DD.MM.YYYY')</code>. Месяц в шаблоне — <code>MM</code>, а <code>MI</code> — минуты.</p>
+    </div>
+  </details>
+
+  <p class="niz"><a href="./">← Повторение</a> · <a href="../uroki/bd-left-join-group-by.html">Урок: LEFT JOIN и GROUP BY</a> · <a href="../uroki/bd-case-daty.html">Урок: CASE и даты</a></p>
 </main>
 <script src="../assets/app.js"></script>
 </body>
