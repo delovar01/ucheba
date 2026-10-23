@@ -23,7 +23,7 @@
   <p class="tiho">Базы данных · лаба 14.10 · под самостоятельную 2, задания 12, 13 и 15 · около 50 минут</p>
 
   <p>Ты уже умеешь фильтровать через <code>WHERE</code>, считать через <code>COUNT</code> и <code>SUM</code> и делить строки на кучки через <code>GROUP BY</code>. Если это ещё плывёт, сначала пройди <a href="bd-left-join-group-by.html">урок про LEFT JOIN и GROUP BY</a>. Сегодня две новые темы: как поставить строке метку по условию и как достать из даты месяц или день недели. Девять шагов, в каждом одна новая вещь.</p>
-  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Рамка «Главное из шага» — главное, к ней возвращайся перед самостоятельной. Непонятно — дальше не иди, напиши номер шага.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. В рамке «Главное из шага» суть шага в двух строках, к ней возвращайся перед самостоятельной. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
 
   <h2>Наша таблица</h2>
   <p>Одна таблица, шесть строк. Это запуски обучения моделей, как в твоей базе <code>ml_tracker</code>, только проще.</p>
@@ -40,7 +40,7 @@
       <tr><td>6</td><td>Аня</td><td>2026-10-14</td><td>running</td><td class="null">NULL</td></tr>
     </table>
   </div>
-  <p><code>status</code> — что с запуском: <code>done</code> закончился, <code>failed</code> упал, <code>running</code> ещё идёт. <code>accuracy</code> — доля верных ответов модели, от 0 до 1. У упавшего и идущего запуска её нет, там <code>NULL</code>, то есть пустая клетка. Дата пишется год-месяц-день: <code>2026-10-03</code> — это 3 октября.</p>
+  <p>В <code>status</code> записано, что с запуском: <code>done</code> закончился, <code>failed</code> упал, <code>running</code> ещё идёт. <code>accuracy</code> показывает долю верных ответов модели, от 0 до 1. У упавшего и идущего запуска её нет, там <code>NULL</code>, то есть пустая клетка. Дата пишется год-месяц-день: <code>2026-10-03</code> значит 3 октября.</p>
 
   <div class="glavnoe">
     <p>Все задачи урока на этой таблице. Возвращайся к ней, когда нужно проверить ответ.</p>
@@ -49,7 +49,7 @@
   <details class="vopros">
     <summary>Хочешь проверять каждый шаг в DBeaver? Вот скрипт</summary>
     <div>
-      <p><code>DATE</code> — тип «дата без времени». <code>NUMERIC(4,2)</code> — число, в котором всего 4 цифры, из них 2 после точки.</p>
+      <p><code>DATE</code> значит «дата без времени». <code>NUMERIC(4,2)</code> значит число, в котором всего 4 цифры, из них 2 после точки.</p>
 <pre><code class="sql">CREATE TABLE runs (
   id         INT PRIMARY KEY,
   researcher TEXT,
@@ -79,8 +79,8 @@ INSERT INTO runs VALUES
     ELSE 'слабо'
   END AS ocenka
 FROM runs;</code></pre>
-    <p>Читается как обычная фраза: «в случае (<code>CASE</code>), когда (<code>WHEN</code>) точность от 0.8, тогда (<code>THEN</code>) пиши „хорошо“, иначе (<code>ELSE</code>) пиши „слабо“, конец (<code>END</code>)». <code>AS ocenka</code> — имя нового столбца, ты так уже называл столбцы с <code>COUNT</code>.</p>
-    <p class="novoe"><code>CASE</code> — это новый столбец, который считается для каждой строки отдельно по условию. Строки он не отбрасывает, в отличие от <code>WHERE</code>.</p>
+    <p>Читается как обычная фраза: «в случае (<code>CASE</code>), когда (<code>WHEN</code>) точность от 0.8, тогда (<code>THEN</code>) пиши „хорошо“, иначе (<code>ELSE</code>) пиши „слабо“, конец (<code>END</code>)». <code>AS ocenka</code> даёт новому столбцу имя. Без <code>AS</code> база назвала бы его сама, как столбец <code>count</code> в прошлом уроке.</p>
+    <p class="novoe"><code>CASE</code> создаёт новый столбец, который считается для каждой строки отдельно по условию. Строки он не отбрасывает, в отличие от <code>WHERE</code>.</p>
 
     <div class="sam">
       <b>Сделай сам.</b> Выпиши <code>id</code> и метку для всех шести строк.
@@ -127,7 +127,7 @@ FROM runs;</code></pre>
       <b>Сделай сам.</b> Переставь ветки в обратном порядке: сначала <code>&gt;= 0.7</code>, потом <code>&gt;= 0.8</code>, потом <code>&gt;= 0.9</code>. Какие метки получат запуски 1, 3 и 4?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p>Все три получат «средне». 0.91, 0.78 и 0.85 — каждое ≥ 0.7, первая же ветка срабатывает, до «хорошо» и «отлично» база не доходит. Метки «отлично» не будет ни у кого.</p>
+          <p>Все три получат «средне». 0.91, 0.78 и 0.85 все не меньше 0.7, первая же ветка срабатывает, до «хорошо» и «отлично» база не доходит. Метки «отлично» не будет ни у кого.</p>
           <p class="oshibka">Думать, что база выберет «самую подходящую» ветку. Она берёт первую подходящую. Поэтому ветки пишут от самой строгой к самой мягкой.</p>
         </div>
       </details>
@@ -216,7 +216,7 @@ GROUP BY researcher;</code></pre>
 <pre><code class="sql">SELECT id, started_at,
   EXTRACT(MONTH FROM started_at) AS mesyac
 FROM runs;</code></pre>
-    <p class="novoe"><code>EXTRACT(часть FROM дата)</code> вынимает из даты одно число. Часть пишется по-английски: <code>YEAR</code> — год, <code>MONTH</code> — месяц, <code>DAY</code> — день месяца.</p>
+    <p class="novoe"><code>EXTRACT(часть FROM дата)</code> вынимает из даты одно число. Часть пишется по-английски: <code>YEAR</code> год, <code>MONTH</code> месяц, <code>DAY</code> день месяца.</p>
     <p>Запуски 1 и 2 сентябрьские, получат 9. Остальные октябрьские, получат 10.</p>
 
     <div class="sam">
@@ -226,7 +226,7 @@ FROM runs;</code></pre>
 <pre><code class="sql">SELECT id, EXTRACT(DAY FROM started_at) AS den
 FROM runs;</code></pre>
           <p>У запуска 3 дата <code>2026-10-03</code>, будет 3. Всего: 14, 28, 3, 5, 12, 14.</p>
-          <p class="oshibka">Перепутать месяц и день, потому что в жизни мы пишем «3.10». В базе дата всегда год-месяц-день, поэтому <code>2026-10-03</code> — 3 октября, а не 10 марта.</p>
+          <p class="oshibka">Перепутать месяц и день, потому что в жизни мы пишем «3.10». В базе дата всегда год-месяц-день, поэтому <code>2026-10-03</code> это 3 октября, а не 10 марта.</p>
         </div>
       </details>
     </div>
@@ -255,7 +255,7 @@ ORDER BY mesyac;</code></pre>
     </table></div>
 
     <div class="sam">
-      <b>Сделай сам.</b> Сколько запусков сделал каждый исследователь в октябре? Подсказка: октябрь отбираем в <code>WHERE</code>, кучки — по исследователю.
+      <b>Сделай сам.</b> Сколько запусков сделал каждый исследователь в октябре? Подсказка: октябрь отбираем в <code>WHERE</code>, кучки делаем по исследователю.
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
 <pre><code class="sql">SELECT researcher, COUNT(*)
@@ -263,7 +263,7 @@ FROM runs
 WHERE EXTRACT(MONTH FROM started_at) = 10
 GROUP BY researcher;</code></pre>
           <p>Аня 1, Борис 2, Вика 1. <code>WHERE</code> оставил строки 3–6, дальше обычные кучки.</p>
-          <p class="oshibka">Написать в <code>WHERE</code> <code>started_at = 10</code>. Дата целиком — не число месяца, такое сравнение база не примет. Сначала вынь месяц через <code>EXTRACT</code>, потом сравнивай.</p>
+          <p class="oshibka">Написать в <code>WHERE</code> <code>started_at = 10</code>. Дата целиком не равна номеру месяца, такое сравнение база не примет. Сначала вынь месяц через <code>EXTRACT</code>, потом сравнивай.</p>
         </div>
       </details>
     </div>
@@ -282,18 +282,18 @@ GROUP BY researcher;</code></pre>
 <pre><code class="sql">SELECT EXTRACT(ISODOW FROM DATE '2026-10-14');  -- 3
 SELECT EXTRACT(ISODOW FROM DATE '2026-10-18');  -- 7
 SELECT EXTRACT(DOW    FROM DATE '2026-10-18');  -- 0</code></pre>
-    <p><code>DATE '2026-10-14'</code> — так пишут дату прямо в запросе, без таблицы. 14 октября 2026 — среда, 18-е — воскресенье.</p>
+    <p>Запись <code>DATE '2026-10-14'</code> позволяет написать дату прямо в запросе, без таблицы. 14 октября 2026 года среда, 18-е воскресенье.</p>
     <p class="novoe"><code>ISODOW</code> считает по-нашему: понедельник 1, воскресенье 7. <code>DOW</code> считает по-американски: воскресенье 0, понедельник 1, суббота 6. Отличаются только у воскресенья.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> Сколько запусков в нашей таблице сделано в выходные? Напиши запрос с <code>ISODOW</code> и проверь ответ по календарю: 3 октября 2026 — суббота.
+      <b>Сделай сам.</b> Сколько запусков в нашей таблице сделано в выходные? Напиши запрос с <code>ISODOW</code> и проверь ответ по календарю: 3 октября 2026 года суббота. Новое слово для условия: <code>x IN (6, 7)</code> значит «x равен 6 или 7», это короче, чем <code>x = 6 OR x = 7</code>.
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
 <pre><code class="sql">SELECT COUNT(*)
 FROM runs
 WHERE EXTRACT(ISODOW FROM started_at) IN (6, 7);</code></pre>
-          <p>Один, запуск 3 (суббота). Остальные: 14.09, 28.09, 5.10, 12.10 — понедельники, 14.10 — среда.</p>
-          <p class="oshibka">Взять <code>DOW</code> и написать <code>IN (6, 7)</code>. В <code>DOW</code> воскресенье — 0, а 7 не бывает вообще, воскресные запуски потеряются. С <code>DOW</code> выходные — это <code>IN (0, 6)</code>.</p>
+          <p>Один, запуск 3 (суббота). Остальные не выходные: 14.09, 28.09, 5.10 и 12.10 понедельники, 14.10 среда.</p>
+          <p class="oshibka">Взять <code>DOW</code> и написать <code>IN (6, 7)</code>. В <code>DOW</code> воскресенье равно 0, а 7 не бывает вообще, воскресные запуски потеряются. С <code>DOW</code> выходные пишут как <code>IN (0, 6)</code>.</p>
         </div>
       </details>
     </div>
@@ -311,7 +311,7 @@ WHERE EXTRACT(ISODOW FROM started_at) IN (6, 7);</code></pre>
     <p>Тоже с лабы 14.10. Дата <code>2026-10-03</code> читается неудобно. Хочется <code>03.10.2026</code>.</p>
 <pre><code class="sql">SELECT id, TO_CHAR(started_at, 'DD.MM.YYYY') AS data
 FROM runs;</code></pre>
-    <p class="novoe"><code>TO_CHAR(дата, 'шаблон')</code> превращает дату в текст по шаблону. В шаблоне <code>DD</code> — день двумя цифрами, <code>MM</code> — месяц двумя цифрами, <code>YYYY</code> — год четырьмя. Точки и всё остальное копируются как есть.</p>
+    <p class="novoe"><code>TO_CHAR(дата, 'шаблон')</code> превращает дату в текст по шаблону. В шаблоне <code>DD</code> означает день двумя цифрами, <code>MM</code> месяц двумя цифрами, <code>YYYY</code> год четырьмя. Точки и всё остальное копируются как есть.</p>
     <p>Результат: <code>14.09.2026</code>, <code>28.09.2026</code>, <code>03.10.2026</code>, <code>05.10.2026</code>, <code>12.10.2026</code>, <code>14.10.2026</code>.</p>
 
     <div class="sam">
@@ -319,14 +319,14 @@ FROM runs;</code></pre>
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
           <p><code>TO_CHAR(started_at, 'YYYY/MM')</code>. Сначала год, потом косая черта как есть, потом месяц.</p>
-          <p class="oshibka">Написать <code>MI</code> вместо <code>MM</code>, потому что «минуты» и «месяц» оба на М. <code>MI</code> — минуты, у даты без времени выйдет <code>2026/00</code>. Месяц — только <code>MM</code>. В MySQL этой функции нет, там <code>DATE_FORMAT(дата, '%Y/%m')</code>.</p>
+          <p class="oshibka">Написать <code>MI</code> вместо <code>MM</code>, потому что «минуты» и «месяц» оба на М. <code>MI</code> означает минуты, у даты без времени выйдет <code>2026/00</code>. Месяц пишется только <code>MM</code>. Если попадётся другая база, MySQL, там этой функции нет, вместо неё <code>DATE_FORMAT(дата, '%Y/%m')</code>.</p>
         </div>
       </details>
     </div>
 
     <div class="glavnoe">
       <p><code>TO_CHAR(дата, 'DD.MM.YYYY')</code> → текст <code>03.10.2026</code>.</p>
-      <p>Результат — текст, а не дата: считать по нему нельзя, только показывать.</p>
+      <p>На выходе текст, а не дата. Считать по нему нельзя, только показывать.</p>
     </div>
   </section>
 
@@ -352,7 +352,7 @@ ORDER BY mesyac;</code></pre>
       <b>Сделай сам.</b> Поменяй запрос так, чтобы вместо удачных считались упавшие (<code>failed</code>). Что будет в октябре?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p>Меняем одно слово в <code>CASE</code>: <code>WHEN status = 'failed'</code>. Сентябрь 2 и 1, октябрь 4 и 0. Ноль в октябре — нормальный ответ: упавших не было, все строки дали 0.</p>
+          <p>Меняем одно слово в <code>CASE</code>: <code>WHEN status = 'failed'</code>. Сентябрь 2 и 1, октябрь 4 и 0. Ноль в октябре это нормальный ответ: упавших не было, все строки дали 0.</p>
           <p class="oshibka">Отобрать упавшие в <code>WHERE status = 'failed'</code>. Тогда пропадёт счёт «всего»: в кучки попадут только упавшие, и октябрь исчезнет совсем. <code>WHERE</code> выкидывает строки, <code>CASE</code> внутри <code>SUM</code> только решает, считать ли их.</p>
         </div>
       </details>
@@ -367,11 +367,11 @@ ORDER BY mesyac;</code></pre>
     <h2>Как это ложится на самостоятельную 2</h2>
     <p>В твоей базе <code>ml_tracker</code> есть всё нужное: у <code>experiments</code> столбцы <code>status</code> и <code>created_at</code> (дата запуска), у <code>researchers</code> тоже есть <code>created_at</code>. Столбца <code>started_at</code> в твоей базе нет, он только в учебной таблице <code>runs</code>.</p>
     <ul>
-      <li>Задание 12, метки по условию — шаги 1–3. Пороги подбери под свои числа, чтобы в ответе встретились все метки.</li>
-      <li>Задание 13, особые в кучке — шаг 4. На твоей базе это кучки по <code>researcher_id</code> в таблице <code>experiments</code>.</li>
-      <li>Задание 15, аналитика по датам — шаги 5–7.</li>
+      <li>Задание 12, метки по условию: шаги 1–3. Пороги подбери под свои числа, чтобы в ответе встретились все метки.</li>
+      <li>Задание 13, особые в кучке: шаг 4. На твоей базе это кучки по <code>researcher_id</code> в таблице <code>experiments</code>.</li>
+      <li>Задание 15, аналитика по датам: шаги 5–7.</li>
       <li><code>created_at</code> у тебя <code>TIMESTAMP</code>, то есть дата со временем. <code>EXTRACT</code> и <code>TO_CHAR</code> работают с ним точно так же.</li>
-      <li>Задания 14, 16 — тот же <code>GROUP BY</code>, что в прошлом уроке. Задание 17 — оконные функции, к нему следующий урок.</li>
+      <li>Задания 14 и 16 решаются тем же <code>GROUP BY</code>, что в прошлом уроке. Задание 17 на оконные функции, к нему будет следующий урок.</li>
     </ul>
   </section>
 
@@ -384,7 +384,7 @@ ORDER BY mesyac;</code></pre>
       <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
     </div>
     <div class="zadacha">
-      <b>2.</b> Для каждого исследователя: сколько у него запусков и сколько из них не закончились (статус не <code>done</code>).
+      <b>2.</b> Для каждого исследователя: сколько у него запусков и сколько из них не закончились (статус не <code>done</code>). «Не равно» в SQL пишется <code>&lt;&gt;</code>: <code>status &lt;&gt; 'done'</code>.
       <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
     </div>
     <div class="zadacha">
@@ -398,7 +398,7 @@ FROM runs;</code></pre>
       <textarea name="z4" placeholder="Что выдаст и почему" aria-label="Ответ на задачу 4"></textarea>
     </div>
     <div class="zadacha">
-      <b>5.</b> В своей базе <code>ml_tracker</code>: сколько запусков по месяцам и сколько из них упали (<code>failed</code>). Запусти в DBeaver, пришли запрос и скрин результата.
+      <b>5.</b> В своей базе <code>ml_tracker</code>: сколько запусков по месяцам и сколько из них упали (<code>failed</code>). Запусти в DBeaver, впиши запрос и что он выдал по каждому месяцу. Дата запуска у тебя в <code>created_at</code>.
       <textarea name="z5" placeholder="SELECT …" aria-label="Ответ на задачу 5"></textarea>
     </div>
 
