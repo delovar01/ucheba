@@ -53,7 +53,7 @@
       const porog = innerHeight * 0.4;
       let n = 0;
       shagi.forEach((s, i) => { if (s.getBoundingClientRect().top < porog) n = i + 1; });
-      const posle = document.querySelector('#posle-shagov');
+      const posle = document.querySelector('#posle-shagov') || document.querySelector('#samostoyatelnaya');
       const vKonce = !!(posle && posle.getBoundingClientRect().top < porog);
       const metka = n + (vKonce ? 'k' : '');
       if (metka === tekushiy) return;
@@ -91,7 +91,8 @@
   }
 
   // --- состояние уроков в списках: не начат / шаг N / пройден ---
-  document.querySelectorAll('[data-urok-status]').forEach(el => {
+  const znachok = el => {
+    el.querySelector(':scope > .sostoyanie')?.remove();
     const sost = chitat('urok:' + el.dataset.urokStatus, {});
     const vsego = el.dataset.shagov || 9;
     const z = document.createElement('span');
@@ -100,7 +101,8 @@
     else if (sost.max) { z.classList.add('idet'); z.textContent = 'дошёл до шага ' + sost.max + ' из ' + vsego; }
     else z.textContent = 'не начат';
     el.appendChild(z);
-  });
+  };
+  document.querySelectorAll('[data-urok-status]').forEach(znachok);
 
   // --- подсветка SQL ---
   const slova = ['SELECT', 'FROM', 'WHERE', 'LEFT JOIN', 'INNER JOIN', 'JOIN', 'ON', 'GROUP BY', 'HAVING',
@@ -119,10 +121,33 @@
   });
 
   // --- «Горит»: сроки из assets/sroki.js ---
+  // #gorit на главной: ближайшие 7 дней, остальное в #gorit-dalshe под раскрывашкой.
+  // .gorit[data-predmet] на странице предмета: все сроки этого предмета.
+  const seychas = Date.now();
+  const den = 86400000;
+  const aktivnye = () => (window.SROKI || [])
+    .filter(s => !s.sdano && (!s.do || new Date(s.do).getTime() > seychas - den))
+    .sort((a, b) => (a.do ? new Date(a.do) : Infinity) - (b.do ? new Date(b.do) : Infinity));
+  const sostUroka = put => chitat('urok:' + (document.querySelector('[data-urok-status] a[href$="' + put.split('/').pop() + '"]')?.closest('[data-urok-status]')?.dataset.urokStatus || ''), {});
+
+  // «Сажусь учиться»: урок к ближайшей сдаче, который ещё не пройден
+  const glavnyy = document.querySelector('.vhod.glavnyy[data-avto]');
+  if (glavnyy && window.SROKI) {
+    const s = aktivnye().find(x => x.urok && !sostUroka(x.urok).proyden && document.querySelector('[data-urok-status] a[href$="' + x.urok.split('/').pop() + '"]'));
+    if (s) {
+      const li = document.querySelector('[data-urok-status] a[href$="' + s.urok.split('/').pop() + '"]').closest('[data-urok-status]');
+      const imya = li.querySelector('b').textContent;
+      const kogda = new Date(new Date(s.do).getTime() - 60000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'Asia/Yekaterinburg' });
+      glavnyy.href = li.querySelector('a').getAttribute('href');
+      glavnyy.dataset.urokStatus = li.dataset.urokStatus;
+      glavnyy.dataset.shagov = li.dataset.shagov;
+      glavnyy.querySelector('span').textContent = imya + '. Это к сдаче «' + s.chto + '» до ' + kogda + ', ' + li.dataset.shagov + ' шагов.';
+      znachok(glavnyy);
+    }
+  }
+
   const gorit = document.querySelector('#gorit');
-  if (gorit && window.SROKI) {
-    const seychas = Date.now();
-    const den = 86400000;
+  if (window.SROKI && (gorit || document.querySelector('.gorit[data-predmet]'))) {
     const formatDaty = d => d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Yekaterinburg' });
     const dataEkb = d => new Date(d.toLocaleDateString('en-CA', { timeZone: 'Asia/Yekaterinburg' }));
     const ostalos = d => {
@@ -134,29 +159,62 @@
       const slovo = (n === 1 && nn !== 11) ? 'день' : (n >= 2 && n <= 4 && (nn < 12 || nn > 14)) ? 'дня' : 'дней';
       return 'через ' + dney + ' ' + slovo;
     };
-    const spisok = window.SROKI
-      .filter(s => !s.sdano && (!s.do || new Date(s.do).getTime() > seychas - den))
-      .sort((a, b) => (a.do ? new Date(a.do) : Infinity) - (b.do ? new Date(b.do) : Infinity));
-    gorit.innerHTML = spisok.map(s => {
+    const punkt = (s, sPredmetom) => {
       // срок «1.11 00:00» показываем как последний день — 31.10
       const d = s.do ? new Date(new Date(s.do).getTime() - 60000) : null;
       const skoro = d && d.getTime() - seychas < 3 * den;
       const kogda = d ? formatDaty(d) + '<small>' + ostalos(d) + '</small>' : 'без срока<small>чем раньше, тем лучше</small>';
+      const urok = s.urok ? sostUroka(s.urok) : null;
       return '<li class="' + (skoro ? 'skoro' : '') + '">' +
         '<div class="kogda">' + kogda + '</div>' +
-        '<div><span class="predmet">' + s.predmet + '</span>' +
+        '<div>' + (sPredmetom ? '<span class="predmet">' + s.predmet + '</span>' : '') +
         '<span class="chto">' + (s.ssylka ? '<a href="' + s.ssylka + '" target="_blank" rel="noopener">' + s.chto + '</a>' : s.chto) + '</span>' +
-        (s.primechanie ? '<span class="tiho">' + s.primechanie + '</span>' : '') +
-        (s.urok ? '<div class="urok"><a href="' + koren + s.urok + '">Урок к этому →</a></div>' : '') +
+        (s.urok ? '<a class="urok" href="' + koren + s.urok + '">' + (urok.proyden ? 'Урок пройден ✓, повторить →' : 'Урок к этому →') + '</a>' : '') +
+        (s.primechanie ? '<details class="podrobnee"><summary>Подробнее</summary><p>' + s.primechanie + '</p></details>' : '') +
         '</div></li>';
-    }).join('') || '<li><div class="kogda">—</div><div>Ничего не горит</div></li>';
+    };
+    const pusto = '<li><div class="kogda">—</div><div>Ничего не горит</div></li>';
+    const vse = aktivnye();
+    if (gorit) {
+      const nedelya = vse.filter(s => s.do && new Date(s.do).getTime() - seychas < 7 * den);
+      const dalshe = vse.filter(s => !nedelya.includes(s));
+      gorit.innerHTML = nedelya.map(s => punkt(s, true)).join('') || '<li><div class="kogda">—</div><div>На этой неделе сдач нет</div></li>';
+      const dal = document.querySelector('#gorit-dalshe');
+      if (dal) {
+        dal.querySelector('ul').innerHTML = dalshe.map(s => punkt(s, true)).join('');
+        dal.querySelector('.skolko').textContent = dalshe.length;
+        dal.hidden = !dalshe.length;
+      }
+    }
+    document.querySelectorAll('.gorit[data-predmet]').forEach(ul => {
+      ul.innerHTML = vse.filter(s => s.predmet === ul.dataset.predmet).map(s => punkt(s, false)).join('') ||
+        '<li><div class="kogda">—</div><div>Сдач по предмету сейчас нет</div></li>';
+    });
   }
+
+  // --- шпаргалка предмета: рамки «Главное» и «В тетрадь» из его уроков ---
+  // <div data-shpargalka="../uroki/a.html ../uroki/b.html">
+  document.querySelectorAll('[data-shpargalka]').forEach(async kuda => {
+    const puti = kuda.dataset.shpargalka.trim().split(/\s+/);
+    const chasti = await Promise.all(puti.map(p => fetch(p).then(r => r.ok ? r.text() : '').catch(() => '')));
+    const html = chasti.map((t, i) => {
+      if (!t) return '';
+      const doc = new DOMParser().parseFromString(t, 'text/html');
+      const nazvanie = doc.querySelector('main h1')?.textContent || '';
+      const shagi = [...doc.querySelectorAll('section.shag[data-shag]')].map((s, n) => {
+        const ramki = [...s.querySelectorAll('.glavnoe, .tetrad')].map(r => r.innerHTML).join('');
+        return ramki ? '<li><a href="' + puti[i] + '#' + s.id + '">' + (n + 1) + '. ' + (s.querySelector('h2')?.textContent || '') + '</a>' + ramki + '</li>' : '';
+      }).join('');
+      return shagi ? '<details class="shpargalka"' + (i === 0 ? ' open' : '') + '><summary><b>' + nazvanie + '</b></summary><ol>' + shagi + '</ol></details>' : '';
+    }).join('');
+    kuda.innerHTML = html || '<p class="tiho">Шпаргалка соберётся из уроков, когда откроешь страницу с интернетом.</p>';
+  });
 
   // --- карта пар: из assets/karta.js ---
   const karta = document.querySelector('#karta');
   if (karta && window.KARTA) {
     const pusto = v => !v || v === '—';
-    karta.innerHTML = window.KARTA.map((p, i) => {
+    karta.innerHTML = window.KARTA.filter(p => !karta.dataset.predmet || p.predmet === karta.dataset.predmet).map((p, i) => {
       const bylo = p.pary.filter(r => !r.ne_bylo);
       const bezTemy = bylo.filter(r => pusto(r.tema)).length;
       const bezMat = bylo.filter(r => pusto(r.material)).length;
@@ -174,7 +232,7 @@
           (pusto(r.tema) ? '<td class="tema pusto">тема не найдена</td>' : '<td class="tema">' + r.tema + '</td>') +
           (pusto(r.material) ? '<td class="pusto">нет</td>' : '<td>' + r.material + '</td>') + urok + '</tr>';
       }).join('');
-      return '<details class="karta-predmet"' + (i === 0 ? ' open' : '') + '><summary><b>' + p.predmet + '</b>' +
+      return '<details class="karta-predmet"' + (i === 0 && !karta.dataset.zakryto ? ' open' : '') + '><summary><b>' + p.predmet + '</b>' +
         '<span class="tiho">' + bylo.length + ' пар · без темы ' + bezTemy + ' · без материала ' + bezMat + ' · с уроком ' + sUrokom + '</span></summary>' +
         '<div class="tablica"><table><tr><th>дата</th><th>тип</th><th>тема</th><th>материал</th><th>урок</th></tr>' + stroki + '</table></div></details>';
     }).join('');

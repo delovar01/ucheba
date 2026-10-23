@@ -319,4 +319,105 @@ details.vopros > div { padding: var(--o1) var(--o4) var(--o3); }
 .knopka.vtoraya { background: transparent; color: var(--akcent); }
 
 .niz { margin-top: var(--o7); color: var(--tekst-2); font-size: var(--t-mel); }
-.niz a { display: inline-block; padding: var(--o2) 0; }
+.niz a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* --- нажимается всё не меньше 44 px --- */
+.knopka-tema { min-height: 44px; }
+h2 > a { display: inline-flex; align-items: center; min-height: 44px; }
+/* дорожка разделов, которую подставляет панель над шапкой */
+.u-put a { display: inline-flex; align-items: center; min-height: 44px; }
+.u-put { padding-top: 0 !important; }
+.spisok-urokov li { position: relative; }
+.spisok-urokov li > a::after { content: ""; position: absolute; inset: 0; }
+.spisok-urokov li > a:focus-visible { outline: none; }
+.spisok-urokov li > a:focus-visible::after { outline: 3px solid var(--akcent); outline-offset: -3px; border-radius: var(--r-mal); }
+.spisok-urokov li:hover > a { text-decoration-thickness: 2px; }
+.hod { padding-bottom: var(--o3); }
+.dorozhka a { position: relative; }
+.dorozhka a::after { content: ""; position: absolute; inset: -19px 0; }
+.gorit a.urok { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--t-mel); }
+details.podrobnee > summary {
+  display: inline-flex; align-items: center; min-height: 44px; cursor: pointer;
+  color: var(--tekst-2); font-size: var(--t-mel);
+}
+details.podrobnee > p { margin: 0 0 var(--o2); color: var(--tekst-2); font-size: var(--t-mel); line-height: 1.5; }
+.gorit li > div:last-child { min-width: 0; }
+
+/* --- главная: на ПК две колонки, «Горит» справа и не уезжает --- */
+main.glavnaya { max-width: 1160px; }
+.glavnaya-setka { display: grid; gap: 0 var(--o7); }
+@media (min-width: 1040px) {
+  .glavnaya-setka { grid-template-columns: minmax(0, 1fr) 380px; grid-template-areas: "verh aside" "niz aside"; align-items: start; }
+  .g-verh { grid-area: verh; } .g-niz { grid-area: niz; }
+  .glavnaya-setka > aside { grid-area: aside; position: sticky; top: 68px; max-height: calc(100vh - 84px); overflow-y: auto; padding-right: var(--o2); }
+  .glavnaya-setka > aside h2:first-child { margin-top: var(--o3); }
+}
+/* шапка главной по ширине её сетки */
+.shirokaya .shapka-ryad, .shirokaya .u-put { max-width: 1192px !important; }
+.shirokaya .shapka-ryad { padding: 0 var(--o4) 0 var(--o2); }
+.glavnaya h2 small { font-size: var(--t-mel); font-weight: 400; color: var(--tekst-2); }
+#gorit-dalshe > summary {
+  display: flex; align-items: center; gap: .3em; min-height: 44px; cursor: pointer;
+  color: var(--akcent); font-weight: 600; font-size: var(--t-mel);
+}
+
+/* предметы карточками: уроки видны прямо с главной */
+.predmety { display: grid; gap: var(--o3); margin: var(--o3) 0; }
+@media (min-width: 640px) { .predmety { grid-template-columns: 1fr 1fr; } }
+.predmet-k {
+  background: var(--fon-2); border: 1px solid var(--linia); border-radius: var(--r-bol);
+  padding: var(--o2) var(--o4) var(--o3); box-shadow: var(--ten); min-width: 0;
+}
+.predmet-k > h3 { margin: 0; font-size: var(--t-h3); }
+.predmet-k > h3 a {
+  display: flex; align-items: center; gap: var(--o2);
+  min-height: 44px; color: var(--tekst); text-decoration: none;
+}
+.predmet-k > h3 a::after { content: "→"; color: var(--akcent); font-weight: 400; margin-left: auto; }
+.predmet-k > h3 a .tetrad-znak { margin-left: var(--o1); }
+.predmet-k .spisok-urokov { margin: 0; }
+.predmet-k .spisok-urokov li { padding: var(--o2) 0; }
+.predmet-k .spisok-urokov li:last-child { border-bottom: 0; }
+.predmet-k .spisok-urokov b { font-weight: 600; font-size: var(--t-mel); }
+.predmet-k .pr { display: none; }
+.predmet-k .tiho { margin: var(--o1) 0 0; }
+.predmet-k.pustoy { box-shadow: none; background: transparent; border-style: dashed; }
+.tetrad-znak { font-size: var(--t-metka); font-weight: 600; color: var(--tekst-2); white-space: nowrap; }
+
+/* второстепенные входы одной строкой */
+.razdely { display: flex; flex-wrap: wrap; gap: var(--o2); margin: var(--o3) 0; padding: 0; list-style: none; }
+.razdely li { margin: 0; }
+.razdely a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--o4);
+  border: 1px solid var(--linia); border-radius: var(--r-pill); background: var(--fon-2);
+  color: var(--tekst); text-decoration: none; font-size: var(--t-mel); font-weight: 600;
+}
+
+/* своя программа (ML) */
+.ml-blok {
+  margin: var(--o5) 0; padding: var(--o4); border-radius: var(--r-bol);
+  border: 1px solid var(--akcent); background: var(--akcent-fon);
+}
+.ml-blok h2, .ml-blok h3 { margin-top: 0; }
+.ml-blok p { font-size: var(--t-mel); }
+.ml-blok .tiho { margin-bottom: 0; }
+.ml-blok td { white-space: normal; vertical-align: top; }
+.ml-blok td:first-child { white-space: nowrap; font-weight: 600; }
+.ml-blok table { width: 100%; background: var(--fon); }
+@media (max-width: 559px) {
+  .ml-blok table, .ml-blok tbody, .ml-blok tr, .ml-blok td { display: block; width: 100%; }
+  .ml-blok tr:first-child { display: none; }
+  .ml-blok td { border: 0; padding: var(--o1) var(--o3); }
+  .ml-blok td:first-child { padding-top: var(--o3); }
+  .ml-blok tr { border-bottom: 1px solid var(--linia); }
+  .ml-blok tr:last-child { border-bottom: 0; }
+}
+
+/* шпаргалка предмета: рамки из уроков */
+details.shpargalka { border: 1px solid var(--linia); border-radius: var(--r); background: var(--fon-2); margin: var(--o3) 0; }
+details.shpargalka > summary { display: flex; align-items: center; min-height: 44px; padding: var(--o2) var(--o4); cursor: pointer; }
+details.shpargalka[open] > summary { border-bottom: 1px solid var(--linia); }
+details.shpargalka ol { list-style: none; padding: var(--o2) var(--o4) var(--o3); margin: 0; }
+details.shpargalka li { margin: var(--o3) 0; font-size: var(--t-mel); }
+details.shpargalka li > a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+details.shpargalka li p { margin: var(--o1) 0; }

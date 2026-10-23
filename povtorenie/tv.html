@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: теорвер — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · теорвер</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Теорвер: проверь себя</h1>
+  <p class="tiho">Лекция 19.10 и практика 20.10. Числа в вопросах новые, не из урока. Решай в тетради деревом, потом открывай ответ.</p>
+  <p>Не помнишь — вернись в урок <a href="../uroki/tv-nezavisimost.html">дерево, Байес, независимость</a>.</p>
+
+  <h2>Одной страницей</h2>
+  <div class="tablica"><table>
+    <tr><th>что</th><th>формула</th></tr>
+    <tr><td>условная</td><td><code>P(B | A)</code>: B, если A уже случилось</td></tr>
+    <tr><td>«и то, и другое»</td><td><code>P(A и B) = P(A)·P(B | A)</code></td></tr>
+    <tr><td>дерево</td><td>ветка: шаг при условии прошлого; лист: произведение по пути</td></tr>
+    <tr><td>полная вероятность</td><td><code>P(R) = Σ P(Hi)·P(R | Hi)</code>, сумма листьев с R</td></tr>
+    <tr><td>Байес</td><td><code>P(H | R) = P(H)·P(R | H) / P(R)</code></td></tr>
+    <tr><td>не нашли</td><td>вычеркнуть листья, нужный лист / сумма оставшихся</td></tr>
+    <tr><td>независимы</td><td><code>P(A и B) = P(A)·P(B)</code> ⇔ <code>P(B | A) = P(B)</code></td></tr>
+  </table></div>
+
+  <h2>Вопросы</h2>
+
+  <details class="vopros">
+    <summary>1. Как читается P(B | A) и как она называется?</summary>
+    <div><p>«Вероятность B, если A уже случилось». Это условная вероятность. Условие стоит справа от черты.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>2. Студент сдаёт зачёт с вероятностью 0.6. Если сдал, со стипендией он с вероятностью 0.5. Какова вероятность «сдал и со стипендией»?</summary>
+    <div><p><code>P(сдал и стипендия) = P(сдал)·P(стипендия | сдал) = 0.6 · 0.5 = 0.3</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>3. Что пишут на ветке дерева, что у листа и чему равна сумма всех листьев?</summary>
+    <div><p>На ветке вероятность этого шага при условии предыдущего. У листа произведение вероятностей по пути от корня. Все листья вместе дают 1, ветки из одной развилки тоже 1.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>4. Станок 1 делает 60% деталей, брак у него 5%. Станок 2 делает 40%, брак 10%. Какая доля всех деталей бракованная?</summary>
+    <div><p>Листья с браком: <code>0.6 · 0.05 = 0.03</code> и <code>0.4 · 0.1 = 0.04</code>. Полная вероятность: <code>0.03 + 0.04 = 0.07</code>, то есть 7%.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>5. В условиях вопроса 4 деталь оказалась бракованной. Какова вероятность, что её сделал станок 2?</summary>
+    <div><p>Байес: лист нужного пути делим на сумму листьев с браком. <code>0.04 / 0.07 = 4/7 ≈ 0.57</code>. Станок 2 делает меньше деталей, но брака у него вдвое больше, поэтому подозрение падает на него.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>6. Детектор ловит дипфейк с вероятностью 0.9, но дипфейков всего 2%. Почему пометке «подозрительно» верить можно только на 27%?</summary>
+    <div><p>0.9 это <code>P(+ | D)</code>, а спрашивают <code>P(D | +)</code>. Листья с пометкой: <code>0.02 · 0.9 = 0.018</code> и <code>0.98 · 0.05 = 0.049</code>. Ложных тревог больше, чем попаданий, потому что настоящих видео в 49 раз больше. <code>0.018 / 0.067 ≈ 0.27</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>7. Телефон с вероятностью 0.9 лежит в одной из 3 комнат, в любой одинаково, а с вероятностью 0.1 потерян на улице. Обыскал две комнаты, пусто. Какова вероятность, что он в третьей?</summary>
+    <div><p>Каждая комната <code>0.9 / 3 = 0.3</code>. Две пустые комнаты вычёркиваем, остаются «комната 3» (0.3) и «улица» (0.1). <code>0.3 / (0.3 + 0.1) = 0.75</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>8. Когда события A и B независимы? Скажи двумя способами.</summary>
+    <div><p>Формулой: <code>P(A и B) = P(A)·P(B)</code>. Словами: знание об A не меняет шансы B, то есть <code>P(B | A) = P(B)</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>9. Чем независимые события отличаются от несовместных?</summary>
+    <div><p>Несовместные не бывают вместе: <code>P(A и B) = 0</code>. Они как раз зависимы: узнал, что было A, и точно знаешь, что B не было. Независимые спокойно случаются вместе, просто одно не влияет на шансы другого.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>10. Три события попарно независимы. Значит ли это, что они независимы все вместе?</summary>
+    <div><p>Нет. Тетраэдр Бернштейна: каждая пара цветов даёт <code>1/4 = 1/2 · 1/2</code>, а все три вместе <code>1/4</code>, хотя произведение <code>1/8</code>. Для независимости в совокупности равенство нужно для каждой пары и для тройки.</p></div>
+  </details>
+
+  <p class="niz"><a href="../tv/">← Теорвер</a> · <a href="./">Всё повторение</a> · <a href="../uroki/tv-nezavisimost.html">Урок</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>
