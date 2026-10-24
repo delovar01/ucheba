@@ -21,7 +21,7 @@
 <main>
   <h1>Алгоритмы: проверь себя</h1>
   <p class="tiho">Лекции 17.09, 24.09, 5.10 и лабы 26.09, 3.10, 10.10. Числа в вопросах новые, не из уроков. Решай в тетради, потом открывай ответ.</p>
-  <p>Не помнишь, вернись в урок: <a href="../uroki/alg-asimptotika.html">асимптотика</a>, <a href="../uroki/alg-master-teorema.html">мастер-теорема</a>, <a href="../uroki/alg-lineynye-sortirovki.html">линейные сортировки</a>,<a href="../uroki/alg-kuchi.html">кучи</a>, <a href="../uroki/alg-rekursiya.html">Java и рекурсия</a>, <a href="../uroki/alg-grafy-obhody.html">BFS и DFS</a>, <a href="../uroki/alg-deykstra.html">Дейкстра</a>.</p>
+  <p>Не помнишь, вернись в урок: <a href="../uroki/alg-asimptotika.html">асимптотика</a>, <a href="../uroki/alg-master-teorema.html">мастер-теорема</a>, <a href="../uroki/alg-lineynye-sortirovki.html">линейные сортировки</a>,<a href="../uroki/alg-kuchi.html">кучи</a>, <a href="../uroki/alg-rekursiya.html">Java и рекурсия</a>, <a href="../uroki/alg-grafy-obhody.html">BFS и DFS</a>, <a href="../uroki/alg-deykstra.html">Дейкстра</a>, <a href="../uroki/alg-dinamicheskoe.html">динамическое программирование</a>.</p>
 
   <h2>Одной страницей</h2>
   <div class="tablica"><table>
@@ -40,6 +40,7 @@
     <tr><td>рекурсия</td><td>база + шаг к базе, память <code>O(глубина)</code>, откат после «беру»</td></tr>
     <tr><td>BFS, DFS</td><td>очередь и волны, рекурсия вглубь, оба <code>O(n + m)</code></td></tr>
     <tr><td>Дейкстра</td><td>фиксируем ближайшую, релаксируем, веса ≥ 0</td></tr>
+    <tr><td>ДП</td><td>состояние, переход, база, порядок, ответ. Рюкзак <code>max(не брать, брать)</code> из строки выше, LCS: совпали → диагональ + 1</td></tr>
   </table></div>
 
   <h2>Вопросы</h2>
@@ -122,6 +123,16 @@
   <details class="vopros">
     <summary>16. Миллион целых, каждое меньше 10¹². Подсчёт, поразрядная или карманная? Сколько проходов при основании 10⁶ и примерно шагов?</summary>
     <div><p>Подсчёту нужен массив на <code>10¹²</code> ячеек, столько памяти нет. Карманная рассчитана на равномерные дроби. Поразрядная в основании <code>10⁶</code>: у числа меньше <code>10¹²</code> два разряда, значит 2 прохода по <code>10⁶ + 10⁶</code>, всего около <code>4 · 10⁶</code> шагов.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>17. Рюкзак на 3 кг: А (вес 1, ценность 6), Б (2, 10), В (3, 12). Таблица ДП, лучшая ценность и что взяли?</summary>
+    <div><p>Строка А: <code>0, 6, 6, 6</code>. Б: <code>0, 6, 10, 16</code>, при <code>c = 3</code> берём Б и смотрим выше при <code>c = 1</code>: <code>6 + 10</code>. В: <code>0, 6, 10, 16</code>, взять В даёт только 12. Ответ 16. Обратно: В не изменил ячейку, не взят. Б изменил, взят, <code>c = 1</code>. А при <code>c = 1</code> изменил, взят. Набор А + Б.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>18. Длина наибольшей общей подпоследовательности строк ПАРК и ПРАК? Какое правило при совпадении символов?</summary>
+    <div><p>3, например <code>ПАК</code> или <code>ПРК</code>. Все четыре не выйдет: строки разные, а длина одна. При совпадении берём ячейку по диагонали и прибавляем 1, <code>dp[i−1][j−1] + 1</code>. При несовпадении больший из соседей сверху и слева.</p></div>
   </details>
 
   <p class="niz"><a href="../alg/">← Алгоритмы</a> · <a href="./">Всё повторение</a> · <a href="../uroki/alg-asimptotika.html">Первый урок</a></p>

@@ -1,6 +1,6 @@
 // Офлайн: страницы сайта лежат в кэше телефона, KaTeX — тоже после первого открытия.
 // Меняешь любой файл — подними номер версии, иначе телефон покажет старое.
-const VERSIYA = 'ucheba-v14';
+const VERSIYA = 'ucheba-v15';
 const STRANICY = [
   './',
   './index.html',
@@ -33,6 +33,7 @@ const STRANICY = [
   './uroki/alg-rekursiya.html',
   './uroki/alg-grafy-obhody.html',
   './uroki/alg-deykstra.html',
+  './uroki/alg-dinamicheskoe.html',
   './uroki/java-tipy-if.html',
   './uroki/java-cikly-metody.html',
   './uroki/java-massivy.html',
