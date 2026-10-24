@@ -21,7 +21,7 @@
 <main>
   <h1>Java: проверь себя</h1>
   <p class="tiho">Одиннадцать уроков, 45 вопросов. Числа в вопросах новые, не из уроков. Ответь вслух или в голове, потом открывай ответ. Все ответы с выводом программы проверены запуском.</p>
-  <p>Не помнишь, вернись в урок: 1–5 <a href="../uroki/java-tipy-if.html">типы, формулы и if</a>, 6–10 <a href="../uroki/java-cikly-metody.html">циклы и методы</a>, 11–14 <a href="../uroki/java-massivy.html">массивы</a>, 15–17 <a href="../uroki/java-sreda.html">среда разработки</a>, 18–21 <a href="../uroki/java-stroki-palindrom.html">строки и палиндром</a>, 22–25 <a href="../uroki/java-klassy.html">классы и объекты</a>, 26–29 <a href="../uroki/java-inkapsulyaciya.html">инкапсуляция</a>, 30–33 <a href="../uroki/java-nasledovanie.html">наследование</a>, 34–37 <a href="../uroki/java-lyambdy.html">лямбды и Stream</a>, 38–41 <a href="../uroki/java-sealed-record.html">sealed и record</a>, 42–45 <a href="../uroki/java-isklyucheniya.html">исключения и null</a>.</p>
+  <p>Не помнишь, вернись в урок: 1–5 <a href="../uroki/java-tipy-if.html">типы, формулы и if</a>, 6–10 <a href="../uroki/java-cikly-metody.html">циклы и методы</a>, 11–14 <a href="../uroki/java-massivy.html">массивы</a>, 15–17 <a href="../uroki/java-sreda.html">среда разработки</a>, 18–21 <a href="../uroki/java-stroki-palindrom.html">строки и палиндром</a>, 22–25 <a href="../uroki/java-klassy.html">классы и объекты</a>, 26–29 <a href="../uroki/java-inkapsulyaciya.html">инкапсуляция</a>, 30–33 <a href="../uroki/java-nasledovanie.html">наследование</a>, 34–37 <a href="../uroki/java-lyambdy.html">лямбды и Stream</a>, 38–41 <a href="../uroki/java-sealed-record.html">sealed и record</a>, 42–45 <a href="../uroki/java-isklyucheniya.html">исключения и null</a>, 46–48 <a href="../uroki/java-svyazi-uml.html">связи классов и UML</a>.</p>
 
   <h2>Одной страницей</h2>
   <div class="tablica"><table>
@@ -273,6 +273,21 @@
   <details class="vopros">
     <summary>45. Ресурс в <code>try (R r = new R())</code> печатает «открыл» и «закрыл». Внутри <code>throw new RuntimeException("бах")</code>, <code>catch</code> печатает текст. Порядок вывода?</summary>
     <div><p>«открыл», «закрыл», «бах». Ресурс закрывается до того, как сработает <code>catch</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>46. Как прочитать <code>Group 1 ◇──── 15..30 Student</code>? Какое поле и какая проверка будут в классе <code>Group</code>?</summary>
+    <div><p>В группе от 15 до 30 студентов, студент в одной группе. Ромб пустой, значит агрегация: студент живёт и без группы. В <code>Group</code> поле <code>List&lt;Student&gt;</code>, в методе добавления проверка, что уже не 30. Нижнюю границу 15 проверяют там, где она важна, а не при каждом добавлении.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>47. Ассоциация, агрегация или композиция: Плейлист и Трек, Сообщение и его Вложение, Пассажир и Автобус.</summary>
+    <div><p>Плейлист и трек: агрегация, один трек лежит в нескольких плейлистах и живёт без них. Сообщение и вложение: композиция, удалили сообщение, вложение пропало вместе с ним. Пассажир и автобус: ассоциация, ни один не часть другого.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>48. is-a или has-a: <code>Admin</code> и <code>User</code>, <code>User</code> и <code>Avatar</code>. Как это выглядит в коде и на UML?</summary>
+    <div><p>Админ является пользователем: <code>class Admin extends User</code>, на UML линия с пустым треугольником к <code>User</code>. Пользователь имеет аватар: поле <code>private Avatar avatar</code>, на UML линия с ромбом у <code>User</code>. Аватар без пользователя не нужен, значит ромб закрашенный, композиция.</p></div>
   </details>
 
   <p class="niz"><a href="../java/">← Java</a> · <a href="./">Всё повторение</a> · <a href="../uroki/index.html">Уроки</a></p>

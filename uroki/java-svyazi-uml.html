@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Связи классов и UML — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-svyazi-uml">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · связи классов и UML</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Связи классов: ассоциация, агрегация, композиция и UML</h1>
+  <p class="tiho">Java · слайды «ООП часть II», слайды 5–11 и 18–19 · под ПР4, срок 1.12 · около 55 минут</p>
+
+  <p>Четвёртый урок про ООП, после <a href="java-klassy.html">классов</a>, <a href="java-inkapsulyaciya.html">инкапсуляции</a> и <a href="java-nasledovanie.html">наследования</a>. Там мы писали классы по одному. Здесь смотрим, как классы связаны между собой и как эти связи рисуют на UML-диаграмме классов. Девять шагов.</p>
+  <p>В каждом шаге свой маленький пример, классы в них не продолжают друг друга. Код можно положить в один файл <code>Main.java</code> вместе с <code>import java.util.*;</code> в самом верху. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>Класс на UML-диаграмме</h2>
+    <p>UML по слайду 5 это язык схем для описания программ. Диаграмма классов показывает классы и связи между ними картинкой, без кода. Её рисуют до программы, чтобы договориться, что из чего состоит.</p>
+<pre><code>class Student {
+    private String name;
+    private int age;
+
+    public String getName() {
+        return name;
+    }
+}</code></pre>
+    <p>На диаграмме этот класс выглядит так:</p>
+<pre><code>┌──────────────────────┐
+│ Student              │
+├──────────────────────┤
+│ - name: String       │
+│ - age: int           │
+├──────────────────────┤
+│ + getName(): String  │
+└──────────────────────┘</code></pre>
+    <p class="novoe">Класс на UML это прямоугольник из трёх частей: имя, поля, методы. Перед полем или методом знак доступа: <code>-</code> значит private, <code>+</code> public, <code>#</code> protected. Тип пишут после имени через двоеточие: <code>name: String</code>, а у метода после скобок: <code>getName(): String</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Нарисуй UML-прямоугольник для класса: закрытые поля <code>String title</code> и <code>int credits</code>, открытый метод <code>int getCredits()</code> и открытый метод <code>void rename(String newTitle)</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>┌─────────────────────────────┐
+│ Course                      │
+├─────────────────────────────┤
+│ - title: String             │
+│ - credits: int              │
+├─────────────────────────────┤
+│ + getCredits(): int         │
+│ + rename(newTitle: String)  │
+└─────────────────────────────┘</code></pre>
+          <p>У <code>rename</code> тип результата void, его на диаграмме обычно не пишут. Параметр тоже по правилу UML: имя, двоеточие, тип.</p>
+          <p class="oshibka">Писать как в Java: <code>- String title</code>. В UML порядок обратный, сначала имя, потом тип: <code>- title: String</code>. На проверке это частая придирка.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>UML-класс: имя, поля, методы. <code>-</code> private, <code>+</code> public, <code>#</code> protected.</p>
+      <p>Сначала имя, потом тип: <code>name: String</code>, <code>getName(): String</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>Ассоциация: классы знают друг о друге</h2>
+    <p>Пример со слайдов 7–8: студент записан на курсы, на курсе учатся студенты. Каждый из них живёт сам по себе: курс не исчезнет, если один студент отчислится, и студент не исчезнет, если курс закроют.</p>
+<pre><code>class Course {
+    private final List&lt;Student&gt; students = new ArrayList&lt;&gt;();
+
+    void addStudent(Student s) {
+        students.add(s);
+        s.addCourse(this);          // вторая сторона связи
+    }
+}
+
+class Student {
+    private final List&lt;Course&gt; courses = new ArrayList&lt;&gt;();
+
+    void addCourse(Course c) {
+        courses.add(c);
+    }
+
+    int courseCount() {
+        return courses.size();
+    }
+}</code></pre>
+    <p class="novoe">Ассоциация по слайду 6: отношение двух классов, которые взаимодействуют. На UML её рисуют сплошной линией между прямоугольниками, на линии можно подписать, что за связь. В коде это поле одного класса, где лежит объект другого или их список.</p>
+<pre><code>Student ───── записан на ───── Course</code></pre>
+    <p><code>this</code> внутри метода курса это сам курс. Строка <code>s.addCourse(this)</code> говорит студенту «запиши меня в свои курсы».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В <code>main</code>: <code>Student s = new Student();</code>, два курса <code>c1</code> и <code>c2</code>, потом <code>c1.addStudent(s); c2.addStudent(s);</code>. Что вернёт <code>s.courseCount()</code>? А если убрать строку <code>s.addCourse(this)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>2: каждый курс записал себя в список студента. Без строки <code>s.addCourse(this)</code> вернёт 0. Курсы знают про студента, а студент про курсы нет.</p>
+          <p class="oshibka">Связь в обе стороны вести двумя независимыми вызовами из <code>main</code> и забыть один. Тогда стороны расходятся: курс думает, что студент записан, а у студента курса нет. Надёжнее, как здесь, обновлять вторую сторону внутри первого метода.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ассоциация: два класса взаимодействуют, каждый живёт сам. UML: сплошная линия, можно с подписью.</p>
+      <p>Связь в обе стороны: обновляю обе стороны в одном методе.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>Множественность: 1, *, 10..100</h2>
+    <p>Линия говорит, что связь есть. Но сколько студентов на курсе? У скольких преподавателей один курс? Это пишут числами у концов линии.</p>
+    <p class="novoe">Множественность по слайду 6. Точное число: <code>1</code>. Любое количество, от нуля и больше: <code>*</code>. Интервал: <code>10..100</code>, от 10 до 100 включительно. Ещё бывают <code>0..1</code>, ноль или один, и <code>1..*</code>, хотя бы один. Число стоит у того класса, который считаем, и говорит, сколько его объектов связано с одним объектом на другом конце.</p>
+<pre><code>Teacher 1 ──── ведёт ──── * Course
+Course  * ── записан на ── 10..100 Student</code></pre>
+    <p>Первая линия читается в обе стороны. У курса один преподаватель, единица стоит возле Teacher. Преподаватель ведёт сколько угодно курсов, звёздочка стоит возле Course.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Прочитай вторую линию в обе стороны. И запиши множественностью: у машины ровно 4 колеса, колесо стоит не больше чем на одной машине или лежит в гараже.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>На одном курсе от 10 до 100 студентов, это число у Student. Один студент записан на сколько угодно курсов, может и ни на один, это <code>*</code> у Course.</p>
+<pre><code>Car 0..1 ──────── 4 Wheel</code></pre>
+          <p>Возле Wheel стоит 4: у одной машины четыре колеса. Возле Car стоит <code>0..1</code>: колесо либо на одной машине, либо ни на какой.</p>
+          <p class="oshibka">Поставить число не у того конца: <code>Car 4 ──── 1 Wheel</code>. Это читается «у колеса четыре машины». Правило: число у класса, который считаем.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>1</code> ровно один, <code>*</code> сколько угодно, <code>0..1</code> ноль или один, <code>1..*</code> хотя бы один, <code>10..100</code> интервал.</p>
+      <p>Число стоит у класса, который считаем.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>Множественность в коде</h2>
+    <p>Диаграмма обещает «от 10 до 100 студентов». Java сама этого не проверит, обещание надо выполнить кодом.</p>
+<pre><code>class Teacher {
+    private final String name;
+    Teacher(String name) { this.name = name; }
+}
+
+class Course {
+    private final Teacher teacher;                        // 1
+    private final List&lt;String&gt; students = new ArrayList&lt;&gt;(); // 10..100
+
+    Course(Teacher teacher) {
+        if (teacher == null)
+            throw new IllegalArgumentException("у курса должен быть преподаватель");
+        this.teacher = teacher;
+    }
+
+    void addStudent(String name) {
+        if (students.size() == 100)
+            throw new IllegalStateException("на курсе уже 100 студентов");
+        students.add(name);
+    }
+
+    boolean canStart() {
+        return students.size() &gt;= 10;
+    }
+}</code></pre>
+    <p>Студентов здесь для краткости храним просто именами. <code>IllegalArgumentException</code> ты видел в уроке про инкапсуляцию: плохой аргумент. <code>IllegalStateException</code> значит «аргумент нормальный, но объект сейчас в таком состоянии, что так нельзя»: курс уже полон.</p>
+    <p class="novoe">Как множественность превращается в код. <code>1</code>: одно поле-объект, и оно не может быть null. <code>0..1</code>: одно поле, null разрешён. <code>*</code>: список. Интервал вроде <code>10..100</code>: список плюс проверки границ в методах.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Создали курс и в цикле добавили 9 студентов. Что вернёт <code>canStart()</code>? Что случится, если в цикле добавлять 101 студента?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>9 меньше 10, <code>canStart()</code> вернёт false. При 101 студенте первые 100 добавятся, на сто первом <code>students.size() == 100</code>, и программа упадёт с <code>IllegalStateException: на курсе уже 100 студентов</code>.</p>
+          <p class="oshibka">Проверять нижнюю границу 10 в <code>addStudent</code> и не давать добавить первого студента, «пока их меньше 10». Тогда на курс никого не запишешь вообще. Нижняя граница проверяется там, где она важна, например перед стартом курса.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>1</code>: поле, не null. <code>0..1</code>: поле, null можно. <code>*</code>: список. Интервал: список + проверки границ.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>Агрегация: имеет, но часть живёт сама</h2>
+    <p>Слайд 9: «студент имеет адрес». Двое соседей по общаге живут по одному адресу. Студент отчислился, а дом стоит, и сосед живёт там же.</p>
+<pre><code>class Address {
+    private final String city;
+    private final String street;
+
+    Address(String city, String street) {
+        this.city = city;
+        this.street = street;
+    }
+
+    @Override
+    public String toString() {
+        return city + ", " + street;
+    }
+}
+
+class Student {
+    private final String name;
+    private final Address address;
+
+    Student(String name, Address address) {   // адрес приходит снаружи
+        this.name = name;
+        this.address = address;
+    }
+
+    Address getAddress() { return address; }
+}</code></pre>
+<pre><code>Address dorm = new Address("Екатеринбург", "Комсомольская, 70");
+Student anya = new Student("Аня", dorm);
+Student boris = new Student("Борис", dorm);
+anya = null;
+System.out.println(boris.getAddress());</code></pre>
+<pre><code>Екатеринбург, Комсомольская, 70</code></pre>
+    <p class="novoe">Агрегация по слайду 9: особая форма ассоциации, отношение «целое имеет часть», по-английски has-a. Часть может существовать без целого и даже принадлежать двум целым сразу. Целое называют агрегирующим классом, часть агрегируемым. На UML это линия с пустым ромбом у целого.</p>
+<pre><code>Student ◇────── Address</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> После <code>anya = null</code> сколько объектов <code>Address</code> осталось в программе и кто на него ссылается? Почему это агрегация, а не композиция?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Один объект адреса, на него ссылаются <code>dorm</code> и поле <code>address</code> у Бориса. Это агрегация: адрес создан снаружи, его отдали двум студентам, и он пережил Аню.</p>
+          <p class="oshibka">Решить, что раз у студента есть поле-объект, это композиция. В уроке про классы так и называли любое поле-объект, это обычное слово программистов. В UML строже: если часть приходит снаружи и может быть общей, это агрегация.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Агрегация: has-a, часть живёт без целого, может быть общей. UML: пустой ромб ◇ у целого.</p>
+      <p>В коде часть обычно передают в конструктор снаружи.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>Композиция: часть не живёт без целого</h2>
+    <p>Слайд 10: «студент имеет имя». Имя «Аня» в базе студентов без самой Ани ничего не значит. Пример нагляднее: комнаты дома. Снесли дом, его кухни отдельно не бывает.</p>
+<pre><code>class Room {
+    private final String name;
+    private final double area;
+
+    Room(String name, double area) {
+        this.name = name;
+        this.area = area;
+    }
+
+    double getArea() { return area; }
+}
+
+class House {
+    private final List&lt;Room&gt; rooms = new ArrayList&lt;&gt;();
+
+    House() {                          // комнаты создаёт сам дом
+        rooms.add(new Room("кухня", 9.5));
+        rooms.add(new Room("комната", 18.0));
+    }
+
+    double totalArea() {
+        double sum = 0;
+        for (Room r : rooms) sum += r.getArea();
+        return sum;
+    }
+}</code></pre>
+    <p class="novoe">Композиция по слайду 10: особая форма агрегации, когда часть не может существовать сама по себе. Часть принадлежит ровно одному целому и живёт, пока живёт оно. В коде целое обычно само создаёт части и не отдаёт их наружу. На UML это линия с закрашенным ромбом у целого.</p>
+<pre><code>House ◆────── Room</code></pre>
+    <p>У ромба множественность целого всегда 1: у комнаты ровно один дом. Поэтому её часто и не пишут.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернёт <code>new House().totalArea()</code>? И что нужно поменять в коде шага 5, чтобы адрес студента стал композицией?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>9.5 + 18.0 = 27.5</code>, напечатается <code>27.5</code>.</p>
+          <p>Чтобы адрес стал композицией, студент должен создавать его сам и ни с кем не делить: конструктор <code>Student(String name, String city, String street)</code>, внутри <code>this.address = new Address(city, street);</code>, и метод <code>getAddress</code> не отдаёт сам объект наружу.</p>
+          <p class="oshibka">Создать комнату снаружи и передать в дом, а потом положить ту же комнату во второй дом. Код соберётся, но это уже не композиция: одна кухня в двух домах. Java не следит за этим сама, следит тот, кто пишет код.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Композиция: часть живёт, только пока живёт целое, и только у одного целого. UML: закрашенный ромб ◆ у целого.</p>
+      <p>В коде целое само создаёт части через <code>new</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>Три связи: как отличить</h2>
+    <p>Слайд 11 ставит три слова рядом: ассоциация, агрегация, композиция. Это матрёшка. Каждая следующая связь это особый случай предыдущей.</p>
+    <p class="novoe">Три вопроса по порядку. Есть ли «целое и часть»? Нет, значит ассоциация: просто взаимодействуют. Да, тогда может ли часть жить без целого или быть у двух целых сразу? Может, значит агрегация ◇. Не может, значит композиция ◆.</p>
+    <div class="tablica"><table>
+      <tr><th>пара</th><th>целое и часть?</th><th>часть живёт сама?</th><th>связь</th></tr>
+      <tr><td>Студент и Курс</td><td>нет</td><td></td><td>ассоциация</td></tr>
+      <tr><td>Студент и Адрес</td><td>да</td><td>да</td><td>агрегация ◇</td></tr>
+      <tr><td>Дом и Комната</td><td>да</td><td>нет</td><td>композиция ◆</td></tr>
+    </table></div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какая связь: а) Заказ и строка заказа «2 кофе по 120». б) Команда и игрок, игрок может перейти в другую команду. в) Водитель и такси, на котором он сегодня работает.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Композиция: строка заказа без заказа ничего не значит и в двух заказах не бывает. б) Агрегация: игрок часть команды, но живёт и без неё. в) Ассоциация: водитель не часть такси и такси не часть водителя, они просто работают вместе.</p>
+          <p class="oshibka">Решать по слову «имеет»: «водитель имеет такси, значит агрегация». В речи «имеет» говорят про что угодно. Спрашивай, правда ли одно состоит из другого.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Целого и части нет → ассоциация. Часть живёт сама → агрегация ◇. Не живёт → композиция ◆.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>is-a и has-a</h2>
+    <p>Связи шагов 5 и 6 читаются «имеет». Связь из урока про наследование читается «является»: электромобиль является машиной. На лекции их называли по-английски.</p>
+    <p class="novoe"><b>is-a</b>, «является», моделируют наследованием <code>extends</code>. На UML линия с пустым треугольником у родителя. <b>has-a</b>, «имеет», моделируют полем: агрегацией или композицией. Слайды 18–19 добавляют: не наследуй только ради чужих методов, и не каждое «является» из жизни стоит делать наследованием.</p>
+<pre><code>ElectricCar ─────▷ Car       is-a: электромобиль является машиной
+Car ◇────── Engine           has-a: у машины есть двигатель</code></pre>
+    <p>Пример плохого наследования: <code>class Stack extends ArrayList</code>. Стек получит все методы списка, и любой сможет вставить элемент в середину стека, хотя стек так не умеет. Правильно: стек имеет список, поле <code>private final List&lt;Integer&gt; items</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> is-a или has-a, и что в коде: а) Студент и Человек, б) Студент и Зачётка, в) Квадрат и Фигура, г) Машина и Колесо.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) is-a, <code>Student extends Person</code>. б) has-a, поле <code>RecordBook</code> в студенте, зачётка без студента не нужна, это композиция. в) is-a, <code>Square extends Shape</code>, пример со слайда 12. г) has-a, у машины список из 4 колёс, колесо можно снять и поставить на другую машину, это агрегация.</p>
+          <p class="oshibka">Сделать <code>Car extends Wheel</code>, чтобы машине достались методы колеса. Машина не является колесом. Проверка простая: скажи вслух «машина является колесом». Звучит глупо, значит не наследование.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>is-a «является» → <code>extends</code>, UML ─▷ к родителю. has-a «имеет» → поле, ◇ или ◆.</p>
+      <p>Не наследую ради чужих методов. Проверка вслух: «X является Y?»</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>Диаграмма из текста задачи</h2>
+    <p>Так обычно выглядит задание: дан текст, нарисуй диаграмму классов и напиши заготовки. Текст: «В университете есть факультеты. Факультет не существует без университета. На факультете учатся студенты, студент учится ровно на одном факультете. Студент может перевестись на другой факультет. Аспирант это студент, у которого есть научный руководитель, преподаватель».</p>
+    <p class="novoe">Порядок работы. Существительные становятся классами. Глаголы и «имеет» становятся связями. Для каждой связи задай три вопроса шага 7 и поставь множественность. «Является» становится наследованием.</p>
+<pre><code>University ◆──── 1..* Faculty
+Faculty 1 ◇──── * Student
+PhdStudent ─────▷ Student
+PhdStudent * ── руководитель ── 1 Teacher</code></pre>
+<pre><code>class University {
+    private final List&lt;Faculty&gt; faculties = new ArrayList&lt;&gt;();
+
+    Faculty openFaculty(String title) {      // создаёт сам: композиция
+        Faculty f = new Faculty(title);
+        faculties.add(f);
+        return f;
+    }
+}
+
+class Faculty {
+    private final String title;
+    private final List&lt;Student&gt; students = new ArrayList&lt;&gt;();
+    Faculty(String title) { this.title = title; }
+    void add(Student s) { students.add(s); }
+    void remove(Student s) { students.remove(s); }
+}
+
+class Teacher { }
+
+class Student { }
+
+class PhdStudent extends Student {
+    private final Teacher supervisor;        // ровно 1
+    PhdStudent(Teacher supervisor) { this.supervisor = supervisor; }
+}</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Почему Faculty и Student связаны агрегацией, а не композицией? Что значит <code>1..*</code> у Faculty в первой строке? И где в коде <code>openFaculty</code> видна композиция?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Студент может перевестись, то есть живёт без конкретного факультета: агрегация. <code>1..*</code>: в университете хотя бы один факультет. Композиция видна в том, что факультет создаётся через <code>new</code> внутри университета, а не приходит снаружи.</p>
+          <p class="oshibka">Сделать аспиранта отдельным классом с копией всех полей студента, без <code>extends</code>. В тексте прямо сказано «аспирант это студент», значит is-a. Копия полей разойдётся при первой же правке.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Существительные → классы, «имеет» и глаголы → связи, три вопроса → вид связи, числа у концов. «Является» → наследование.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР4</h2>
+    <ul>
+      <li>UML-прямоугольник класса и знаки доступа: шаг 1.</li>
+      <li>Ассоциация и множественность 1, *, 10..100, их код: шаги 2–4.</li>
+      <li>Агрегация, композиция и как их отличить: шаги 5–7.</li>
+      <li>is-a и has-a: шаг 8, вместе с <a href="java-nasledovanie.html#shag-12">уроком про наследование, шаг 12</a>.</li>
+    </ul>
+    <p>Вариант ПР4 выдаёт тест на элеарне, попытка одна: сразу сохрани текст. Если в задании есть диаграмма, начни с шага 9.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: связи классов и UML">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач про библиотеку. Ответов здесь нет: впиши ответы и код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Код перед отправкой запусти в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Нарисуй UML-прямоугольник класса <code>Book</code>: закрытые поля название и год, открытые методы <code>getTitle()</code> и <code>isOld()</code>, книга старая, если ей больше 50 лет.
+      <textarea name="z1" placeholder="Book / - title: String …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Какая связь и почему: Библиотека и Книга, Книга и Страница, Читатель и Книга, которую он взял почитать. Нарисуй каждую линией со знаком.
+      <textarea name="z2" placeholder="Library ◇── Book, потому что…" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Читатель держит на руках от 0 до 5 книг, книга в любой момент у одного читателя или ни у кого. Запиши множественность на линии и напиши метод <code>take(Book b)</code> класса <code>Reader</code>, который не даёт взять шестую книгу.
+      <textarea name="z3" placeholder="Reader 0..1 ──── 0..5 Book …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> is-a или has-a: электронная книга и книга, читатель и читательский билет, студент-читатель и читатель. Для каждой пары одна строка кода: <code>extends</code> или поле.
+      <textarea name="z4" placeholder="…" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Напиши класс <code>Book</code>, который композицией хранит страницы: конструктор <code>Book(String title, int pages)</code> сам создаёт столько объектов <code>Page</code> с номерами от 1, метод <code>pageCount()</code> возвращает их число. Проверь: <code>new Book("Java", 3).pageCount()</code> даёт 3.
+      <textarea name="z5" placeholder="class Page { … } class Book { …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Композиция</td><td>Модуль A4: модель в PyTorch собирают из слоёв, которые она сама создаёт в конструкторе. Слой живёт внутри своей модели.</td></tr>
+      <tr><td>Агрегация</td><td>Модуль A2: один и тот же датасет отдают нескольким моделям для сравнения. Датасет живёт сам, модели его только используют.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-lyambdy.html">Дальше: лямбды и Stream →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

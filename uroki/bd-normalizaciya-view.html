@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Нормализация и CREATE VIEW — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-normalizaciya-view">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · нормализация и VIEW</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Нормализация 0НФ–3НФ и представления CREATE VIEW</h1>
+  <p class="tiho">Базы данных · лекция 1 от 15.09, слайды 35–40, и лекция 29.09, слайды 22 и 26 · около 50 минут</p>
+
+  <p>На лекции 1 были нормальные формы: правила, по которым проверяют, хорошо ли разложены данные по таблицам. На лекции 29.09 представления: сохранённый запрос, который выглядит как таблица. Здесь обе темы на одном примере. Сначала разложим одну широкую таблицу по правилам и получим почти твою базу <code>ml_tracker</code>. Потом соберём её обратно одним представлением. Девять шагов.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. В рамке «Главное из шага» суть шага в двух строках. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <h2>Широкая таблица</h2>
+  <p>Пусть запуски записывали в одну таблицу, как в Excel. Пять запусков Степана и Азата:</p>
+  <div class="tablica">
+    <div class="imya">zhurnal</div>
+    <table>
+      <tr><th>researcher</th><th>grp</th><th>dataset</th><th>rows</th><th>model</th><th>framework</th><th>status</th></tr>
+      <tr><td>Павленко Степан</td><td>РИ-250932</td><td>iris</td><td>150</td><td>Logisticregression</td><td>sklearn</td><td>done</td></tr>
+      <tr><td>Павленко Степан</td><td>РИ-250932</td><td>iris</td><td>150</td><td>Resnet</td><td>pytorch</td><td>done</td></tr>
+      <tr><td>Павленко Степан</td><td>РИ-250932</td><td>IMDB Reviews</td><td>50000</td><td>rubert-tiny2</td><td>pytorch</td><td>done</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>РИ-250932</td><td>pirs</td><td>210</td><td>RandomForest</td><td>sklearn</td><td>done</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>РИ-250932</td><td>Titanic</td><td>891</td><td>RandomForest</td><td>sklearn</td><td>failed</td></tr>
+    </table>
+  </div>
+  <p><code>rows</code> это число строк в наборе данных. Для простоты считаем, что тёзок нет и один человек не запускал одну и ту же модель на одном наборе дважды.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>Что плохого в одной широкой таблице</h2>
+    <p>Посмотри на таблицу: «Павленко Степан, РИ-250932» записано трижды, «iris, 150» дважды, «RandomForest, sklearn» дважды. Повторы сами по себе только занимают место. Хуже то, что из-за них ломаются изменения.</p>
+    <p class="novoe">Три аномалии. <b>Изменения</b>: один факт лежит в нескольких строках, поправил одну, остальные врут. <b>Вставки</b>: нельзя записать факт, пока нет строки целиком. <b>Удаления</b>: удалил строку, и вместе с ней пропал факт, который хранился только в ней.</p>
+    <p>Пример аномалии изменения. Азат перевёлся в РИ-250931. Если поправить группу только в его первой строке, в базе у Азата будет две разные группы, и непонятно, какая верная.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Найди в широкой таблице аномалию вставки и аномалию удаления. а) Хотим записать, что в наборе MNIST 70000 строк, но запусков на нём ещё нет. б) Удаляем неудачный запуск Азата на Titanic.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Вставка: строку не заполнить, нет исследователя, модели и статуса. Придётся писать пустые клетки или выдумывать запуск. б) Удаление: это единственная строка с Titanic, и вместе с запуском пропадёт факт, что в Titanic 891 строка.</p>
+          <p class="oshibka">Считать главной бедой лишнее место на диске. Место сейчас дешёвое. Беда в том, что данные начинают противоречить сами себе, и это уже не исправить запросом.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Три аномалии: изменения (поправил не везде), вставки (не записать без строки целиком), удаления (стёр строку, пропал факт).</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>Нормализация и нулевая нормальная форма</h2>
+    <p>Определения с лекции 1. Нормализация это проверка логической ER-модели по правилам, чтобы понять, качественно ли она составлена. Нормальная форма это набор таких правил. Форм девять, на курсе первые три, и перед ними ещё нулевая.</p>
+    <p class="novoe">0НФ, ненормализованная форма: в клетке может лежать несколько значений сразу, списком. Так обычно выглядят данные из Excel или из головы.</p>
+    <p>Те же запуски в 0НФ, одна строка на человека:</p>
+    <div class="tablica"><table>
+      <tr><th>researcher</th><th>grp</th><th>datasets</th><th>models</th></tr>
+      <tr><td>Павленко Степан</td><td>РИ-250932</td><td>iris, iris, IMDB Reviews</td><td>Logisticregression, Resnet, rubert-tiny2</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>РИ-250932</td><td>pirs, Titanic</td><td>RandomForest, RandomForest</td></tr>
+    </table></div>
+    <p>Повторов людей нет, зато каждый запрос превращается в мучение. Чтобы найти, кто работал с Titanic, придётся искать кусок внутри текста. Посчитать запуски через <code>COUNT</code> вообще не выйдет: строк две, а запусков пять.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В 0НФ-таблице у Азата модели «RandomForest, RandomForest». Как по этой таблице понять, какой статус был у запуска на Titanic?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Никак: статусов в таблице нет. А если добавить столбец «done, failed», связь держится только на порядке внутри двух списков: второй набор, вторая модель, второй статус. Базе этот порядок ничего не говорит.</p>
+          <p class="oshibka">Решить, что 0НФ лучше широкой таблицы, раз повторов меньше. Повторы ушли внутрь клеток, а искать и считать стало невозможно. 0НФ хуже.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Нормализация: проверка модели по правилам. Нормальная форма: набор правил, на курсе 0НФ–3НФ.</p>
+      <p>0НФ: в клетке список значений.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>Первая нормальная форма</h2>
+    <p>Разрежем списки так, чтобы на каждый запуск была своя строка. Получится как раз широкая таблица сверху урока.</p>
+    <p class="novoe">1НФ: в каждой клетке одно значение, его называют атомарным, то есть дальше не делится. Нет повторяющихся групп столбцов вроде model1, model2, model3. У каждой строки есть ключ, который её однозначно определяет.</p>
+    <p>Ключ широкой таблицы: тройка <code>(researcher, dataset, model)</code>. Ни один столбец по отдельности строку не определяет: у Степана три строки, у iris две, у RandomForest две. А тройка встречается один раз. Такой ключ из нескольких столбцов называют составным.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В 1НФ ли такие таблицы? а) Столбец <code>phone</code> со значением «+7 900 111-22-33, +7 900 444-55-66». б) Столбцы <code>model1</code>, <code>model2</code>, <code>model3</code>. в) Столбец <code>full_name</code> со значением «Павленко Степан».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Нет: два телефона в одной клетке. б) Нет: повторяющаяся группа столбцов. Четвёртую модель не записать, а искать придётся в трёх местах. в) Да: имя мы целиком храним и целиком ищем, для нашей задачи оно атомарно.</p>
+          <p class="oshibka">Резать всё подряд: имя на фамилию и имя, дату на день, месяц и год. Атомарность зависит от задачи. Если ты никогда не ищешь по одной фамилии, «Павленко Степан» одно значение.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>1НФ: одно значение в клетке, нет model1, model2…, у строк есть ключ.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>Зависимость: что от чего зависит</h2>
+    <p>Для 2НФ и 3НФ нужно одно слово. Если знаешь набор данных, ты знаешь и число строк в нём: iris значит 150, где бы iris ни встретился. А по числу строк исследователя не узнать.</p>
+    <p class="novoe">Функциональная зависимость <code>A → B</code>: по значению A однозначно определяется значение B. Читается «B зависит от A». В одинаковых A всегда одинаковое B.</p>
+    <p>Зависимости широкой таблицы:</p>
+    <ul>
+      <li><code>researcher → grp</code>: группа зависит только от человека</li>
+      <li><code>dataset → rows</code>: число строк зависит только от набора</li>
+      <li><code>model → framework</code>: библиотека зависит только от модели</li>
+      <li><code>(researcher, dataset, model) → status</code>: статус зависит от всей тройки</li>
+    </ul>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Верна ли зависимость, проверь по таблице: а) <code>framework → model</code>, б) <code>dataset → status</code>, в) <code>(researcher, dataset) → status</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Нет: у pytorch две модели, Resnet и rubert-tiny2. б) Нет в общем случае: по таблице у iris оба done, но если на iris упадёт ещё один запуск, станет done и failed. Набор статус не определяет. в) Нет: у Степана на iris два запуска с разными моделями, и статусы у них могут быть разными.</p>
+          <p class="oshibka">Проверить зависимость по пяти строкам примера и объявить её верной. Зависимость это правило про любые данные, а не совпадение в маленькой выборке. Спрашивай себя: может ли в жизни быть иначе?</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>A → B</code>: по A однозначно знаем B. Проверяем по смыслу, а не по нескольким строкам.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>Вторая нормальная форма</h2>
+    <p>Ключ у нас <code>(researcher, dataset, model)</code>. Но <code>grp</code> зависит только от части ключа, от researcher. <code>rows</code> только от dataset, <code>framework</code> только от model. Именно эти столбцы и повторялись в шаге 1.</p>
+    <p class="novoe">2НФ: таблица в 1НФ, и каждый неключевой столбец зависит от всего ключа, а не от его части. Столбцы, которые зависят от части ключа, выносят в отдельную таблицу вместе с этой частью.</p>
+    <div class="ryadom">
+      <div class="tablica">
+        <div class="imya">researchers</div>
+        <table>
+          <tr><th>researcher</th><th>grp</th></tr>
+          <tr><td>Павленко Степан</td><td>РИ-250932</td></tr>
+          <tr><td>Щайхутдинов Азат</td><td>РИ-250932</td></tr>
+        </table>
+      </div>
+      <div class="tablica">
+        <div class="imya">datasets</div>
+        <table>
+          <tr><th>dataset</th><th>rows</th></tr>
+          <tr><td>iris</td><td>150</td></tr>
+          <tr><td>IMDB Reviews</td><td>50000</td></tr>
+          <tr><td>pirs</td><td>210</td></tr>
+          <tr><td>Titanic</td><td>891</td></tr>
+        </table>
+      </div>
+      <div class="tablica">
+        <div class="imya">models</div>
+        <table>
+          <tr><th>model</th><th>framework</th></tr>
+          <tr><td>Logisticregression</td><td>sklearn</td></tr>
+          <tr><td>Resnet</td><td>pytorch</td></tr>
+          <tr><td>rubert-tiny2</td><td>pytorch</td></tr>
+          <tr><td>RandomForest</td><td>sklearn</td></tr>
+        </table>
+      </div>
+    </div>
+    <p>В таблице запусков остались только ключ и <code>status</code>: <code>runs(researcher, dataset, model, status)</code>, пять строк.</p>
+    <p>Если ключ из одного столбца, части у него нет, и таблица в 1НФ уже автоматически в 2НФ. Проблема 2НФ бывает только у составного ключа.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Проверь аномалии из шага 1 на новых таблицах. Сколько строк надо поправить, если Азат перевёлся? Можно ли записать MNIST с 70000 строк без запуска? Что пропадёт, если удалить запуск на Titanic?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Одну строку в <code>researchers</code>. MNIST записать можно: одна строка в <code>datasets</code>, запуск не нужен. Удаление запуска стирает строку только в <code>runs</code>, а Titanic со своими 891 строкой остаётся в <code>datasets</code>. Все три аномалии ушли.</p>
+          <p class="oshibka">Вынести <code>status</code> в таблицу людей, «раз он про запуски человека». Статус зависит от всей тройки: у Степана три запуска, и у каждого свой. В <code>researchers</code> на Степана одна строка, три статуса туда не влезут.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>2НФ: 1НФ и каждый неключевой столбец зависит от всего ключа. Зависит от части → в отдельную таблицу с этой частью.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>Третья нормальная форма</h2>
+    <p>В таблицу наборов добавили тип задачи и его название по-русски:</p>
+    <div class="tablica">
+      <div class="imya">datasets</div>
+      <table>
+        <tr><th>dataset</th><th>rows</th><th>type_task</th><th>type_ru</th></tr>
+        <tr><td>iris</td><td>150</td><td>classification</td><td>классификация</td></tr>
+        <tr><td>IMDB Reviews</td><td>50000</td><td>nlp</td><td>тексты</td></tr>
+        <tr><td>pirs</td><td>210</td><td>analize</td><td>анализ</td></tr>
+        <tr><td>Titanic</td><td>891</td><td>classification</td><td>классификация</td></tr>
+      </table>
+    </div>
+    <p>Ключ здесь один столбец, <code>dataset</code>, так что 2НФ выполнена. Но «классификация» повторяется, и снова можно поправить её в одной строке и забыть в другой. Причина: <code>type_ru</code> зависит не от ключа, а от <code>type_task</code>, обычного столбца.</p>
+    <p class="novoe">3НФ по лекции: модель уже в 2НФ, и ни один неключевой атрибут не зависит от другого неключевого. Такой столбец выносят в отдельную таблицу вместе с тем, от чего он зависит.</p>
+    <div class="ryadom">
+      <div class="tablica">
+        <div class="imya">datasets</div>
+        <table>
+          <tr><th>dataset</th><th>rows</th><th>type_task</th></tr>
+          <tr><td>iris</td><td>150</td><td>classification</td></tr>
+          <tr><td>IMDB Reviews</td><td>50000</td><td>nlp</td></tr>
+          <tr><td>pirs</td><td>210</td><td>analize</td></tr>
+          <tr><td>Titanic</td><td>891</td><td>classification</td></tr>
+        </table>
+      </div>
+      <div class="tablica">
+        <div class="imya">task_types</div>
+        <table>
+          <tr><th>type_task</th><th>type_ru</th></tr>
+          <tr><td>classification</td><td>классификация</td></tr>
+          <tr><td>nlp</td><td>тексты</td></tr>
+          <tr><td>analize</td><td>анализ</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В таблице <code>researchers(researcher, grp, kurator)</code> хранится куратор группы. В 3НФ ли она? Если нет, как разложить?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Нет. Куратор зависит от группы, а группа неключевой столбец: <code>grp → kurator</code>. У всех из РИ-250932 куратор один и повторяется. Раскладываем: <code>researchers(researcher, grp)</code> и <code>groups(grp, kurator)</code>.</p>
+          <p class="oshibka">Перепутать 2НФ и 3НФ. 2НФ про зависимость от части ключа, у нас ключ из одного столбца, части нет. 3НФ про зависимость одного неключевого столбца от другого, здесь как раз она.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>3НФ: 2НФ и неключевой столбец не зависит от другого неключевого. Зависит → в отдельную таблицу.</p>
+      <p>2НФ: от части ключа. 3НФ: от неключевого.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>Что получилось: твоя база</h2>
+    <p>Из одной широкой таблицы вышло пять: люди, наборы, типы задач, модели и запуски. Посмотри на <code>ml_tracker</code>: там те же <code>researchers</code>, <code>datasets</code>, <code>models</code> и <code>experiments</code>. Твоя база уже почти в 3НФ.</p>
+    <p class="novoe">В нормализованной базе каждый факт хранится в одном месте. Группа человека лежит в одной строке, число строк набора в одной строке. Связи держатся на ключах, и данные снова собирают через <code>JOIN</code>.</p>
+    <p>Одно отличие от нашего примера: в твоей базе ключи это номера <code>id</code>, а не имена. Так надёжнее. Тёзки не сольются в одного, а поменять имя можно одной правкой, ссылки на номер при этом не ломаются. Номер вместо имени называют суррогатным ключом.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В <code>ml_tracker</code> у <code>datasets</code> есть столбец <code>type_task</code> со значениями вроде <code>classification</code> и <code>nlp</code>. Нарушает ли это 3НФ? Когда начнёт нарушать?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Пока нет: <code>type_task</code> зависит от ключа <code>id</code>, и других столбцов, которые зависят от типа, нет. Нарушать начнёт, если рядом добавить что-то, что определяется типом, например русское название типа или метрику по умолчанию для этого типа.</p>
+          <p class="oshibka">Считать повтор значения нарушением сам по себе. «classification» встречается дважды, но это два разных набора с одним типом. Нарушение появляется, когда от этого повторяющегося значения зависит ещё один столбец.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Нормализованная база: каждый факт в одном месте, связи по ключам, собираем через <code>JOIN</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>CREATE VIEW: сохранить запрос как таблицу</h2>
+    <p>Обратная сторона нормализации: чтобы увидеть запуски с именами, каждый раз пишешь три <code>JOIN</code>. Это можно сделать один раз.</p>
+<pre><code class="sql">CREATE VIEW runs_full AS
+SELECT r.full_name, d.name AS dataset, m.name AS model, e.status
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+JOIN datasets d    ON d.id = e.dataset_id
+JOIN models m      ON m.id = e.model_id;</code></pre>
+    <p>Дальше с <code>runs_full</code> работают как с таблицей:</p>
+<pre><code class="sql">SELECT * FROM runs_full WHERE status &lt;&gt; 'done';</code></pre>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>dataset</th><th>model</th><th>status</th></tr>
+      <tr><td>Щайхутдинов Азат</td><td>Titanic</td><td>RandomForest</td><td>failed</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>MNIST</td><td>Resnet</td><td>running</td></tr>
+    </table></div>
+    <p class="novoe">Представление, по-английски view, по слайду 26 лекции 29.09: запрос, который хранится в базе. Оно выглядит и действует как таблица, но своих данных у него нет. Когда ты пишешь <code>SELECT … FROM runs_full</code>, база подставляет сохранённый запрос и выполняет их вместе.</p>
+    <p><code>&lt;&gt;</code> значит «не равно». На лекции такие таблицы назвали виртуальными, рядом с постоянными из <code>CREATE TABLE</code>, производными из подзапроса и временными, которые живут до конца сеанса.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос к <code>runs_full</code>: сколько запусков у каждой модели. Сколько выйдет у Resnet?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT model, COUNT(*)
+FROM runs_full
+GROUP BY model;</code></pre>
+          <p>Resnet 3, это запуски 2, 4 и 8. Logisticregression, RandomForest и rubert-tiny2 по 2. CatBoost не запускали, его нет.</p>
+          <p class="oshibka">Запустить <code>CREATE VIEW runs_full</code> второй раз, поправив запрос. PostgreSQL ответит <code>relation "runs_full" already exists</code>. Для замены пишут <code>CREATE OR REPLACE VIEW runs_full AS …</code>, а убрать совсем можно через <code>DROP VIEW runs_full;</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CREATE VIEW имя AS SELECT …</code>: сохранённый запрос, работает как таблица, своих данных нет.</p>
+      <p>Поправить: <code>CREATE OR REPLACE VIEW</code>. Убрать: <code>DROP VIEW</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>Представление всегда свежее</h2>
+    <p>Раз своих данных у представления нет, оно каждый раз показывает то, что сейчас лежит в таблицах. Проверим на пробе, которую потом откатим, как в уроке <a href="bd-izmenenie-dannyh.html">про UPDATE</a>:</p>
+<pre><code class="sql">BEGIN;
+UPDATE experiments SET status = 'done' WHERE id = 8;
+SELECT * FROM runs_full WHERE status &lt;&gt; 'done';
+ROLLBACK;</code></pre>
+    <p>Внутри пробы останется одна строка, Titanic failed. Запуск 8 на MNIST стал done, и представление сразу это увидело, хотя его никто не пересоздавал. После <code>ROLLBACK</code> всё вернётся как было.</p>
+    <p class="novoe">Представление не копия данных. Меняешь таблицы, меняется и то, что показывает представление. Поэтому его используют, чтобы не писать один и тот же длинный <code>JOIN</code> и чтобы показать человеку только нужные столбцы, без почты и прочего лишнего.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Олег, у которого нет запусков, есть в <code>runs_full</code>? Что надо поменять в определении представления, чтобы он там появился?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Нет: в определении обычный <code>JOIN</code>, а у Олега нет строки в <code>experiments</code>. Чтобы он был, представление строят от людей: <code>FROM researchers r LEFT JOIN experiments e ON …</code> и дальше <code>LEFT JOIN</code> к наборам и моделям. Это урок <a href="bd-left-join-group-by.html">про LEFT JOIN</a>.</p>
+          <p class="oshibka">Думать, что представление один раз запомнило результат, и после изменения таблиц его надо пересоздать. Пересоздают, только если меняется сам запрос. Если меняются данные, представление и так их видит.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Представление показывает текущие данные таблиц. Пересоздаю, только когда меняю запрос.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: нормализация и VIEW">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Первые три на новом примере: буфет записывает заказы одной таблицей <code>orders(order_id, student, student_grp, items, item_prices, total)</code>, где в <code>items</code> лежит «кофе, пирожок», а в <code>item_prices</code> «120, 60». Ответов здесь нет: впиши ответы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> В какой нормальной форме таблица <code>orders</code> и почему? Приведи её к 1НФ: какие будут столбцы и какой ключ?
+      <textarea name="z1" placeholder="0НФ, потому что… В 1НФ: …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Выпиши функциональные зависимости своей 1НФ-таблицы и приведи её к 2НФ. Какие таблицы получились?
+      <textarea name="z2" placeholder="order_id → … " aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Есть ли в твоих таблицах нарушение 3НФ? Подсказка: от чего зависит <code>total</code> и нужен ли он вообще, если цены и количество хранятся?
+      <textarea name="z3" placeholder="…" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> В своей базе <code>ml_tracker</code> создай представление <code>metrics_full</code>: имя исследователя, набор данных, модель, название оценки и её значение. Запусти <code>SELECT * FROM metrics_full WHERE name_metric = 'accuracy'</code> и впиши, сколько строк вышло.
+      <textarea name="z4" placeholder="CREATE VIEW metrics_full AS …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Чем представление отличается от таблицы, созданной так: <code>CREATE TABLE runs_copy AS SELECT * FROM runs_full;</code>? Что будет с каждой из них, если завтра добавить новый запуск?
+      <textarea name="z5" placeholder="…" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Нормализация</td><td>Модуль A2: данные для обучения лежат по таблицам, а модели нужна одна широкая. Её собирают через JOIN, это обратный ход нормализации.</td></tr>
+      <tr><td>VIEW</td><td>Модуль A2: представление с готовой широкой таблицей признаков. pandas читает его одной строкой <code>read_sql</code>, и каждый раз данные свежие.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="../bd/">Дальше: страница БД →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

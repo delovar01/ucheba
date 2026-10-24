@@ -10,6 +10,8 @@
   const BI = { id: 'bd-izmenenie-dannyh', nazvanie: 'INSERT, UPDATE, DELETE', ssylka: 'uroki/bd-izmenenie-dannyh.html' };
   const BP = { id: 'bd-podzaprosy-cte', nazvanie: 'Подзапросы, WITH и множества', ssylka: 'uroki/bd-podzaprosy-cte.html' };
   const BR = { id: 'bd-stroki', nazvanie: 'Строковые функции', ssylka: 'uroki/bd-stroki.html' };
+  const BNV = { id: 'bd-normalizaciya-view', nazvanie: 'Нормализация и CREATE VIEW', ssylka: 'uroki/bd-normalizaciya-view.html' };
+  const BFN = { id: 'bd-funkcii', nazvanie: 'Скалярные и агрегатные функции', ssylka: 'uroki/bd-funkcii.html' };
   const SP = { id: 'sa-process', nazvanie: 'Цикл, роли, модели', ssylka: 'uroki/sa-process.html' };
   const ST = { id: 'sa-trebovaniya', nazvanie: 'Требования и диаграммы', ssylka: 'uroki/sa-trebovaniya.html' };
   const SR = { id: 'sa-uchastniki-riski', nazvanie: 'Участники, вопрос, риск, ограничение', ssylka: 'uroki/sa-uchastniki-riski.html' };
@@ -39,6 +41,9 @@
   const AO = { id: 'alg-grafy-obhody', nazvanie: 'Графы: BFS и DFS', ssylka: 'uroki/alg-grafy-obhody.html' };
   const AD = { id: 'alg-deykstra', nazvanie: 'Дейкстра', ssylka: 'uroki/alg-deykstra.html' };
   const AP = { id: 'alg-dinamicheskoe', nazvanie: 'Динамическое программирование', ssylka: 'uroki/alg-dinamicheskoe.html' };
+  const ASB = { id: 'alg-sliyanie-bystraya', nazvanie: 'Слияние и быстрая сортировка', ssylka: 'uroki/alg-sliyanie-bystraya.html' };
+  const AS2 = { id: 'alg-ostov-dsu', nazvanie: 'Минимальный остов: DSU, Краскал, Прим', ssylka: 'uroki/alg-ostov-dsu.html' };
+  const AT = { id: 'alg-toposort-puti', nazvanie: 'Топосортировка, Форд–Беллман, Флойд', ssylka: 'uroki/alg-toposort-puti.html' };
   const JT = { id: 'java-tipy-if', nazvanie: 'Типы, формулы и if', ssylka: 'uroki/java-tipy-if.html' };
   const JC = { id: 'java-cikly-metody', nazvanie: 'Циклы и статические методы', ssylka: 'uroki/java-cikly-metody.html' };
   const JM = { id: 'java-massivy', nazvanie: 'Массивы и участки убывания', ssylka: 'uroki/java-massivy.html' };
@@ -49,6 +54,7 @@
   const JN = { id: 'java-nasledovanie', nazvanie: 'Наследование и полиморфизм', ssylka: 'uroki/java-nasledovanie.html' };
   const JL = { id: 'java-lyambdy', nazvanie: 'Лямбды и Stream', ssylka: 'uroki/java-lyambdy.html' };
   const JR = { id: 'java-sealed-record', nazvanie: 'sealed-типы и record', ssylka: 'uroki/java-sealed-record.html' };
+  const JU = { id: 'java-svyazi-uml', nazvanie: 'Связи классов и UML', ssylka: 'uroki/java-svyazi-uml.html' };
   const JE = { id: 'java-isklyucheniya', nazvanie: 'Исключения и null', ssylka: 'uroki/java-isklyucheniya.html' };
   const NO = { id: 'seti-osnovy', nazvanie: 'Основы компьютерных сетей', ssylka: 'uroki/seti-osnovy.html' };
   const NT = { id: 'seti-tcp-ip', nazvanie: 'Адреса, подсети и TCP', ssylka: 'uroki/seti-tcp-ip.html' };
@@ -63,15 +69,15 @@
       predmet: 'Базы данных',
       pary: [
         { data: 'ср 9.09', tip: 'лаба', tema: 'Проектирование ER-диаграммы', material: 'конспект', urok: BE },
-        { data: 'вт 15.09', tip: 'лекция 1', tema: 'Введение в БД, ER-диаграммы, установка СУБД', material: 'конспекты, слайды', urok: BE },
+        { data: 'вт 15.09', tip: 'лекция 1', tema: 'Введение в БД, ER-диаграммы, нормальные формы 0НФ–3НФ, установка СУБД', material: 'конспекты, слайды', urok: [BE, BNV] },
         { data: 'ср 16.09', tip: 'лаба', tema: 'Создание базы GrantPlatform в DBeaver', material: 'конспект', urok: BS },
         { data: 'ср 23.09', tip: 'лаба', tema: 'Тема для СР1, ER-диаграмма по ней, CREATE TABLE, тестовые данные', material: 'конспект', urok: BS },
-        { data: 'вт 29.09', tip: 'лекция 2–3', tema: 'Создание таблиц, выборка, фильтры, подзапросы, JOIN', material: 'конспекты, слайды', urok: [BS, BF, LJ, BP] },
+        { data: 'вт 29.09', tip: 'лекция 2–3', tema: 'Создание таблиц, выборка, фильтры, подзапросы, JOIN, представления', material: 'конспекты, слайды', urok: [BS, BF, LJ, BP, BNV] },
         { data: 'ср 30.09', tip: 'лаба', tema: 'Запросы на выборку: SELECT, WHERE, BETWEEN', material: 'конспект', urok: BF },
         { data: 'ср 7.10', tip: 'лаба', tema: 'Агрегаты: COUNT, SUM, AVG, MIN, MAX', material: 'конспект', urok: LJ },
         { data: 'вт 13.10', tip: 'лекция 4', tema: 'INSERT, UPDATE, DELETE, CASE, CTE', material: 'конспекты, слайды', urok: [BI, CD, BP] },
         { data: 'ср 14.10', tip: 'лаба', tema: 'Функции дат и CASE: EXTRACT, TO_CHAR (по чату записей соседних групп той же недели)', material: 'конспект', urok: CD },
-        { data: 'ср 21.10', tip: 'лаба', tema: 'Строковые функции: SUBSTRING, склейка || (по чату записей 20.10 соседних групп. Своя запись пары есть, 53 мин, в её чате только вопрос про ДЗ 3, тему по видео не сверяли)', material: 'конспект', urok: BR },
+        { data: 'ср 21.10', tip: 'лаба', tema: 'Строковые функции: SUBSTRING, склейка || (по чату записей 20.10 соседних групп. Своя запись пары есть, 53 мин, в её чате только вопрос про ДЗ 3, тему по видео не сверяли)', material: 'конспект, памятка преподавателя по функциям', urok: [BR, BFN] },
       ],
     },
     {
@@ -84,9 +90,9 @@
         { data: 'чт 24.09', tip: 'лекция 2', tema: 'Структуры данных, кучи, амортизационный анализ', material: 'конспект, слайды, запись', urok: AH },
         { data: 'сб 26.09', tip: 'лаба', tema: 'Java с нуля: типы, калькулятор, FizzBuzz, «угадай число»', material: 'код Зубарева', urok: AR },
         { data: 'сб 3.10', tip: 'лаба', tema: 'Рекурсия и перебор: сумма цифр, скобки, подмножества', material: 'конспект, код', urok: AR },
-        { data: 'пн 5.10', tip: 'лекция 3', tema: 'Алгоритмы на графах', material: 'конспект, слайды', urok: [AO, AD] },
+        { data: 'пн 5.10', tip: 'лекция 3', tema: 'Алгоритмы на графах', material: 'конспект, слайды', urok: [AO, AD, AS2, AT] },
         { data: 'сб 10.10', tip: 'лаба', tema: 'Графы: обход в ширину и глубину, Дейкстра, путь в лабиринте', material: 'конспект, код', urok: [AO, AD] },
-        { data: 'сб 17.10', tip: 'лаба', tema: 'Разбор домашних задач: сортировка пузырьком и слиянием, куча на массиве, обход в ширину, алгоритм Прима (косвенно: код «class 4» Зубарев выложил только 24.10 вместе с пятым занятием, записи пары нет)', material: 'код Зубарева: hw/assignment1 и PrimVisualization', urok: [AH, AO] },
+        { data: 'сб 17.10', tip: 'лаба', tema: 'Разбор домашних задач: сортировка пузырьком и слиянием, куча на массиве, обход в ширину, алгоритм Прима (косвенно: код «class 4» Зубарев выложил только 24.10 вместе с пятым занятием, записи пары нет)', material: 'код Зубарева: hw/assignment1 и PrimVisualization', urok: [ASB, AH, AO, AS2] },
         { data: 'пн 19.10', tip: 'лекция 4', tema: 'не найдено, искал: элеарн 10052 (лекций и слайдов в курсе нет совсем, форум пуст), записи BBB комнат 6kj-sn9-boc-wiz и hrp-c6w-mpp-zpy (пусто), ktalk (список записей закрыт), Модеус (тема не подписана), вольт. Лекция 3 остановилась на графах', material: '' },
         { data: 'сб 24.10', tip: 'лаба', tema: 'Динамическое программирование: Фибоначчи (мемоизация и таблица), рюкзак 0/1, наибольшая общая подпоследовательность, лабиринт и уравнение Беллмана', material: 'слайды «Динамическое программирование» и код Зубарева (hw/assignment2)', urok: AP },
       ],
@@ -118,7 +124,7 @@
         { data: 'пн 12.10', tip: 'лекция 5', tema: 'Исключения и null', material: 'конспект, запись', urok: JE },
         { data: 'вт 13.10', tip: 'лаба', tema: 'Массивы', material: 'конспект, слайды', urok: JM },
         { data: 'пн 19.10', tip: 'лекция 6', tema: 'не найдено, искал: элеарн 10103 (слайдов лекции нет, форум пуст), java-demos Корелина (последний коммит 2.10, новых папок нет), записи BBB комнаты лекций w2m-z8c-rdr-myp (пусто), ktalk (запись по ссылке открывается, но ссылки на 19.10 нет, список записей закрыт), Модеус (тема не подписана), вольт', material: '' },
-        { data: 'вт 20.10', tip: 'лаба', tema: 'ООП: классы и объекты, инкапсуляция (косвенно: в элеарне раздел ПР4 «ООП. Инкапсуляция» и слайды «ООП часть I», выложены 22.10; записи нет)', material: 'слайды «ООП часть I» и «ООП часть II»', urok: [JI, JN] },
+        { data: 'вт 20.10', tip: 'лаба', tema: 'ООП: классы и объекты, инкапсуляция (косвенно: в элеарне раздел ПР4 «ООП. Инкапсуляция» и слайды «ООП часть I», выложены 22.10; записи нет)', material: 'слайды «ООП часть I» и «ООП часть II»', urok: [JI, JN, JU] },
       ],
     },
     {

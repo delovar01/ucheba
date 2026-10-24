@@ -1,6 +1,6 @@
 // Офлайн: страницы сайта лежат в кэше телефона, KaTeX — тоже после первого открытия.
 // Меняешь любой файл — подними номер версии, иначе телефон покажет старое.
-const VERSIYA = 'ucheba-v17';
+const VERSIYA = 'ucheba-v18';
 const STRANICY = [
   './',
   './index.html',
@@ -15,6 +15,8 @@ const STRANICY = [
   './uroki/bd-sozdanie-tablic.html',
   './uroki/bd-podzaprosy-cte.html',
   './uroki/bd-stroki.html',
+  './uroki/bd-funkcii.html',
+  './uroki/bd-normalizaciya-view.html',
   './uroki/tv-vyskazyvaniya.html',
   './uroki/tv-dnf.html',
   './uroki/tv-mnozhestva.html',
@@ -36,11 +38,14 @@ const STRANICY = [
   './uroki/fiz-volnovaya-optika.html',
   './uroki/alg-asimptotika.html',
   './uroki/alg-master-teorema.html',
+  './uroki/alg-sliyanie-bystraya.html',
   './uroki/alg-lineynye-sortirovki.html',
   './uroki/alg-kuchi.html',
   './uroki/alg-rekursiya.html',
   './uroki/alg-grafy-obhody.html',
   './uroki/alg-deykstra.html',
+  './uroki/alg-ostov-dsu.html',
+  './uroki/alg-toposort-puti.html',
   './uroki/alg-dinamicheskoe.html',
   './uroki/java-tipy-if.html',
   './uroki/java-cikly-metody.html',
@@ -50,6 +55,7 @@ const STRANICY = [
   './uroki/java-klassy.html',
   './uroki/java-inkapsulyaciya.html',
   './uroki/java-nasledovanie.html',
+  './uroki/java-svyazi-uml.html',
   './uroki/java-lyambdy.html',
   './uroki/java-sealed-record.html',
   './uroki/java-isklyucheniya.html',

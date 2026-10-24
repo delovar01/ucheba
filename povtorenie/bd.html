@@ -363,6 +363,52 @@ SUBSTRING(email FROM POSITION('@' IN email))     -- @urfu.ru</code></pre>
     </div>
   </details>
 
+  <h2>После урока «Скалярные и агрегатные функции»</h2>
+
+  <details class="vopros">
+    <summary>40. Что вернут SELECT 210 / 32, SELECT CEIL(210 / 32) и SELECT CEIL(210::numeric / 32)? Почему разное?</summary>
+    <div>
+      <p>6, 6 и 7. Целое на целое PostgreSQL делит нацело, дробь 0.5625 пропадает ещё до <code>CEIL</code>. Только с <code>::numeric</code> выходит 6.5625, и <code>CEIL</code> округляет вверх до 7.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>41. Запрос считает долю провалов: COUNT(…) / COUNT(e.id) с LEFT JOIN, и падает с division by zero. Почему и как починить?</summary>
+    <div>
+      <p>У исследователя без запусков <code>COUNT(e.id)</code> равен 0. Чинят <code>/ NULLIF(COUNT(e.id), 0)</code>: ноль превращается в <code>NULL</code>, и деление даёт <code>NULL</code> вместо ошибки. Нужен 0 вместо <code>NULL</code>, оборачивают в <code>COALESCE(…, 0)</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>42. Чем STRING_AGG отличается от BOOL_OR и BOOL_AND? Что вернёт BOOL_AND(status = 'done') у Азата?</summary>
+    <div>
+      <p>Все три агрегатные. <code>STRING_AGG</code> склеивает значения кучки в строку через разделитель. <code>BOOL_OR</code> отвечает, верно ли условие хоть для одной строки, <code>BOOL_AND</code>, верно ли для всех. У Азата статусы done, failed, running, поэтому <code>BOOL_AND</code> вернёт false.</p>
+    </div>
+  </details>
+
+  <h2>После урока «Нормализация и CREATE VIEW»</h2>
+
+  <details class="vopros">
+    <summary>43. Таблица students(id, name, phones), в phones лежит «+7 900 1, +7 900 2». В какой она форме и как привести к 1НФ?</summary>
+    <div>
+      <p>В 0НФ: в клетке два значения. Для 1НФ телефоны выносят в отдельную таблицу <code>phones(student_id, phone)</code>, по строке на телефон. Столбцы phone1 и phone2 не выход: это повторяющаяся группа, она тоже нарушает 1НФ.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>44. Таблица enroll(student, course, grade, course_teacher), ключ (student, course). Какую форму она нарушает и как разложить?</summary>
+    <div>
+      <p>2НФ: <code>course_teacher</code> зависит только от <code>course</code>, то есть от части ключа. Раскладываем на <code>enroll(student, course, grade)</code> и <code>courses(course, course_teacher)</code>. Оценка зависит от всего ключа и остаётся.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>45. Что такое представление и чем оно отличается от CREATE TABLE … AS SELECT?</summary>
+    <div>
+      <p>Представление (<code>CREATE VIEW имя AS SELECT …</code>) хранит запрос, а не данные, и каждый раз показывает текущие строки таблиц. <code>CREATE TABLE … AS SELECT</code> один раз копирует результат в новую таблицу, и новые запуски туда сами не попадут. Поправить представление: <code>CREATE OR REPLACE VIEW</code>, убрать: <code>DROP VIEW</code>.</p>
+    </div>
+  </details>
+
   <p class="niz"><a href="../bd/">← БД</a> · <a href="./">Всё повторение</a></p>
 </main>
 <script src="../assets/app.js"></script>

@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Скалярные и агрегатные функции — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-funkcii">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · функции</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Скалярные и агрегатные функции</h1>
+  <p class="tiho">Базы данных · памятка преподавателя «Скалярные, агрегатные и оконные функции» · около 55 минут</p>
+
+  <p>Преподаватель выложила памятку со списком функций PostgreSQL. Часть из неё ты уже прошёл: строковые функции в уроке <a href="bd-stroki.html">«Строковые функции»</a>, <code>EXTRACT</code>, <code>TO_CHAR</code> и <code>CASE</code> в уроке <a href="bd-case-daty.html">«CASE и даты»</a>, <code>COUNT</code> и <code>MAX</code> в уроке <a href="bd-left-join-group-by.html">про GROUP BY</a>. Здесь всё остальное из памятки. Десять шагов, всё на твоей базе <code>ml_tracker</code>.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. В рамке «Главное из шага» суть шага в двух строках. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <h2>Что понадобится из базы</h2>
+  <p>Исследователи: 1 Павленко Степан, 2 Щайхутдинов Азат, 3 Иванова Мария, 4 Смирнов Олег, у Олега запусков нет. Модели: 1 Logisticregression, 2 RandomForest, 3 Resnet, 4 rubert-tiny2, 5 CatBoost.</p>
+  <div class="tablica">
+    <div class="imya">datasets · наборы данных</div>
+    <table>
+      <tr><th>id</th><th>name</th><th>type_task</th><th>count</th></tr>
+      <tr><td>1</td><td>iris</td><td>classification</td><td>150</td></tr>
+      <tr><td>2</td><td>pirs</td><td>analize</td><td>210</td></tr>
+      <tr><td>3</td><td>California Housing</td><td>regression</td><td>20640</td></tr>
+      <tr><td>4</td><td>IMDB Reviews</td><td>nlp</td><td>50000</td></tr>
+      <tr><td>5</td><td>MNIST</td><td>cv</td><td>70000</td></tr>
+      <tr><td>6</td><td>Titanic</td><td>classification</td><td>891</td></tr>
+    </table>
+  </div>
+  <div class="tablica">
+    <div class="imya">experiments · запуски</div>
+    <table>
+      <tr><th>id</th><th>researcher_id</th><th>model_id</th><th>created_at</th><th>count_apoh</th><th>status</th></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>2026-09-20 18:00</td><td>1</td><td>done</td></tr>
+      <tr><td>2</td><td>1</td><td>3</td><td>2026-09-21 19:30</td><td class="null">NULL</td><td>done</td></tr>
+      <tr><td>3</td><td>2</td><td>2</td><td>2026-09-22 10:15</td><td>1</td><td>done</td></tr>
+      <tr><td>4</td><td>3</td><td>3</td><td>2026-09-23 12:00</td><td>1</td><td>done</td></tr>
+      <tr><td>5</td><td>3</td><td>4</td><td>2026-09-24 14:40</td><td>5</td><td>done</td></tr>
+      <tr><td>6</td><td>1</td><td>4</td><td>2026-10-02 21:10</td><td>3</td><td>done</td></tr>
+      <tr><td>7</td><td>2</td><td>2</td><td>2026-10-05 16:45</td><td>1</td><td>failed</td></tr>
+      <tr><td>8</td><td>2</td><td>3</td><td>2026-10-11 23:20</td><td>10</td><td>running</td></tr>
+      <tr><td>9</td><td>3</td><td>1</td><td>2026-10-15 09:30</td><td>1</td><td>done</td></tr>
+    </table>
+  </div>
+  <div class="tablica">
+    <div class="imya">metrics · оценки запусков</div>
+    <table>
+      <tr><th>id</th><th>experiments_id</th><th>name_metric</th><th>mean_metric</th></tr>
+      <tr><td>1</td><td>1</td><td>accuracy</td><td>0.787</td></tr>
+      <tr><td>2</td><td>1</td><td>f1</td><td>0.721</td></tr>
+      <tr><td>3</td><td>2</td><td>accuracy</td><td>0.835</td></tr>
+      <tr><td>4</td><td>2</td><td>f1</td><td>0.789</td></tr>
+      <tr><td>5</td><td>3</td><td>accuracy</td><td>0.960</td></tr>
+      <tr><td>6</td><td>3</td><td>f1</td><td>0.941</td></tr>
+      <tr><td>7</td><td>4</td><td>r2</td><td>0.812</td></tr>
+      <tr><td>8</td><td>5</td><td>accuracy</td><td>0.982</td></tr>
+      <tr><td>9</td><td>6</td><td>accuracy</td><td>0.874</td></tr>
+      <tr><td>10</td><td>6</td><td>f1</td><td>0.866</td></tr>
+      <tr><td>11</td><td>8</td><td>accuracy</td><td>0.991</td></tr>
+      <tr><td>12</td><td>9</td><td>accuracy</td><td>0.947</td></tr>
+    </table>
+  </div>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>Скалярная и агрегатная функция</h2>
+    <p>Два запроса к одной таблице:</p>
+<pre><code class="sql">SELECT UPPER(name) FROM models;   -- 5 строк
+SELECT COUNT(*) FROM models;      -- 1 строка: 5</code></pre>
+    <p class="novoe">Так их делит памятка. Скалярная функция обрабатывает значение в каждой строке отдельно: сколько строк пришло, столько и вернулось. Агрегатная собирает много строк в одно значение, по всей таблице или по каждой кучке из <code>GROUP BY</code>.</p>
+    <p><code>UPPER</code> скалярная: пять моделей, пять строк большими буквами. <code>COUNT</code> агрегатная: пять строк свернулись в одно число.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Скалярная или агрегатная: <code>LENGTH</code>, <code>MAX</code>, <code>COALESCE</code>, <code>SUM</code>, <code>TO_CHAR</code>? Сколько строк вернёт <code>SELECT LENGTH(name) FROM datasets</code>, а сколько <code>SELECT MAX(count) FROM datasets</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Скалярные: <code>LENGTH</code>, <code>COALESCE</code>, <code>TO_CHAR</code>. Агрегатные: <code>MAX</code>, <code>SUM</code>. Первый запрос вернёт 6 строк, по одной на набор. Второй одну строку, 70000.</p>
+          <p class="oshibka">Смешать без <code>GROUP BY</code>: <code>SELECT name, MAX(count) FROM datasets</code>. Агрегатная хочет одну строку, а <code>name</code> шесть. PostgreSQL ответит <code>column "datasets.name" must appear in the GROUP BY clause</code>. Скалярные с обычными столбцами смешивать можно.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Скалярная: строка на входе, строка на выходе. Агрегатная: много строк в одно значение, на таблицу или на кучку.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>INITCAP: каждое слово с большой буквы</h2>
+    <p>Названия моделей в базе записаны кто как: rubert-tiny2 маленькими, CatBoost с большой в середине. Хочется одинаково.</p>
+<pre><code class="sql">SELECT name, INITCAP(name) AS krasivo
+FROM models;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>krasivo</th></tr>
+      <tr><td>Logisticregression</td><td>Logisticregression</td></tr>
+      <tr><td>RandomForest</td><td>Randomforest</td></tr>
+      <tr><td>Resnet</td><td>Resnet</td></tr>
+      <tr><td>rubert-tiny2</td><td>Rubert-Tiny2</td></tr>
+      <tr><td>CatBoost</td><td>Catboost</td></tr>
+    </table></div>
+    <p class="novoe"><code>INITCAP(s)</code> делает первую букву каждого слова заглавной, а все остальные маленькими. Словом считается кусок из букв и цифр подряд. Дефис, пробел и другие знаки разделяют слова.</p>
+    <p>Пример из памятки: <code>INITCAP('smart city')</code> даёт <code>Smart City</code>. В rubert-tiny2 дефис разделил два слова, поэтому большие буквы две.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что выдаст <code>SELECT INITCAP(name) FROM datasets</code> для IMDB Reviews, MNIST и California Housing?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>Imdb Reviews</code>, <code>Mnist</code>, <code>California Housing</code>. Последний не изменился, он и так записан по правилу.</p>
+          <p class="oshibka">Думать, что <code>INITCAP</code> только поднимает первую букву, а остальное не трогает. Она ещё и опускает все остальные. Поэтому сокращения вроде MNIST и CatBoost она портит, для них <code>INITCAP</code> не годится.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>INITCAP</code>: первая буква каждого слова большая, остальные маленькие. Сокращения портит.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>ABS: расстояние без знака</h2>
+    <p>Допустим, цель команды: оценка 0.9. Какие оценки к ней ближе всего, неважно, выше или ниже?</p>
+<pre><code class="sql">SELECT experiments_id, name_metric, mean_metric,
+       ABS(mean_metric - 0.9) AS daleko
+FROM metrics
+ORDER BY daleko
+LIMIT 3;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>experiments_id</th><th>name_metric</th><th>mean_metric</th><th>daleko</th></tr>
+      <tr><td>6</td><td>accuracy</td><td>0.874</td><td>0.026</td></tr>
+      <tr><td>6</td><td>f1</td><td>0.866</td><td>0.034</td></tr>
+      <tr><td>3</td><td>f1</td><td>0.941</td><td>0.041</td></tr>
+    </table></div>
+    <p class="novoe"><code>ABS(x)</code> это модуль числа: убирает минус. <code>ABS(-5)</code> даёт 5, <code>ABS(5)</code> тоже 5. Разность <code>a − b</code> под <code>ABS</code> это расстояние между a и b, без разницы, кто больше.</p>
+    <p>0.874 ниже цели, разность −0.026. 0.941 выше, разность +0.041. После <code>ABS</code> их можно честно сравнить.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что будет первым в ответе, если убрать <code>ABS</code> и сортировать просто по <code>mean_metric - 0.9</code>? Почему это не «ближе всего к цели»?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Первой станет самая низкая оценка, f1 0.721 у запуска 1: разность −0.179, это самое маленькое число. Без <code>ABS</code> сортировка ставит вперёд самые отрицательные, то есть самые далёкие снизу.</p>
+          <p class="oshibka">Поставить <code>ABS</code> не туда: <code>ABS(mean_metric) - 0.9</code>. Оценки и так положительные, <code>ABS</code> их не меняет, а минус после вычитания остаётся. Под модулем должна стоять вся разность.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ABS(x)</code>: модуль, без знака. <code>ABS(a − b)</code>: насколько a далеко от b.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>CAST и ::, а заодно ловушка целого деления</h2>
+<pre><code class="sql">SELECT 150 / 32;            -- 4
+SELECT 150::numeric / 32;   -- 4.6875</code></pre>
+    <p>Первый ответ не опечатка. Если оба числа целые, PostgreSQL делит нацело и выбрасывает дробную часть, как <code>/</code> для <code>int</code> в Java.</p>
+    <p class="novoe"><code>CAST(x AS тип)</code> или короче <code>x::тип</code> переводит значение в другой тип. <code>numeric</code> это число с дробной частью без потери точности, <code>int</code> целое, <code>date</code> дата, <code>text</code> текст. Пример из памятки: <code>'5'::int</code> даёт число 5 из текста '5'.</p>
+    <p>Ещё полезное: <code>created_at::date</code> отрезает время. Из <code>2026-09-20 18:00</code> останется <code>2026-09-20</code>. В DBeaver дробь покажется с хвостом нулей, <code>4.6875000000000000</code>, это то же число.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернут: а) <code>SELECT 891 / 32</code>, б) <code>SELECT CAST(891 AS numeric) / 32</code>, в) <code>SELECT '2026-10-25'::date - '2026-09-20'::date</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) 27, целое деление. б) 27.84375. в) 35: разность двух дат PostgreSQL отдаёт целым числом дней. С 20 сентября до 30 сентября 10 дней, плюс 25 дней октября.</p>
+          <p class="oshibka">Перевести в тип то, что в него не переводится: <code>'abc'::int</code>. PostgreSQL ответит <code>invalid input syntax for type integer: "abc"</code>. Текст становится числом, только если в нём и правда записано число.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>x::тип</code> = <code>CAST(x AS тип)</code>. Целое / целое = целое, для дроби одно из чисел <code>::numeric</code>.</p>
+      <p><code>created_at::date</code> отрезает время.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>CEIL и FLOOR: округлить вверх и вниз</h2>
+    <p>Модель учат пачками по 32 примера. Сколько пачек нужно на весь набор? Сколько пачек будут полными?</p>
+<pre><code class="sql">SELECT name, count,
+       CEIL(count::numeric / 32)  AS pachek,
+       FLOOR(count::numeric / 32) AS polnyh
+FROM datasets;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>count</th><th>pachek</th><th>polnyh</th></tr>
+      <tr><td>iris</td><td>150</td><td>5</td><td>4</td></tr>
+      <tr><td>pirs</td><td>210</td><td>7</td><td>6</td></tr>
+      <tr><td>California Housing</td><td>20640</td><td>645</td><td>645</td></tr>
+      <tr><td>IMDB Reviews</td><td>50000</td><td>1563</td><td>1562</td></tr>
+      <tr><td>MNIST</td><td>70000</td><td>2188</td><td>2187</td></tr>
+      <tr><td>Titanic</td><td>891</td><td>28</td><td>27</td></tr>
+    </table></div>
+    <p class="novoe"><code>CEIL(x)</code> округляет вверх до целого, <code>FLOOR(x)</code> вниз. Пример из памятки: <code>CEIL(8.1)</code> даёт 9. Если число уже целое, обе функции его не меняют.</p>
+    <p>У iris <code>150 / 32 = 4.6875</code>: четыре полные пачки и пятая неполная на 22 примера. У California Housing ровно 645 пачек, поэтому оба столбца равны.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернёт этот же запрос, если забыть <code>::numeric</code> и написать <code>CEIL(count / 32)</code>? Посчитай для iris.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>4 вместо 5. Сначала выполнится <code>150 / 32</code> нацело, получится 4, и округлять уже нечего. Неполная пятая пачка потеряется. Это ловушка из шага 4.</p>
+          <p class="oshibka">Путать, куда округляют отрицательные: <code>FLOOR(-2.5)</code> даёт −3, а не −2. Вниз значит к меньшему числу, а −3 меньше −2. <code>CEIL(-2.5)</code> даёт −2.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CEIL</code> вверх, <code>FLOOR</code> вниз, до целого. Делишь целые, сначала <code>::numeric</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>NULLIF: защита от деления на ноль</h2>
+    <p>Хотим процент удачных запусков у каждого исследователя, Олега тоже не терять, поэтому <code>LEFT JOIN</code>:</p>
+<pre><code class="sql">SELECT r.full_name,
+       100.0 * SUM(CASE WHEN e.status = 'done' THEN 1 ELSE 0 END)
+             / COUNT(e.id) AS udachnyh
+FROM researchers r
+LEFT JOIN experiments e ON e.researcher_id = r.id
+GROUP BY r.full_name;</code></pre>
+    <p>Запрос падает: <code>ERROR: division by zero</code>. У Олега запусков нет, <code>COUNT(e.id)</code> у него 0, и на ноль делить нельзя.</p>
+    <p class="novoe"><code>NULLIF(a, b)</code> возвращает <code>NULL</code>, если a равно b, а иначе само a. <code>NULLIF(x, 0)</code> превращает ноль в <code>NULL</code>. Деление на <code>NULL</code> не падает, а даёт <code>NULL</code>, то есть «посчитать нельзя».</p>
+<pre><code class="sql">       ... / NULLIF(COUNT(e.id), 0) AS udachnyh</code></pre>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>udachnyh</th></tr>
+      <tr><td>Павленко Степан</td><td>100</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>33.33…</td></tr>
+      <tr><td>Иванова Мария</td><td>100</td></tr>
+      <tr><td>Смирнов Олег</td><td class="null">NULL</td></tr>
+    </table></div>
+    <p>У Азата 1 удачный из 3, DBeaver покажет длинную дробь 33.3333…, а у Степана и Марии 100 с хвостом нулей.<code>100.0</code> с точкой нужно по той же причине, что в шаге 4: иначе 100 · 1 / 3 нацело даст 33. Порядок строк может быть другим.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернут <code>NULLIF(5, 0)</code>, <code>NULLIF(0, 0)</code> и <code>10 / NULLIF(0, 0)</code>? А что вернёт <code>COALESCE(10 / NULLIF(0, 0), 0)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>5, <code>NULL</code>, <code>NULL</code>. Последнее 0: <code>COALESCE</code> из урока про строки берёт первое не пустое значение, и вместо <code>NULL</code> ставит 0.</p>
+          <p class="oshibka">Перепутать аргументы: <code>NULLIF(0, COUNT(e.id))</code>. Функция вернёт первый аргумент, ноль, всем, у кого запуски есть, и все проценты станут нулями. Первым пишут то, что возвращаем, вторым то, что надо спрятать.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>NULLIF(a, b)</code>: <code>NULL</code>, если a = b, иначе a.</p>
+      <p>Делитель может быть 0 → <code>/ NULLIF(делитель, 0)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>CURRENT_DATE: сегодняшняя дата</h2>
+<pre><code class="sql">SELECT CURRENT_DATE;   -- 2026-10-25, если сегодня 25.10.2026</code></pre>
+    <p class="novoe"><code>CURRENT_DATE</code> это сегодняшняя дата на сервере базы. Скобок после него нет. С датой можно считать: <code>CURRENT_DATE - 30</code> это дата 30 дней назад, а разность двух дат это число дней.</p>
+    <p>Запуски за последние 30 дней:</p>
+<pre><code class="sql">SELECT id, created_at
+FROM experiments
+WHERE created_at &gt;= CURRENT_DATE - 30;</code></pre>
+    <p>Если сегодня 25.10.2026, граница 25.09.2026, и подойдут запуски 6, 7, 8 и 9. Завтра ответ может стать другим: запрос с <code>CURRENT_DATE</code> каждый день считает заново. Сверяя ответ в DBeaver, учитывай, какое у тебя сегодня число.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько дней прошло с каждого запуска до сегодня? Напиши запрос и посчитай для запусков 1 и 9, если сегодня 25.10.2026.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id, CURRENT_DATE - created_at::date AS dney
+FROM experiments;</code></pre>
+          <p>Запуск 1 от 20.09: 35 дней. Запуск 9 от 15.10: 10 дней.</p>
+          <p class="oshibka">Вычесть без <code>::date</code>: <code>CURRENT_DATE - created_at</code>. <code>created_at</code> хранит ещё и время, и разность выйдет интервалом вроде <code>34 days 06:00:00</code>, а не числом дней. Время сначала отрезают.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CURRENT_DATE</code>: сегодня, без скобок. Дата − число = дата. Дата − дата = дней.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>AGE: возраст в месяцах и днях</h2>
+    <p>35 дней читать неудобно. Человек скажет «месяц и пять дней».</p>
+<pre><code class="sql">SELECT id, AGE(CURRENT_DATE, created_at::date) AS proshlo
+FROM experiments;</code></pre>
+    <p class="novoe"><code>AGE(d1, d2)</code> возвращает промежуток от d2 до d1 в годах, месяцах и днях. Тип у результата не число, а интервал. Если сегодня 25.10.2026, у запуска 1 будет <code>1 mon 5 days</code>: от 20.09 месяц до 20.10 и ещё 5 дней.</p>
+    <p>Порядок важен: сначала более поздняя дата. В DBeaver интервал может показаться длиннее, например <code>0 years 1 mons 5 days 0 hours 0 mins 0.0 secs</code>. Это то же самое.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что покажет <code>proshlo</code> для запуска 5 от 24.09 и запуска 6 от 2.10, если сегодня 25.10.2026? Чем это отличается от разности дат из шага 7?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Запуск 5: <code>1 mon 1 day</code>. Запуск 6: <code>23 days</code>, месяца ещё не прошло. Разность дат дала бы просто 31 и 23 числом. <code>AGE</code> удобна, чтобы читать глазами, а с разностью дат удобнее считать и сравнивать.</p>
+          <p class="oshibka">Поставить даты наоборот: <code>AGE(created_at::date, CURRENT_DATE)</code>. Выйдет минус: <code>-1 mons -5 days</code>. Сначала поздняя дата, потом ранняя.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>AGE(поздняя, ранняя)</code>: интервал в годах, месяцах, днях. Для чтения глазами.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>STRING_AGG: значения кучки в одну строку</h2>
+    <p>Хотим у каждого исследователя список моделей, с которыми он работал, одной строкой.</p>
+<pre><code class="sql">SELECT r.full_name,
+       STRING_AGG(m.name, ', ' ORDER BY m.name) AS modeli
+FROM researchers r
+JOIN experiments e ON e.researcher_id = r.id
+JOIN models m      ON m.id = e.model_id
+GROUP BY r.full_name;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>modeli</th></tr>
+      <tr><td>Павленко Степан</td><td>Logisticregression, Resnet, rubert-tiny2</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>RandomForest, RandomForest, Resnet</td></tr>
+      <tr><td>Иванова Мария</td><td>Logisticregression, Resnet, rubert-tiny2</td></tr>
+    </table></div>
+    <p class="novoe"><code>STRING_AGG(x, разделитель)</code> агрегатная: склеивает значения всей кучки в одну строку через разделитель. <code>ORDER BY</code> внутри скобок задаёт порядок в списке, без него порядок любой.</p>
+    <p>У Азата RandomForest дважды: запуски 3 и 7 были на одной модели. Убрать повторы помогает <code>DISTINCT</code> внутри скобок: <code>STRING_AGG(DISTINCT m.name, ', ' ORDER BY m.name)</code> даст <code>RandomForest, Resnet</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос: у каждого исследователя статусы его запусков одной строкой в порядке номеров запусков. Что выйдет у Азата?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT r.full_name,
+       STRING_AGG(e.status, ', ' ORDER BY e.id) AS statusy
+FROM researchers r
+JOIN experiments e ON e.researcher_id = r.id
+GROUP BY r.full_name;</code></pre>
+          <p>У Азата <code>done, failed, running</code>, это запуски 3, 7, 8. У Степана и Марии <code>done, done, done</code>.</p>
+          <p class="oshibka">Склеивать числа: <code>STRING_AGG(e.id, ', ')</code>. PostgreSQL ответит <code>function string_agg(integer, unknown) does not exist</code>: функция склеивает только текст. Число переводят шагом 4: <code>STRING_AGG(e.id::text, ', ')</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>STRING_AGG(x, ', ' ORDER BY …)</code>: кучку в одну строку. Повторы убирает <code>DISTINCT</code>, числа сначала <code>::text</code>.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>BOOL_OR и BOOL_AND: хоть один или все</h2>
+    <p>Два вопроса про каждого исследователя: был ли у него хоть один провал? Все ли его запуски дошли до конца?</p>
+<pre><code class="sql">SELECT r.full_name,
+       BOOL_OR(e.status = 'failed') AS byl_proval,
+       BOOL_AND(e.status = 'done')  AS vse_gotovy
+FROM researchers r
+JOIN experiments e ON e.researcher_id = r.id
+GROUP BY r.full_name;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>byl_proval</th><th>vse_gotovy</th></tr>
+      <tr><td>Павленко Степан</td><td>false</td><td>true</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>true</td><td>false</td></tr>
+      <tr><td>Иванова Мария</td><td>false</td><td>true</td></tr>
+    </table></div>
+    <p class="novoe"><code>BOOL_OR(условие)</code> агрегатная: true, если условие верно хоть для одной строки кучки. <code>BOOL_AND(условие)</code>: true, если верно для всех. Внутри пишут то же условие, что в <code>WHERE</code>.</p>
+    <p>У Азата запуск 7 failed, поэтому <code>BOOL_OR</code> true, и не все done, поэтому <code>BOOL_AND</code> false. DBeaver может показать true и false галочками.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У кого был хоть один запуск на 5 эпох и больше? Напиши запрос и ответь глазами по таблице. Учти, что у запуска 2 эпох <code>NULL</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT r.full_name, BOOL_OR(e.count_apoh &gt;= 5) AS dolgie
+FROM researchers r
+JOIN experiments e ON e.researcher_id = r.id
+GROUP BY r.full_name;</code></pre>
+          <p>Степан false: у него 1, <code>NULL</code> и 3. Азат true, запуск 8 на 10 эпох. Мария true, запуск 5 на 5 эпох. <code>NULL</code> функция пропускает, как <code>COUNT(столбец)</code>.</p>
+          <p class="oshibka">Взять <code>LEFT JOIN</code>, чтобы видеть и Олега, и ждать у него false. У Олега одна строка с пустым запуском, условие на ней <code>NULL</code>, и <code>BOOL_OR</code> вернёт <code>NULL</code>, а не false. Нужен false, оборачивай: <code>COALESCE(BOOL_OR(…), false)</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>BOOL_OR</code>: хоть одна строка кучки. <code>BOOL_AND</code>: все строки. <code>NULL</code> пропускают.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Вся памятка одной таблицей</h2>
+    <div class="tablica"><table>
+      <tr><th>функция</th><th>где в уроках</th></tr>
+      <tr><td>UPPER, LOWER, LENGTH, CONCAT и ||, LEFT, RIGHT, SUBSTRING, SPLIT_PART, TRIM, REPLACE, COALESCE</td><td><a href="bd-stroki.html">строковые функции</a></td></tr>
+      <tr><td>INITCAP, ABS, CEIL, FLOOR, CAST и ::, NULLIF, CURRENT_DATE, AGE</td><td>этот урок, шаги 2–8</td></tr>
+      <tr><td>EXTRACT, TO_CHAR, CASE</td><td><a href="bd-case-daty.html">CASE и даты</a></td></tr>
+      <tr><td>MIN, MAX, COUNT, COUNT(DISTINCT)</td><td><a href="bd-left-join-group-by.html">LEFT JOIN и GROUP BY</a>, <a href="bd-distinct-top-okna.html">DISTINCT и окна</a></td></tr>
+      <tr><td>STRING_AGG, BOOL_OR, BOOL_AND</td><td>этот урок, шаги 9–10</td></tr>
+      <tr><td>оконные функции</td><td><a href="bd-distinct-top-okna.html">DISTINCT, лучший и окна</a></td></tr>
+    </table></div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: скалярные и агрегатные функции">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач на твоей базе. Ответов здесь нет: впиши запросы в поля, запусти в DBeaver и допиши, что вышло. Отправь учителю кнопкой ниже, он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Для каждого набора данных: название через <code>INITCAP</code>, число строк и сколько нужно пачек по 64 примера. Сколько пачек у Titanic?
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Для каждого запуска сколько дней прошло с его создания до сегодня и то же самое через <code>AGE</code>. Отсортируй от самого старого.
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Для каждого исследователя, включая Олега: сколько запусков и среднее число эпох на запуск с дробной частью, деление сделай через <code>NULLIF</code>. Почему у Олега <code>NULL</code>?
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Для каждого типа задачи <code>type_task</code> список наборов данных одной строкой через точку с запятой и пробел, по алфавиту.
+      <textarea name="z4" placeholder="SELECT type_task, STRING_AGG(…" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Для каждой модели: была ли у неё хоть одна оценка выше 0.95 и все ли её оценки выше 0.8. Подсказка: от <code>metrics</code> к <code>experiments</code>, потом к <code>models</code>.
+      <textarea name="z5" placeholder="SELECT m.name, BOOL_OR(…" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>CEIL и пачки</td><td>Модуль A4: число шагов за эпоху это <code>ceil(len(data) / batch_size)</code>, ровно шаг 5. Последняя пачка неполная.</td></tr>
+      <tr><td>NULLIF и доли</td><td>Модуль A7: точность, полнота и f1 это деления, и у редкого класса знаменатель бывает нулём. Библиотеки тогда пишут предупреждение и ставят 0, ты делаешь то же через <code>NULLIF</code> и <code>COALESCE</code>.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-normalizaciya-view.html">Дальше: нормализация и VIEW →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>
