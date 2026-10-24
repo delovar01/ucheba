@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Строки, Scanner и палиндром — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-stroki-palindrom">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Строки и палиндром</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Строки, Scanner и палиндром</h1>
+  <p class="tiho">Java · лаба 15.09, конспект 05, слайды «Символьный тип. Строки» · к ПР2 и ПР3, срок 1.11 в 00:00 · около 55 минут</p>
+
+  <p>На лабе 15.09 Павлов показывал ввод строки через Scanner и проверку палиндрома двумя указателями. Палиндром это слово, которое читается одинаково слева направо и справа налево: шалаш, радар. Десять шагов: длина строки, символ по номеру, обход, два способа читать строку с клавиатуры, сравнение строк, регистр, сам палиндром и его проверка разворотом.</p>
+  <p>Нужны уроки <a href="java-tipy-if.html">типы и if</a> и <a href="java-cikly-metody.html">циклы и методы</a>: здесь работают <code>for</code>, <code>while</code> и методы. Новые слова <code>break</code>, <code>--</code> и <code>? :</code> объяснены в шагах, где появляются. Где написано «строки внутри <code>main</code>», каркас как в первом уроке.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>String и длина строки</h2>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>String city = "Екатеринбург";
+String empty = "";
+System.out.println(city);
+System.out.println(city.length());
+System.out.println(empty.length());</code></pre>
+<pre><code>Екатеринбург
+12
+0</code></pre>
+    <p class="novoe"><code>String</code> это тип для текста. Значение пишут в двойных кавычках. Строка в Java это объект, то есть значение со своими командами. Команду объекта вызывают через точку: <code>city.length()</code> возвращает длину, число символов. Скобки обязательны, это вызов метода.</p>
+    <p><code>""</code> это пустая строка, в ней ноль символов. Пробел и запятая тоже символы и тоже считаются.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернёт <code>"Java 21".length()</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>7</code>: четыре буквы, пробел, две цифры.</p>
+          <p class="oshibka">Написать <code>city.length</code> без скобок, как у массива. Для строки это ошибка компиляции <code>cannot find symbol</code>. У массива длина без скобок, у строки со скобками.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>String s = "текст";</code> длина <code>s.length()</code> со скобками.</p>
+      <p>Пробелы и знаки тоже символы.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>Символ по номеру: charAt</h2>
+<pre><code>String word = "кошка";
+System.out.println(word.charAt(0));
+System.out.println(word.charAt(2));
+System.out.println(word.charAt(word.length() - 1));
+char first = word.charAt(0);
+System.out.println(first == 'к');</code></pre>
+<pre><code>к
+ш
+а
+true</code></pre>
+    <p class="novoe"><code>s.charAt(i)</code> возвращает символ под номером i. Номера идут с 0, как индексы массива: первый символ <code>charAt(0)</code>, последний <code>charAt(s.length() - 1)</code>. Результат имеет тип <code>char</code>, один символ. Его пишут в одинарных кавычках: <code>'к'</code> это char, <code>"к"</code> это String.</p>
+    <p><code>char</code> хранит код символа, то есть число, поэтому два char сравнивают через <code>==</code>. Это верно и надёжно.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что будет при <code>word.charAt(5)</code> для слова «кошка»?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Exception in thread "main" java.lang.StringIndexOutOfBoundsException: Index 5 out of bounds for length 5
+	at java.base/jdk.internal.util.Preconditions$1.apply(Preconditions.java:55)
+	…ещё десять строк java.base…
+	at Main.main(Main.java:9)</code></pre>
+          <p>Пять букв, номера 0–4, номера 5 нет. Исключение «индекс 5 за границей строки длины 5». Строки <code>at java.base/…</code> это внутренности самой Java, в них не разбираются. Ищи строку со своим файлом, здесь <code>Main.java:9</code>.</p>
+          <p class="oshibka">Брать последний символ как <code>charAt(length())</code>. Это на один дальше конца. Последний всегда <code>length() - 1</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>s.charAt(i)</code>, номера от 0 до <code>s.length() - 1</code>.</p>
+      <p><code>'а'</code> char, сравнение через <code>==</code>. <code>"а"</code> String.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>Обход строки циклом</h2>
+    <p>Сколько букв «а» во фразе?</p>
+<pre><code>String s = "мама мыла раму";
+int count = 0;
+for (int i = 0; i &lt; s.length(); i++) {
+    if (s.charAt(i) == 'а') {
+        count++;
+    }
+}
+System.out.println("Букв а: " + count);</code></pre>
+<pre><code>Букв а: 4</code></pre>
+    <p class="novoe">Обход строки: <code>for (int i = 0; i &lt; s.length(); i++)</code> и внутри <code>s.charAt(i)</code>. Это тот же накопитель из урока про циклы, только каждый раз смотрим очередной символ.</p>
+    <p>Буквы: м а м а, м ы л а, р а м у. Две «а» в первом слове и по одной во втором и третьем.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Посчитай пробелы в той же фразе. Что поменять в коде?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>if (s.charAt(i) == ' ') {
+    count++;
+}</code></pre>
+          <p>Пробел тоже символ, пишется <code>' '</code>, одинарные кавычки и пробел между ними. Ответ 2.</p>
+          <p class="oshibka">Набрать в условии латинскую <code>'a'</code> вместо русской <code>'а'</code>. Выглядят одинаково, а коды разные. Программа соберётся и честно напечатает 0, проверено. Если счёт подозрительно нулевой, перенабери букву на русской раскладке.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Обход: <code>for (i = 0; i &lt; s.length(); i++)</code> и <code>s.charAt(i)</code>.</p>
+      <p>Русская «а» и латинская «a» это разные символы.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>Строка с клавиатуры: next и nextLine</h2>
+<pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String first = sc.next();
+        String rest = sc.nextLine();
+        System.out.println("[" + first + "]");
+        System.out.println("[" + rest + "]");
+    }
+}</code></pre>
+    <p>Ввели <code>Анна Каренина</code> и Enter:</p>
+<pre><code>[Анна]
+[ Каренина]</code></pre>
+    <p class="novoe"><code>sc.next()</code> читает одно слово: пропускает пробелы впереди и останавливается на первом пробеле после слова. <code>sc.nextLine()</code> читает всё до конца строки, до Enter, вместе с пробелами. Квадратные скобки в выводе нужны, чтобы видеть пробелы по краям.</p>
+    <p><code>nextLine</code> начал с того места, где остановился <code>next</code>, поэтому пробел перед «Каренина» попал в строку. Нужна фраза целиком, как в палиндроме «А роза упала на лапу Азора», бери <code>nextLine</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Программа читает два раза <code>sc.next()</code>. Ввели <code>   привет    мир  </code> с лишними пробелами. Что окажется в скобках?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>[привет]
+[мир]</code></pre>
+          <p><code>next</code> сам пропускает любое число пробелов, слова выходят чистыми.</p>
+          <p class="oshibka">Читать фразу через <code>next()</code> и удивляться, что в программу попало только первое слово. Остальное осталось ждать во вводе.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>next()</code> одно слово, <code>nextLine()</code> вся строка до Enter.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>Ловушка: nextInt, а потом nextLine</h2>
+    <p>Строки внутри <code>main</code>, Scanner как в шаге 4. Спрашиваем возраст, потом имя:</p>
+<pre><code>System.out.println("Возраст:");
+int age = sc.nextInt();
+System.out.println("Имя:");
+String name = sc.nextLine();
+System.out.println("Имя: [" + name + "], возраст " + age);</code></pre>
+    <p>Ввели <code>20</code>, Enter. Имя ввести не успели:</p>
+<pre><code>Возраст:
+Имя:
+Имя: [], возраст 20</code></pre>
+    <p class="novoe"><code>nextInt</code> забирает только число, а Enter после него остаётся во вводе. Следующий <code>nextLine</code> видит этот Enter, читает пустой остаток строки и сразу возвращает <code>""</code>. Лечится одной строкой: после <code>nextInt</code> вызвать <code>sc.nextLine();</code> вхолостую, чтобы забрать хвост.</p>
+<pre><code>int age = sc.nextInt();
+sc.nextLine();
+System.out.println("Имя:");
+String name = sc.nextLine();</code></pre>
+<pre><code>Возраст:
+Имя:
+Имя: [Степан], возраст 20</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> А если вместо <code>nextLine</code> для имени взять <code>next()</code>, ловушка будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Нет. <code>next</code> пропускает пробелы и переводы строки впереди и дождётся слова. Но имя из двух слов он не прочитает. Нужна вся строка, значит <code>nextLine</code> и холостой <code>nextLine</code> после числа.</p>
+          <p class="oshibka">Решить, что «nextLine сломан», и заменить его везде на <code>next</code>. Ловушка только в одном месте: <code>nextLine</code> сразу после <code>nextInt</code> или <code>nextDouble</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>После <code>nextInt</code> перед <code>nextLine</code> вставь холостой <code>sc.nextLine();</code></p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>Сравнивать строки: equals, а не ==</h2>
+    <p>Строки внутри <code>main</code>, Scanner как в шаге 4. Пользователь ввёл <code>да</code>:</p>
+<pre><code>String answer = sc.nextLine();
+System.out.println(answer == "да");
+System.out.println(answer.equals("да"));</code></pre>
+<pre><code>false
+true</code></pre>
+    <p class="novoe">Переменная типа String хранит не сам текст, а ссылку, адрес объекта в памяти. <code>==</code> сравнивает адреса: это один и тот же объект? Строка со Scanner это новый объект, адрес у неё свой, и <code>==</code> даёт false, хотя буквы те же. <code>a.equals(b)</code> сравнивает буквы. Строки сравнивают только так.</p>
+    <p>Подвох: <code>String x = "да"; x == "да"</code> даёт true, проверено. Одинаковые строки, записанные прямо в коде, Java хранит в одном месте. Поэтому <code>==</code> «то работает, то нет», и на тесте с вводом оно ломается.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Программа в цикле читает команды в <code>cmd</code> и должна остановиться на слове «выход». <code>break</code> сразу выходит из цикла, строки ниже него в цикле уже не выполняются. Почини условие выхода: <code>if (cmd == "выход") { break; }</code>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>if (cmd.equals("выход")) {
+    break;
+}</code></pre>
+          <p>Через <code>==</code> цикл никогда бы не кончился на введённом слове.</p>
+          <p class="oshibka">Сравнивать через <code>==</code>, потому что в коротком тесте без Scanner всё «работало». Тест без ввода не ловит эту ошибку.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Строки: <code>a.equals(b)</code>. <code>==</code> сравнивает адреса.</p>
+      <p>char сравнивают через <code>==</code>, String через <code>equals</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>Регистр: toLowerCase и equalsIgnoreCase</h2>
+<pre><code>String s = "ШаЛаШ";
+s.toLowerCase();
+System.out.println(s);
+s = s.toLowerCase();
+System.out.println(s);
+System.out.println("Да".equals("да"));
+System.out.println("Да".equalsIgnoreCase("да"));</code></pre>
+<pre><code>ШаЛаШ
+шалаш
+false
+true</code></pre>
+    <p class="novoe">Строку нельзя изменить. <code>s.toLowerCase()</code> не меняет <code>s</code>, а возвращает новую строку маленькими буквами. Чтобы она не пропала, её присваивают: <code>s = s.toLowerCase();</code>. <code>toUpperCase()</code> так же даёт большие буквы. <code>equalsIgnoreCase</code> сравнивает, не глядя на регистр.</p>
+    <p>Ещё один метод того же рода: <code>trim()</code> срезает пробелы по краям. Его тоже присваивают.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает <code>System.out.println("[" + "  Выход ".trim().toLowerCase() + "]");</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>[выход]</code></pre>
+          <p>Методы выполняются слева направо: сначала срезали пробелы, потом опустили буквы.</p>
+          <p class="oshibka">Вызвать <code>s.toLowerCase();</code> отдельной строкой и дальше работать с <code>s</code>. Строка осталась прежней, первая строка вывода выше это показывает.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Строка не меняется: <code>s = s.toLowerCase();</code> с присваиванием.</p>
+      <p>Без учёта регистра: <code>equalsIgnoreCase</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>Палиндром двумя указателями</h2>
+    <p>Задача с лабы: ввести слово, ответить YES, если оно палиндром, иначе NO.</p>
+<pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String word = sc.nextLine();
+
+        int left = 0;
+        int right = word.length() - 1;
+        boolean isPalindrome = true;
+
+        while (left &lt; right) {
+            if (word.charAt(left) != word.charAt(right)) {
+                isPalindrome = false;
+                break;
+            }
+            left++;
+            right--;
+        }
+        System.out.println(isPalindrome ? "YES" : "NO");
+    }
+}</code></pre>
+    <p>Ввели <code>шалаш</code>, программа напечатала <code>YES</code>. Ввели <code>мопс</code>, <code>NO</code>.</p>
+    <p class="novoe">Два указателя это две переменные-номера. <code>left</code> идёт с начала, <code>right</code> с конца, навстречу друг другу. На каждом шаге сравниваем символы под ними. Не равны, значит не палиндром, выходим через <code>break</code>. Равны, сдвигаем оба к середине. Встретились, проверять больше нечего, все пары совпали.</p>
+    <p>Три новые записи в коде. <code>right--</code> отнимает от right единицу, как <code>++</code> прибавляет. <code>break</code> сразу выходит из цикла. <code>isPalindrome ? "YES" : "NO"</code> выбирает одно из двух значений: если слева от <code>?</code> true, берётся то, что до двоеточия, иначе то, что после. Это короткий <code>if</code> внутри скобок <code>println</code>.</p>
+    <p>Ход на «шалаш»: позиции 0 и 4, ш и ш, равны. Позиции 1 и 3, а и а, равны. Теперь left = right = 2, условие <code>left &lt; right</code> ложно, цикл кончился, YES. На «мопс» первая же пара м и с разная, NO после одного сравнения.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько сравнений сделает цикл на «анна» и на «анну», и что ответит программа?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>«анна»: 0 и 3 а и а, 1 и 2 н и н. Дальше left = 2, right = 1, указатели разошлись, цикл кончился. Два сравнения, YES. «анну»: а и у разные сразу. Одно сравнение, NO. Проверено запуском.</p>
+          <p class="oshibka">Начать <code>right</code> с <code>word.length()</code> без минус единицы. Первое же <code>charAt(right)</code> выйдет за конец: <code>StringIndexOutOfBoundsException: Index 5 out of bounds for length 5</code> на «шалаш».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>left = 0</code>, <code>right = length() - 1</code>, <code>while (left &lt; right)</code>.</p>
+      <p>Разные: false и <code>break</code>. Равные: <code>left++</code>, <code>right--</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>Палиндром-фраза: пропускать пробелы и знаки</h2>
+    <p>«А роза упала на лапу Азора» тоже палиндром, если не смотреть на пробелы и регистр. Новую «чистую» строку не строим, лишнее перескакиваем указателями. Строки внутри <code>main</code>, <code>s</code> прочитана через <code>nextLine</code>:</p>
+<pre><code>int left = 0;
+int right = s.length() - 1;
+boolean ok = true;
+while (left &lt; right) {
+    char l = s.charAt(left);
+    char r = s.charAt(right);
+    if (!Character.isLetterOrDigit(l)) {
+        left++;
+    } else if (!Character.isLetterOrDigit(r)) {
+        right--;
+    } else if (Character.toLowerCase(l) != Character.toLowerCase(r)) {
+        ok = false;
+        break;
+    } else {
+        left++;
+        right--;
+    }
+}
+System.out.println(ok ? "YES" : "NO");</code></pre>
+    <p>«А роза упала на лапу Азора» и «Нажал кабан на баклажан» дают YES, «Мама, мыла раму» даёт NO.</p>
+    <p class="novoe"><code>Character.isLetterOrDigit(c)</code> отвечает, буква это или цифра. Пробел и запятая не буквы, и указатель просто шагает мимо них. <code>Character.toLowerCase(c)</code> опускает один символ, А и а становятся равны. За один проход цикла двигается один указатель. Оба сразу двигаются только после того, как пара букв сравнена и совпала.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что ответит программа на <code>Топот!</code>? Пройди глазами первые два прохода цикла.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Проход 1: слева Т, буква, справа «!», не буква, <code>right--</code>. Проход 2: Т и т, после <code>toLowerCase</code> равны, оба указателя сдвинулись. Дальше о и о, середина п. Ответ YES, проверено.</p>
+          <p class="oshibka">Сдвигать оба указателя, когда один из символов не буква. Тогда пара собьётся: слева будет буква, а её пара справа уже проскочена.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Не буква слева: <code>left++</code>. Не буква справа: <code>right--</code>.</p>
+      <p>Обе буквы: сравнить через <code>Character.toLowerCase</code>.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>Проверка разворотом: StringBuilder.reverse</h2>
+    <p>Второй способ узнать палиндром: развернуть строку и сравнить с исходной. Он короче, им удобно проверять своё решение двумя указателями.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        check("шалаш");
+        check("мопс");
+        check("а");
+        check("");
+    }
+
+    static void check(String s) {
+        System.out.println("[" + s + "] указатели " + isPalindrome(s) + ", разворот " + byReverse(s));
+    }
+
+    static boolean isPalindrome(String s) {
+        int left = 0;
+        int right = s.length() - 1;
+        while (left &lt; right) {
+            if (s.charAt(left) != s.charAt(right)) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+
+    static boolean byReverse(String s) {
+        String reversed = new StringBuilder(s).reverse().toString();
+        return s.equals(reversed);
+    }
+}</code></pre>
+<pre><code>[шалаш] указатели true, разворот true
+[мопс] указатели false, разворот false
+[а] указатели true, разворот true
+[] указатели true, разворот true</code></pre>
+    <p class="novoe"><code>StringBuilder</code> это изменяемая строка. <code>new StringBuilder(s)</code> делает её из обычной, <code>.reverse()</code> разворачивает, <code>.toString()</code> превращает обратно в String. Дальше обычный <code>equals</code>.</p>
+    <p>Разворот тратит память на вторую строку и всегда проходит её целиком. Два указателя останавливаются на первой несовпавшей паре и лишней памяти не берут. На лабе просили указатели, разворот это проверка.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Почему <code>s.equals(new StringBuilder(s).reverse())</code> для «шалаш» даёт false?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Забыт <code>.toString()</code>. <code>equals</code> у строки возвращает true только для другой строки, а тут StringBuilder, объект другого типа. Буквы те же, ответ false, проверено. Нужно <code>s.equals(new StringBuilder(s).reverse().toString())</code>.</p>
+          <p class="oshibka">Видеть false на «шалаш» и искать ошибку в указателях. Сначала проверь саму проверку на заведомо верном слове.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>new StringBuilder(s).reverse().toString()</code>, потом <code>equals</code>.</p>
+      <p>Проверяй решение на краях: одна буква, пустая строка, чётная длина.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Где это пригодится в ПР</h2>
+    <ul>
+      <li>Ввод строки и чисел вперемешку без пустого имени: шаги 4–5.</li>
+      <li>Ответ «да или нет», команда «выход»: шаги 6–7.</li>
+      <li>Обход строки и два указателя: шаги 3 и 8, тот же каркас «навстречу» работает на массивах из урока про массивы.</li>
+    </ul>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: строки и палиндром">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Ввести строку через <code>nextLine</code> и напечатать, сколько в ней цифр. Подсказка: <code>Character.isDigit(c)</code>. Проверь на <code>Группа РИ-250932</code>.
+      <textarea name="z1" placeholder="int digits = 0; …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Программа спрашивает число попыток через <code>nextInt</code>, потом имя игрока через <code>nextLine</code>. Напиши так, чтобы имя «Анна Мария» читалось целиком.
+      <textarea name="z2" placeholder="int tries = sc.nextInt(); …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Цикл читает команды, пока не введут «стоп» в любом регистре: «Стоп», «СТОП», «стоп». Сравнение строк сделай правильно.
+      <textarea name="z3" placeholder="while (true) { String cmd = sc.nextLine(); …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Метод <code>static boolean isPalindrome(String s)</code> двумя указателями, без учёта регистра. Проверь на «Шалаш», «Анна», «мопс» и пустой строке и сверь каждый ответ разворотом через StringBuilder.
+      <textarea name="z4" placeholder="static boolean isPalindrome(String s) { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Двумя указателями переверни строку в массив символов: <code>char[] a = s.toCharArray();</code>, меняй местами <code>a[left]</code> и <code>a[right]</code>, пока они не встретятся. Две ячейки меняют через третью переменную: сначала запомни <code>a[left]</code> в <code>char t</code>, потом положи на его место <code>a[right]</code>, а в <code>a[right]</code> положи <code>t</code>. Выведи <code>new String(a)</code>. Проверь на «кошка».
+      <textarea name="z5" placeholder="char[] a = s.toCharArray(); …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Регистр, пробелы, знаки</td><td>Модуль A6: перед поиском по тексту его чистят так же, опускают регистр и срезают лишнее, иначе «Кошка» и «кошка» считаются разными словами.</td></tr>
+      <tr><td>Два указателя</td><td>Модуль X1.7: приём «навстречу с двух концов» один из самых частых на контестах, работает на строках и отсортированных массивах.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-klassy.html">Дальше: классы и объекты →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

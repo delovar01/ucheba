@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>HTTP для API: REST и ключи — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="seti-http-api">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Сети · HTTP для API</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>HTTP для API: REST, запросы, ключи</h1>
+  <p class="tiho">Сети · лекция 4, пт 2.10, «Протокол HTTP для API» · на зачёт и для своих ботов · около 65 минут</p>
+
+  <p>Лекция 2.10 была про три вещи: REST API, запросы к API по HTTP и API-ключи, которые нельзя светить. Слайды есть только внутри записи, текстом их нет, поэтому урок держится этих трёх тем и стандартного их содержания. Одиннадцать шагов: что такое API, JSON, ресурсы REST, методы на ресурсах, POST с телом, PUT и DELETE, параметры, ключ и 401, почему ключ нельзя светить, где его хранить, лимиты запросов.</p>
+  <p>Все запросы настоящие, проверены 24.10. Нужен урок <a href="seti-http.html">протокол HTTP</a>: запрос, ответ, методы, коды. Команды запускай в <code>cmd</code>.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>API: программа спрашивает программу</h2>
+<pre><code>curl https://api.github.com/users/octocat</code></pre>
+<pre><code>{
+  "login": "octocat",
+  "id": 583231,
+  "name": "The Octocat",
+  "location": "San Francisco",
+  "public_repos": 8,
+  "followers": 24737,
+  "created_at": "2011-01-25T18:44:36Z"
+}</code></pre>
+    <p class="novoe">API, интерфейс программирования приложений, это набор адресов, по которым одна программа спрашивает другую и получает ответ в удобном для программы виде. Сайт отдаёт HTML, текст страницы с разметкой, который браузер рисует для человека. API отдаёт данные, обычно в формате JSON. Ходят к API тем же HTTP: метод, URL, заголовки, тело, код ответа.</p>
+    <p>Настоящий ответ GitHub длиннее, здесь оставлены семь полей. Так же устроен API Телеграма, через который работает бот, и API погоды, карт, банков.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запусти команду выше у себя. Сколько публичных репозиториев у octocat и когда он зарегистрирован?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>На 24.10 поле <code>"public_repos": 8</code>, регистрация <code>"created_at": "2011-01-25T18:44:36Z"</code>, 25 января 2011. Число подписчиков у тебя может отличаться, оно живое.</p>
+          <p class="oshibka">Открыть <code>https://github.com/octocat</code> вместо <code>https://api.github.com/users/octocat</code> и получить огромный HTML. Страница для людей и API для программ живут по разным адресам.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>API: адреса для программ, ответ данными, обычно JSON.</p>
+      <p>Ходят к нему тем же HTTP.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>JSON: как выглядят данные</h2>
+<pre><code>{
+  "id": 1,
+  "name": "Leanne Graham",
+  "email": "Sincere@april.biz",
+  "active": true,
+  "phone": null,
+  "address": { "city": "Gwenborough", "zipcode": "92998-3874" },
+  "tags": ["admin", "beta"]
+}</code></pre>
+    <p class="novoe">JSON это текстовый формат данных. Объект в фигурных скобках состоит из пар <code>"ключ": значение</code> через запятую. Ключ всегда в двойных кавычках. Значение бывает строкой в двойных кавычках, числом, <code>true</code> или <code>false</code>, <code>null</code> «ничего», другим объектом или списком в квадратных скобках.</p>
+    <p>Пример это пользователь 1 с учебного сервера jsonplaceholder, часть полей и два последних добавлены для наглядности. Вложенный объект <code>address</code> читается как «у пользователя есть адрес, а у адреса город».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Найди три ошибки: <code>{ 'name': "Анна", age: 19, "city": "Екатеринбург", }</code>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Одинарные кавычки у <code>'name'</code>, ключ <code>age</code> без кавычек, запятая после последней пары. Правильно: <code>{ "name": "Анна", "age": 19, "city": "Екатеринбург" }</code>.</p>
+          <p class="oshibka">Писать JSON как словарь Python или объект JavaScript. Там можно одинарные кавычки и лишнюю запятую, а JSON их не прощает, и сервер ответит 400.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>JSON: <code>{"ключ": значение}</code>, ключи и строки в двойных кавычках.</p>
+      <p>Значения: строка, число, true, false, null, объект, список.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>REST: у каждого ресурса свой адрес</h2>
+<pre><code>/posts            все посты
+/posts/1          пост номер 1
+/posts/1/comments комментарии к посту 1
+/users/1          пользователь 1
+/users/1/posts    посты пользователя 1</code></pre>
+    <p class="novoe">REST это стиль устройства API. В нём всё, с чем работает API, называют ресурсами: пост, пользователь, заказ. У каждого ресурса свой адрес из существительных: <code>/posts/1</code>, а не <code>/getPost?id=1</code>. Что сделать с ресурсом, говорит метод HTTP, а не адрес. Сервер не хранит состояние клиента между запросами, как сам HTTP.</p>
+    <p>Набор однотипных ресурсов называют коллекцией и пишут во множественном числе: <code>/posts</code>. Один элемент коллекции это <code>/posts/1</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> API магазина. Придумай адреса по правилам REST: все товары, товар 42, отзывы о товаре 42, заказы пользователя 7.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>/products</code>, <code>/products/42</code>, <code>/products/42/reviews</code>, <code>/users/7/orders</code>.</p>
+          <p class="oshibka">Класть действие в адрес: <code>/deleteProduct/42</code>, <code>/products/42/update</code>. В REST адрес говорит «что», а метод «что сделать»: <code>DELETE /products/42</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>REST: ресурсы с адресами из существительных, действие в методе.</p>
+      <p>Коллекция <code>/posts</code>, элемент <code>/posts/1</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>Методы на ресурсах</h2>
+<pre><code>GET     /posts      список               200
+GET     /posts/1    один пост            200 или 404
+POST    /posts      создать новый        201
+PUT     /posts/1    заменить целиком     200
+PATCH   /posts/1    поменять часть полей 200
+DELETE  /posts/1    удалить              200 или 204</code></pre>
+    <p class="novoe">Четыре действия с данными, создать, прочитать, изменить, удалить, по-английски называют CRUD. В REST они ложатся на методы: создать POST в коллекцию, прочитать GET, изменить PUT или PATCH, удалить DELETE. PATCH отличается от PUT тем, что присылают только меняемые поля, а не весь ресурс. 204 значит «готово, тела в ответе нет».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой запрос: поменять у поста 5 только заголовок, удалить комментарий 12, добавить пользователя.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>PATCH /posts/5</code> с телом <code>{"title": "…"}</code>. <code>DELETE /comments/12</code>. <code>POST /users</code> с данными в теле.</p>
+          <p class="oshibka">Создавать через <code>POST /users/8</code>, придумав номер самому. Номер нового ресурса назначает сервер, а POST идёт в коллекцию <code>/users</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>CRUD: POST создать, GET прочитать, PUT или PATCH изменить, DELETE удалить.</p>
+      <p>POST в коллекцию, остальное на элемент.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>POST с телом JSON</h2>
+<pre><code>curl -i -X POST https://jsonplaceholder.typicode.com/posts -H "Content-Type: application/json" -d "{\"title\":\"privet\",\"body\":\"test\",\"userId\":1}"</code></pre>
+<pre><code>HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Content-Length: 69
+location: https://jsonplaceholder.typicode.com/posts/101
+
+{
+  "title": "privet",
+  "body": "test",
+  "userId": 1,
+  "id": 101
+}</code></pre>
+    <p class="novoe">Чтобы создать ресурс, отправляют POST с телом. <code>-X POST</code> задаёт метод, <code>-H</code> добавляет заголовок, <code>-d</code> кладёт тело. Заголовок <code>Content-Type: application/json</code> обязателен: без него сервер не поймёт, что в теле JSON. Ответ 201 Created, в теле созданный ресурс с номером, который выдал сервер, а в заголовке <code>Location</code> его адрес.</p>
+    <p>Кавычки внутри тела в <code>cmd</code> пишут как <code>\"</code>, иначе командная строка их съест. В Postman проще: Body, raw, JSON, и текст пишется как есть. Учебный сервер ничего не сохраняет по-настоящему, он только делает вид.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Отправь тот же запрос без <code>-H "Content-Type: application/json"</code>. Что вернётся в теле?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Придёт 201, но тело странное:</p>
+<pre><code>{
+  "{\"title\":\"privet\",\"body\":\"test\",\"userId\":1}": "",
+  "id": 101
+}</code></pre>
+          <p>Без заголовка <code>curl</code> отправляет тело как данные формы. Сервер не узнал в нём JSON, принял всю строку за имя одного поля с пустым значением, а полей <code>title</code> и <code>body</code> не увидел.</p>
+          <p class="oshibka">Видеть 201 и считать, что всё хорошо. Код говорит, что запрос принят, а не что данные дошли правильно. Проверяй тело ответа.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>POST: <code>-X POST -H "Content-Type: application/json" -d "{…}"</code>.</p>
+      <p>Ответ 201, номер выдаёт сервер, адрес в <code>Location</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>PUT и DELETE</h2>
+<pre><code>curl -i -X PUT https://jsonplaceholder.typicode.com/posts/1 -H "Content-Type: application/json" -d "{\"id\":1,\"title\":\"novoe\",\"body\":\"tekst\",\"userId\":1}"</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{
+  "id": 1,
+  "title": "novoe",
+  "body": "tekst",
+  "userId": 1
+}</code></pre>
+<pre><code>curl -s -o nul -w "%{http_code}" -X DELETE https://jsonplaceholder.typicode.com/posts/1</code></pre>
+<pre><code>200</code></pre>
+    <p class="novoe">PUT отправляют на адрес элемента и кладут в тело ресурс целиком, со всеми полями. Ответ 200 и новая версия ресурса. DELETE тела не требует, хватает адреса. Ответ 200 или 204. Оба метода идемпотентные: повтор даёт то же состояние, это правило из урока про HTTP.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Пост 1 был с полями <code>title</code>, <code>body</code>, <code>userId</code>. Отправили <code>PUT /posts/1</code> с телом <code>{"title": "новое"}</code>. Что станет с <code>body</code> на настоящем сервере REST?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>По смыслу PUT ресурс заменяется целиком, поэтому <code>body</code> и <code>userId</code> пропадут или сервер откажет с 400. Поменять одно поле нужно через PATCH.</p>
+          <p class="oshibka">Использовать PUT для правки одного поля и потерять остальные. Сервер обычно не предупреждает, ответ 200 придёт.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>PUT на элемент, тело целиком. DELETE на элемент, без тела.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Параметры пути и запроса</h2>
+<pre><code>curl https://jsonplaceholder.typicode.com/posts?userId=1</code></pre>
+<pre><code>[
+  { "userId": 1, "id": 1, "title": "sunt aut facere ...", ... },
+  { "userId": 1, "id": 2, "title": "qui est esse", ... },
+  ...
+  { "userId": 1, "id": 10, "title": "optio molestias id quia eum", ... }
+]</code></pre>
+    <p class="novoe">Данные в запрос GET передают двумя путями. Параметр пути входит в сам адрес и выбирает ресурс: <code>/posts/1</code>, <code>/users/1/posts</code>. Параметр запроса идёт после <code>?</code> и уточняет выборку: фильтр <code>?userId=1</code>, страница <code>?page=2</code>, размер страницы <code>?limit=20</code>. Ответ на коллекцию это список объектов в квадратных скобках.</p>
+    <p>У пользователя 1 на учебном сервере 10 постов, номера с 1 по 10. Тот же список даёт <code>/users/1/posts</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Нужны вторые 20 товаров категории «phones». Как выглядит URL, если API принимает <code>category</code>, <code>page</code> и <code>limit</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>/products?category=phones&amp;page=2&amp;limit=20</code>. Если страницы считают с нуля, будет <code>page=1</code>, это смотрят в документации API.</p>
+          <p class="oshibka">Забыть <code>&amp;</code> между параметрами или поставить второй <code>?</code>: <code>?category=phones?page=2</code>. Знак вопроса один, дальше только <code>&amp;</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Путь выбирает ресурс: <code>/posts/1</code>. Запрос уточняет: <code>?userId=1&amp;page=2</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>API-ключ и ответ 401</h2>
+<pre><code>curl -i https://api.github.com/user</code></pre>
+<pre><code>HTTP/1.1 401 Unauthorized
+Content-Type: application/json; charset=utf-8
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 56
+
+{
+  "message": "Requires authentication",
+  "documentation_url": "https://docs.github.com/rest",
+  "status": "401"
+}</code></pre>
+    <p class="novoe">API-ключ, или токен, это длинная секретная строка, по которой API узнаёт, кто к нему пришёл и что ему можно. Его выдают в личном кабинете сервиса. Чаще всего ключ передают в заголовке: <code>Authorization: Bearer ключ</code>. Слово Bearer по-английски значит «предъявитель», оно говорит серверу, что дальше идёт токен. Без ключа закрытый адрес отвечает 401 Unauthorized: «представься». С ключом, но без прав, ответ 403.</p>
+<pre><code>curl https://api.github.com/user -H "Authorization: Bearer ghp_твой_токен"</code></pre>
+    <p>Адрес <code>/user</code> значит «я сам», серверу нужен ключ, чтобы понять, кто это «я». Публичный <code>/users/octocat</code> из шага 1 работал без ключа. Заголовки <code>X-RateLimit</code> в ответе разберёт шаг 11.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запрос с ключом вернул 403, а без ключа 401. Что не так в каждом случае?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>401: сервер не знает, кто ты, ключа нет или он неверный. 403: ключ верный, но у него нет прав на этот ресурс, например токен выпущен только на чтение.</p>
+          <p class="oshibka">Писать в заголовке <code>Authorization: ghp_…</code> без слова <code>Bearer</code> или наоборот <code>Bearer: ghp_…</code> с двоеточием. Формат строгий: имя заголовка, двоеточие, <code>Bearer</code>, пробел, ключ.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ключ в заголовке: <code>Authorization: Bearer ключ</code>.</p>
+      <p>Нет ключа 401, нет прав 403.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Почему ключ нельзя светить</h2>
+    <p>У Телеграма ключ бота входит прямо в путь адреса. Запрос с выдуманным ключом:</p>
+<pre><code>curl -i https://api.telegram.org/bot123:fake/getMe</code></pre>
+<pre><code>HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"ok":false,"error_code":401,"description":"Unauthorized"}</code></pre>
+    <p class="novoe">Ключ работает как пароль: любой, у кого он есть, действует от твоего имени. Отправляет сообщения от бота, тратит деньги на платном API, читает данные. Ключи утекают через код на GitHub, скриншоты, сообщения в чатах, историю команд и журналы серверов, куда пишется полный URL. Утёк ключ, его сразу отзывают в кабинете сервиса и выпускают новый: удалить из кода мало, копии уже остались.</p>
+    <p>Публичные репозитории GitHub постоянно сканируют чужие программы в поисках ключей, и токен, выложенный в коммите, находят за минуты. У Телеграма новый токен выдаёт @BotFather командой <code>/revoke</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Ты выложил на GitHub код бота с токеном, через минуту заметил и удалил файл новым коммитом. Ключ в безопасности?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Нет. Старый коммит с токеном остаётся в истории репозитория, и его могли скопировать за эту минуту. Токен нужно отозвать и выпустить новый.</p>
+          <p class="oshibka">Прятать ключ, разрезав его на куски в коде или закодировав. Любой, кто читает код, соберёт его обратно. Ключ не должен попадать в код вообще, это следующий шаг.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ключ это пароль. Утёк: отозвать и выпустить новый.</p>
+      <p>Не в код, не в скриншот, не в чат.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Где хранить ключ: .env и переменные</h2>
+<pre><code>файл .env рядом с кодом:
+BOT_TOKEN=123456:AAH-настоящий-токен
+
+файл .gitignore:
+.env
+
+в cmd:
+set GH_TOKEN=ghp_твой_токен
+curl https://api.github.com/user -H "Authorization: Bearer %GH_TOKEN%"</code></pre>
+    <p class="novoe">Переменная окружения это значение, которое хранит не код, а система или открытое окно <code>cmd</code>. Программа читает его по имени. Ключи держат в переменных окружения или в файле <code>.env</code>, откуда их подгружает программа. Сам <code>.env</code> вписывают в <code>.gitignore</code>, список файлов, которые Git не добавляет в репозиторий. В код попадает только имя переменной.</p>
+    <p>В <code>cmd</code> переменную задают <code>set ИМЯ=значение</code>, а подставляют <code>%ИМЯ%</code>. Она живёт, пока открыто это окно. В Postman то же делают переменные окружения: значение в Environments, а в заголовке <code>Bearer {{token}}</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Твой одногруппник клонировал репозиторий бота, где <code>.env</code> в <code>.gitignore</code>. Бот у него не запускается. Почему и что ему сделать?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Файла <code>.env</code> в репозитории нет, так и задумано, поэтому токена у него нет. Ему нужно создать свой <code>.env</code> со своим токеном. Чтобы было понятно какой, в репозиторий кладут <code>.env.example</code> с именами переменных и пустыми значениями.</p>
+          <p class="oshibka">Добавить <code>.env</code> в <code>.gitignore</code> уже после того, как он попал в коммит. Git продолжит следить за файлом, а ключ останется в истории. Сначала <code>.gitignore</code>, потом первый коммит.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ключ в <code>.env</code> или переменной окружения, <code>.env</code> в <code>.gitignore</code>.</p>
+      <p>cmd: <code>set ИМЯ=…</code>, подстановка <code>%ИМЯ%</code>.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>Лимиты запросов и код 429</h2>
+    <p>В ответе шага 8 были заголовки <code>X-RateLimit-Limit: 60</code> и <code>X-RateLimit-Remaining: 56</code>.</p>
+    <p class="novoe">Лимит запросов, rate limit, это сколько запросов API разрешает за отрезок времени. GitHub без ключа даёт 60 запросов в час с одного адреса, <code>Remaining</code> показывает, сколько осталось. Превысил лимит, сервер отвечает 429 Too Many Requests, часто с заголовком <code>Retry-After</code>: через сколько секунд можно снова. С ключом лимит обычно больше, ещё одна причина передавать ключ.</p>
+    <p>Правильная реакция программы на 429: подождать и повторить, каждый раз ожидая дольше. Повторять сразу в цикле бесполезно, это только продлевает блокировку.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Бот делает 2 запроса к API каждую минуту. Хватит ли ему лимита 60 запросов в час без ключа?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Нет. 2 × 60 = 120 запросов в час, вдвое больше лимита. Через 30 минут пойдут ответы 429. Нужен ключ с большим лимитом или реже спрашивать.</p>
+          <p class="oshibka">Путать 429 с 503. 429 значит «ты слишком часто спрашиваешь», виноват клиент. 503 значит «сервер перегружен вообще», виновата сторона сервера.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Лимит: <code>X-RateLimit-Remaining</code>, превысил 429.</p>
+      <p>На 429 ждать и повторять реже.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: HTTP для API">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши ответы в поля и отправь учителю кнопкой ниже. Где нужна команда, вставь её вместе с первой строкой ответа сервера.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Спроектируй адреса и методы REST для API библиотеки: список книг, книга 15, добавить книгу, удалить книгу 15, поменять у книги 15 только год, книги автора 3, книги 2020 года.
+      <textarea name="z1" placeholder="GET /books …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Отправь <code>curl</code> запросом POST на <code>https://jsonplaceholder.typicode.com/comments</code> комментарий с полями <code>postId</code> 1, <code>name</code>, <code>email</code> и <code>body</code>. Вставь команду, код ответа и какой <code>id</code> выдал сервер.
+      <textarea name="z2" placeholder="curl -i -X POST …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Получи комментарии к посту 2 двумя способами: параметром пути и параметром запроса. Сколько их пришло?
+      <textarea name="z3" placeholder="/posts/2/comments … и /comments?postId=2 …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> В коде бота строка <code>TOKEN = "123456:AAH…"</code>, а репозиторий публичный. Напиши по шагам, что сделать прямо сейчас и как переделать код, чтобы это не повторилось.
+      <textarea name="z4" placeholder="1. Отозвать … 2. …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Какой код ответа и что делать программе: ключ не передали, ключ только на чтение, а запрос на запись, превышен лимит, в JSON тела лишняя запятая, ресурса с таким номером нет.
+      <textarea name="z5" placeholder="401 … 403 …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>POST с JSON и ключ в заголовке</td><td>Модуль A6: запрос к API языковой модели это ровно шаги 5 и 8. POST, тело с сообщениями в JSON, <code>Authorization: Bearer ключ</code>, ответ JSON.</td></tr>
+      <tr><td>Ключ в <code>.env</code></td><td>Модуль A6: ключ к API моделей хранится в <code>.env</code> и читается из переменной окружения. Утёк ключ платного API, им начинают тратить твои деньги.</td></tr>
+      <tr><td>REST и коды</td><td>Модуль A7: свою модель выкатывают сервисом с адресом <code>POST /predict</code>, на кривые данные он отвечает 4xx, а не падает.</td></tr>
+      <tr><td>Лимиты и 429</td><td>Модуль A2: данные для датасета часто скачивают через API постранично, <code>?page=</code>, и упираются в лимит. Нужны паузы и повтор после 429.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../seti/">← Сети</a> · <a href="../povtorenie/seti.html">Повторение</a> · <a href="seti-dns.html">Дальше: DNS →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

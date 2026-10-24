@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Исключения и null — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-isklyucheniya">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Исключения и null</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Исключения и null</h1>
+  <p class="tiho">Java · лекция 5, 12.10 (Корелин), слайды seminar_4 и код seminar2: UserService, Optional · на зачёт · около 65 минут</p>
+
+  <p>Исключения ты уже видел: деление на ноль, выход за массив, <code>IllegalArgumentException</code> из урока <a href="java-inkapsulyaciya.html">инкапсуляция</a>. Там программа просто падала. Здесь научимся ловить ошибку и продолжать работу, отличать два вида исключений, писать своё, закрывать файлы автоматически и жить с <code>null</code> без падений.</p>
+  <p>Примеры по слайдам лекции и по коду seminar2, где Корелин показывал своё исключение и Optional. Нужны уроки про <a href="java-nasledovanie.html">наследование</a> и <a href="java-lyambdy.html">лямбды</a>.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>Исключение это объект</h2>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Начало");
+        int x = Integer.parseInt("abc");
+        System.out.println("Конец " + x);
+    }
+}</code></pre>
+<pre><code>Начало
+Exception in thread "main" java.lang.NumberFormatException: For input string: "abc"
+	at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+	at java.base/java.lang.Integer.parseInt(Integer.java:662)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at Main.main(Main.java:4)</code></pre>
+    <p class="novoe">Слайд лекции: исключение это объект, который описывает ошибку. <code>Integer.parseInt</code> переводит строку в число, а «abc» не число. Метод создал объект <code>NumberFormatException</code> с текстом <code>For input string: "abc"</code> и бросил его. Никто не поймал, и программа остановилась: «Конец» не напечатан. Строки <code>at</code> это путь, по которому летело исключение, снизу вверх: из твоего <code>main</code>, строка 4, в методы Java.</p>
+    <p>Все исключения наследники класса <code>Throwable</code>. От него идут две ветки. <code>Error</code>: поломки самой машины Java, например кончилась память, их не ловят. <code>Exception</code>: ошибки программы, их ловят. Внутри <code>Exception</code> есть ветка <code>RuntimeException</code>, к ней шаг 5.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие исключения из прошлых уроков ты уже встречал? Назови три и что их вызвало.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>ArithmeticException</code>: целое деление на ноль. <code>ArrayIndexOutOfBoundsException</code>: индекс за пределами массива. <code>NullPointerException</code>: метод у <code>null</code>. Ещё <code>InputMismatchException</code> от Scanner, когда ждали число, и <code>IllegalArgumentException</code>, который бросал сеттер.</p>
+          <p class="oshibka">Читать трассу сверху и искать ошибку в <code>NumberFormatException.java</code>. Твой код это первая строка с твоим файлом, здесь <code>Main.java:4</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Исключение: объект ошибки, который бросают и ловят.</p>
+      <p><code>Throwable</code> → <code>Error</code> и <code>Exception</code> → <code>RuntimeException</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>try и catch: поймать и продолжить</h2>
+<pre><code>String[] inputs = {"42", "abc", "7"};
+int sum = 0;
+for (String s : inputs) {
+    try {
+        int x = Integer.parseInt(s);
+        sum += x;
+        System.out.println("Прибавил " + x);
+    } catch (NumberFormatException e) {
+        System.out.println("Не число: " + e.getMessage());
+    }
+}
+System.out.println("Сумма " + sum);</code></pre>
+<pre><code>Прибавил 42
+Не число: For input string: "abc"
+Прибавил 7
+Сумма 49</code></pre>
+    <p class="novoe"><code>try</code>, «попробуй», обводит код, где может случиться ошибка. <code>catch</code>, «поймай», говорит, какое исключение ловить и что тогда делать. Как только в <code>try</code> вылетело исключение, остаток блока пропускается, и управление переходит в <code>catch</code>. Объект исключения лежит в переменной <code>e</code>, <code>e.getMessage()</code> отдаёт его текст. После <code>catch</code> программа идёт дальше: цикл обработал «7», сумма 42 + 7 = 49.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Где поставить <code>try</code>, чтобы на «abc» программа остановила весь подсчёт, но напечатала «Ввод испорчен» вместо падения?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Вокруг всего цикла: <code>try { for (…) { … } } catch (NumberFormatException e) { System.out.println("Ввод испорчен"); }</code>. Исключение выбросит из цикла сразу, «7» уже не обработается: напечатается «Прибавил 42», «Ввод испорчен», и сумма останется 42. Где стоит <code>try</code>, там и решается, что пропустить.</p>
+          <p class="oshibka">Обводить <code>try</code> весь <code>main</code> по привычке. Тогда одна плохая строка отменяет всю работу, хотя хотели пропустить только её.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>try { опасное } catch (Тип e) { что делать }</code>, дальше программа идёт.</p>
+      <p><code>e.getMessage()</code>: текст ошибки.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>Несколько catch: от частного к общему</h2>
+<pre><code>static void check(String s, int index) {
+    try {
+        int[] marks = {5, 4, 3};
+        int x = Integer.parseInt(s);
+        System.out.println(marks[index] / x);
+    } catch (NumberFormatException e) {
+        System.out.println("Не число");
+    } catch (ArithmeticException e) {
+        System.out.println("Деление на ноль: " + e.getMessage());
+    } catch (RuntimeException e) {
+        System.out.println("Что-то ещё: " + e);
+    }
+}</code></pre>
+<pre><code>check("2", 0);
+check("x", 0);
+check("0", 1);
+check("1", 5);</code></pre>
+<pre><code>2
+Не число
+Деление на ноль: / by zero
+Что-то ещё: java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 3</code></pre>
+    <p class="novoe">Блоков <code>catch</code> может быть несколько, Java проверяет их сверху вниз и берёт первый подходящий. Подходит и сам класс, и любой его наследник: выход за массив поймал <code>catch (RuntimeException e)</code>, это полиморфизм из урока про наследование. Поэтому частные исключения ставят выше, общие ниже.</p>
+    <p>Если одинаково обрабатываешь два вида, их пишут через черту: <code>catch (NumberFormatException | ArithmeticException e)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Поменяли местами: сначала <code>catch (RuntimeException e)</code>, потом <code>catch (NumberFormatException e)</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:7: error: exception NumberFormatException has already been caught
+        } catch (NumberFormatException e) {
+          ^
+1 error</code></pre>
+          <p>«Уже поймано». <code>NumberFormatException</code> наследник <code>RuntimeException</code>, общий блок выше перехватит его первым, и нижний никогда не сработает. Компилятор такое не пропускает.</p>
+          <p class="oshibka">Ловить сразу <code>Exception</code>, «чтобы наверняка». Поймаешь и то, чего не ждал, и не поймёшь, что сломалось. Лови то, что знаешь, как обработать.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>catch проверяются сверху вниз, ловит первый подходящий.</p>
+      <p>Частные выше общих. <code>catch (A | B e)</code> для одинаковой обработки.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>finally: выполнится всегда</h2>
+<pre><code>static int parse(String s) {
+    try {
+        System.out.println("пробую " + s);
+        return Integer.parseInt(s);
+    } catch (NumberFormatException e) {
+        System.out.println("не число");
+        return -1;
+    } finally {
+        System.out.println("finally для " + s);
+    }
+}</code></pre>
+<pre><code>System.out.println(parse("12"));
+System.out.println(parse("abc"));</code></pre>
+<pre><code>пробую 12
+finally для 12
+12
+пробую abc
+не число
+finally для abc
+-1</code></pre>
+    <p class="novoe"><code>finally</code> выполняется всегда: ошибки не было, ошибку поймали, даже если в <code>try</code> или <code>catch</code> стоит <code>return</code>. Видно по выводу: «finally для 12» напечатано раньше, чем <code>main</code> получил 12. Туда кладут уборку: закрыть файл, соединение, отпустить ресурс. Пример <code>FinallyExample</code> с лекции про это.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает код? <code>try { println("A"); int x = 5 / 0; println("B"); } finally { println("C"); } println("D");</code>, блока <code>catch</code> нет.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>A
+C
+Exception in thread "main" java.lang.ArithmeticException: / by zero
+	at Main.main(Main.java:5)</code></pre>
+          <p>B пропущено, исключение вылетело. <code>finally</code> отработал, а поймать было некому, поэтому программа упала, и D не напечатано. <code>try</code> с одним <code>finally</code> не ловит, а только убирает.</p>
+          <p class="oshibka">Думать, что <code>finally</code> спасает от падения. Спасает только <code>catch</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>finally { уборка }</code> работает всегда, даже после <code>return</code>.</p>
+      <p>Ловит только <code>catch</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>Проверяемые и непроверяемые</h2>
+<pre><code>import java.io.FileReader;
+
+public class Main {
+    public static void main(String[] args) {
+        FileReader reader = new FileReader("marks.txt");
+        System.out.println("Открыл");
+    }
+}</code></pre>
+<pre><code>Main.java:5: error: unreported exception FileNotFoundException; must be caught or declared to be thrown
+        FileReader reader = new FileReader("marks.txt");
+                            ^
+1 error</code></pre>
+    <p class="novoe">Слайды делят исключения на два вида. Проверяемые, checked, компилятор проверяет при сборке: если метод может их бросить, ты обязан поймать или объявить. Это все наследники <code>Exception</code>, кроме ветки <code>RuntimeException</code>. Типичные: нет файла, оборвалась сеть. Это беды снаружи, программа в них не виновата, но готова к ним быть обязана. Непроверяемые, unchecked, это <code>RuntimeException</code> и наследники: деление на ноль, выход за массив, <code>NullPointerException</code>. Компилятор про них молчит, это ошибки в самом коде, их обычно исправляют, а не ловят. Исключение из правила: разбор чужого ввода, как <code>parseInt</code> в шаге 2, заранее не проверишь, его ловят.</p>
+    <p>Ошибка выше: «необъявленное исключение FileNotFoundException, его надо поймать или объявить». С <code>try</code> всё собирается:</p>
+<pre><code>try {
+    FileReader reader = new FileReader("marks.txt");
+    System.out.println("Открыл");
+} catch (FileNotFoundException e) {
+    System.out.println("Нет файла: " + e.getMessage());
+}</code></pre>
+<pre><code>Нет файла: marks.txt (Не удается найти указанный файл)</code></pre>
+    <p>Текст в скобках пишет Windows, на другой системе он свой. Для <code>FileNotFoundException</code> нужен <code>import java.io.FileNotFoundException;</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какое из двух проверяемое: <code>NumberFormatException</code> или <code>FileNotFoundException</code>? Как узнать, не запуская компилятор?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Проверяемое <code>FileNotFoundException</code>. Посмотреть родителей: в IDEA Ctrl+H по имени класса показывает иерархию. <code>NumberFormatException</code> потомок <code>RuntimeException</code>, значит непроверяемое, поэтому <code>parseInt</code> в шаге 1 собирался без <code>try</code>.</p>
+          <p class="oshibka">Считать, что «проверяемое» значит «серьёзнее». Деление на ноль уронит программу так же. Разница только в том, следит ли компилятор.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Checked, наследники <code>Exception</code>: компилятор заставит поймать или объявить.</p>
+      <p>Unchecked, наследники <code>RuntimeException</code>: ошибки кода, компилятор молчит.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>throws: передать ошибку наверх</h2>
+<pre><code>import java.io.FileNotFoundException;
+import java.io.FileReader;
+
+public class Main {
+    static FileReader open(String name) throws FileNotFoundException {
+        return new FileReader(name);
+    }
+
+    static void load(String name) throws FileNotFoundException {
+        FileReader r = open(name);
+        System.out.println("Загрузил " + name);
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        load("marks.txt");
+    }
+}</code></pre>
+<pre><code>Exception in thread "main" java.io.FileNotFoundException: marks.txt (Не удается найти указанный файл)
+	at java.base/java.io.FileInputStream.open0(Native Method)
+	at java.base/java.io.FileInputStream.open(FileInputStream.java:213)
+	at java.base/java.io.FileInputStream.&lt;init&gt;(FileInputStream.java:152)
+	at java.base/java.io.FileInputStream.&lt;init&gt;(FileInputStream.java:106)
+	at java.base/java.io.FileReader.&lt;init&gt;(FileReader.java:60)
+	at Main.open(Main.java:6)
+	at Main.load(Main.java:10)
+	at Main.main(Main.java:15)</code></pre>
+    <p class="novoe">Второй способ выполнить требование компилятора: <code>throws</code> в заголовке метода, «этот метод может бросить такое исключение». Метод сам его не ловит, а передаёт тому, кто его вызвал. Исключение летит вверх по цепочке вызовов, пока кто-то не поймает. Здесь не поймал никто, даже <code>main</code>, и в трассе видна вся цепочка снизу вверх: <code>main</code> вызвал <code>load</code>, тот <code>open</code>.</p>
+    <p>Правило: ловят там, где знают, что делать. <code>open</code> не знает, показать ли ошибку пользователю или взять другой файл, поэтому передаёт наверх. У Корелина так <code>getUserOrException(int userId) throws UserNotFoundException</code>, шаг 7.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> <code>average(int[] a)</code> возвращает <code>sum(a) / a.length</code>. Вызвали для пустого массива. Нужен ли <code>throws</code>, и что покажет трасса?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Exception in thread "main" java.lang.ArithmeticException: / by zero
+	at Main.average(Main.java:3)
+	at Main.main(Main.java:16)</code></pre>
+          <p><code>throws</code> не нужен, <code>ArithmeticException</code> непроверяемое. Летит наверх так же. <code>sum</code> в трассе нет: он успел закончить и вернул 0, упало деление в <code>average</code>.</p>
+          <p class="oshibka">Писать <code>throws Exception</code> у каждого метода, чтобы компилятор отстал. Тогда все вызывающие тоже обязаны что-то делать с «любой ошибкой», и настоящая причина теряется.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>метод() throws Тип</code>: не ловлю, передаю вызывающему.</p>
+      <p>Ловят там, где знают, что делать.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>throw и своё исключение</h2>
+    <p>По мотивам <code>UserService</code> из seminar2: пользователя ищут по номеру, не нашли, бросают своё исключение.</p>
+<pre><code>class UserNotFoundException extends Exception {
+    public UserNotFoundException(int id) {
+        super("Пользователь " + id + " не найден");
+    }
+}
+
+class UserService {
+    private final Map&lt;Integer, String&gt; users = new HashMap&lt;&gt;();
+
+    public UserService() {
+        users.put(1, "Alice");
+        users.put(2, "Bob");
+    }
+
+    public String getUserOrException(int id) throws UserNotFoundException {
+        String user = users.get(id);
+        if (user == null) {
+            throw new UserNotFoundException(id);
+        }
+        return user;
+    }
+}</code></pre>
+<pre><code>UserService service = new UserService();
+int[] ids = {2, 7};
+for (int id : ids) {
+    try {
+        System.out.println("Нашёл " + service.getUserOrException(id));
+    } catch (UserNotFoundException e) {
+        System.out.println(e.getMessage());
+    }
+}</code></pre>
+<pre><code>Нашёл Bob
+Пользователь 7 не найден</code></pre>
+    <p class="novoe">Своё исключение это обычный класс-наследник. Унаследовал <code>Exception</code>, значит проверяемое, <code>RuntimeException</code>, значит непроверяемое. Текст передают родителю через <code>super(…)</code>, и его потом отдаёт <code>getMessage()</code>. <code>throw new …</code> бросает объект, ты делал это с <code>IllegalArgumentException</code>. <code>Map</code> здесь словарь «номер → имя». <code>put(1, "Alice")</code> кладёт пару «номер и имя», <code>get(номер)</code> достаёт имя или возвращает <code>null</code>, если номера нет. Нужны <code>import java.util.HashMap;</code> и <code>import java.util.Map;</code>.</p>
+    <p>Имя исключения говорит, что случилось, лучше любого текста: <code>UserNotFoundException</code> ловят отдельно от остальных ошибок.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши непроверяемое <code>NotEnoughMoneyException</code> с текстом «Нужно X, есть Y» и брось его в <code>withdraw</code>, если денег мало. На счёте 1000, сняли 300, потом 900. Что напечатает?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>class NotEnoughMoneyException extends RuntimeException {
+    public NotEnoughMoneyException(double need, double have) {
+        super("Нужно " + need + ", есть " + have);
+    }
+}
+
+public void withdraw(double amount) {
+    if (amount &gt; balance) {
+        throw new NotEnoughMoneyException(amount, balance);
+    }
+    balance -= amount;
+}</code></pre>
+<pre><code>Exception in thread "main" NotEnoughMoneyException: Нужно 900.0, есть 700.0
+	at Account.withdraw(Main.java:12)
+	at Main.main(Main.java:22)</code></pre>
+          <p>После первого снятия осталось 700. <code>throws</code> не нужен, исключение непроверяемое.</p>
+          <p class="oshibka">Забыть <code>new</code>: <code>throw NotEnoughMoneyException(…)</code>. Компилятор примет это за вызов метода и ответит <code>cannot find symbol</code>. Бросают объект, его сначала создают.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>class МоёException extends Exception</code> или <code>RuntimeException</code>, текст через <code>super(…)</code>.</p>
+      <p><code>throw new МоёException(…)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>try-with-resources: закрыть само</h2>
+<pre><code>class Connection implements AutoCloseable {
+    private final String name;
+
+    public Connection(String name) {
+        this.name = name;
+        System.out.println("открыл " + name);
+    }
+
+    public void send(String text) {
+        if (text.isEmpty()) {
+            throw new IllegalArgumentException("пустое сообщение");
+        }
+        System.out.println(name + " отправил: " + text);
+    }
+
+    @Override
+    public void close() {
+        System.out.println("закрыл " + name);
+    }
+}</code></pre>
+<pre><code>try (Connection c = new Connection("база")) {
+    c.send("привет");
+    c.send("");
+    c.send("сюда не дойдём");
+} catch (IllegalArgumentException e) {
+    System.out.println("ошибка: " + e.getMessage());
+}
+System.out.println("дальше");</code></pre>
+<pre><code>открыл база
+база отправил: привет
+закрыл база
+ошибка: пустое сообщение
+дальше</code></pre>
+    <p class="novoe">Ресурс это то, что надо вернуть после работы: открытый файл, соединение с базой или сетью. Слайд: try-with-resources, с Java 7, сам закрывает ресурсы с интерфейсом <code>AutoCloseable</code>. Ресурс создают в круглых скобках после <code>try</code>. Когда блок кончился, нормально или исключением, Java вызывает <code>close()</code>. По выводу видно: «закрыл» напечатано раньше, чем сработал <code>catch</code>. Это та же уборка, что в <code>finally</code>, только её нельзя забыть.</p>
+    <p>Файлы, <code>Scanner</code> и соединения Java уже реализуют <code>AutoCloseable</code>: <code>try (Scanner in = new Scanner(new File("marks.txt"))) { … }</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В скобках два ресурса через точку с запятой, A и B, внутри печать «работаю». В каком порядке они закроются?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>открыл A
+открыл B
+работаю
+закрыл B
+закрыл A</code></pre>
+          <p>В обратном порядке: последний открытый закрывается первым. B может зависеть от A, например запрос от соединения, и закрывать A раньше нельзя.</p>
+          <p class="oshibka">Положить в скобки <code>try</code> объект, который не реализует <code>AutoCloseable</code>. Компилятор ответит <code>try-with-resources not applicable to variable type</code>: закрывать нечем.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>try (Ресурс r = new Ресурс()) { … }</code>: <code>close()</code> вызовется сам.</p>
+      <p>Ресурс должен реализовать <code>AutoCloseable</code>, закрываются в обратном порядке.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>null и NullPointerException</h2>
+<pre><code>static String findNickname(String name) {
+    if (name.equals("Степан")) {
+        return "delovar";
+    }
+    return null;
+}
+
+public static void main(String[] args) {
+    String nick = findNickname("Аня");
+    System.out.println(nick.length());
+}</code></pre>
+<pre><code>Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.length()" because "nick" is null
+	at Main.main(Main.java:11)</code></pre>
+    <p class="novoe"><code>null</code> значит «значения нет», ты встречал его в уроке про классы. Слайд: Тони Хоар, придумавший <code>null</code> в 1965, назвал его своей ошибкой на миллиард долларов. Метод вернул <code>null</code>, и тот, кто вызвал, об этом не подумал. Падение случается не там, где появился <code>null</code>, а позже, где у него вызвали метод. Сообщение подсказывает: «нельзя вызвать <code>length()</code>, потому что <code>nick</code> равен null».</p>
+    <p>Способы со слайда. Явно проверять: <code>if (nick != null)</code>. Не пускать <code>null</code> в объект: <code>this.name = Objects.requireNonNull(name, "имя обязательно");</code> сразу бросает <code>NullPointerException: имя обязательно</code> в конструкторе, а не где-то потом. Возвращать <code>Optional</code>, шаг 10. Аннотации, то есть пометки через <code>@</code> вроде <code>@Override</code>, <code>@Nullable</code> и <code>@NonNull</code> из библиотек подсказывают IDEA, где <code>null</code> возможен.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В конструкторе <code>User</code> стоит <code>Objects.requireNonNull(name, "имя обязательно")</code>. Что напечатает <code>new User(null)</code>, и чем это лучше, чем просто сохранить <code>null</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Exception in thread "main" java.lang.NullPointerException: имя обязательно
+	at java.base/java.util.Objects.requireNonNull(Objects.java:259)
+	at User.&lt;init&gt;(Main.java:7)
+	at Main.main(Main.java:19)</code></pre>
+          <p>Падение в момент создания, с понятным текстом и строкой, откуда пришёл <code>null</code>. Иначе объект создался бы, и упал бы чей-то код через час. Это проверка в конструкторе из урока про инкапсуляцию, одной строкой.</p>
+          <p class="oshibka">Возвращать <code>null</code> из метода и не писать об этом ни слова. Вызывающий узнает о нём только по падению.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>NullPointerException падает там, где у <code>null</code> вызвали метод.</p>
+      <p>Проверка <code>!= null</code>, <code>Objects.requireNonNull</code>, <code>Optional</code>.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Optional: коробка, где значения может не быть</h2>
+<pre><code>static Map&lt;Integer, String&gt; emails = new HashMap&lt;&gt;();
+
+static Optional&lt;String&gt; findEmail(int userId) {
+    return Optional.ofNullable(emails.get(userId));
+}</code></pre>
+<pre><code>emails.put(1, "alice@example.com");
+
+Optional&lt;String&gt; a = findEmail(1);
+Optional&lt;String&gt; b = findEmail(9);
+System.out.println(a);
+System.out.println(b);
+System.out.println(a.isPresent() + " " + b.isPresent());
+
+System.out.println(b.orElse("нет почты"));
+System.out.println(a.map(String::length).orElse(0));
+System.out.println(b.map(String::length).orElse(0));
+a.ifPresent(e -&gt; System.out.println("Пишу на " + e));
+b.ifPresent(e -&gt; System.out.println("сюда не попадём"));
+
+String must = findEmail(9).orElseThrow(() -&gt; new NoSuchElementException("User with ID 9 has no email"));</code></pre>
+<pre><code>Optional[alice@example.com]
+Optional.empty
+true false
+нет почты
+17
+0
+Пишу на alice@example.com
+Exception in thread "main" java.util.NoSuchElementException: User with ID 9 has no email
+	at Main.lambda$main$2(Main.java:28)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at Main.main(Main.java:28)</code></pre>
+    <p class="novoe"><code>Optional&lt;T&gt;</code> это коробка, в которой значение есть или его нет. Метод, который может не найти, возвращает коробку, и сам тип говорит: «проверь». <code>Optional.ofNullable(x)</code> кладёт значение или делает пустую коробку, если <code>x</code> равен <code>null</code>. Ещё два способа сделать коробку: <code>Optional.of(x)</code> для значения, которое точно не <code>null</code>, и <code>Optional.empty()</code> для пустой. Дальше методы из seminar2 Корелина. <code>isPresent</code>: есть ли. <code>orElse(запас)</code>: значение или запас. <code>map(функция)</code>: преобразовать, если есть, пустая коробка остаётся пустой. <code>ifPresent(действие)</code>: сделать, только если есть. <code>orElseThrow(…)</code>: значение или исключение, здесь <code>NoSuchElementException</code>, «нет такого элемента». Лямбды и ссылки на метод здесь из урока про ФП.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатают <code>Optional.of("  bob ").map(String::trim).map(String::toUpperCase).orElse("?")</code>, то же для <code>Optional.empty()</code>, и что будет от <code>Optional.of(null)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>BOB
+?
+Exception in thread "main" java.lang.NullPointerException
+	at java.base/java.util.Objects.requireNonNull(Objects.java:233)
+	at java.base/java.util.Optional.of(Optional.java:113)
+	at Main.main(Main.java:9)</code></pre>
+          <p>Цепочка <code>map</code> на пустой коробке ничего не делает и падений не даёт. <code>Optional.of</code> требует значение и на <code>null</code> падает. Если <code>null</code> возможен, бери <code>ofNullable</code>.</p>
+          <p class="oshibka">Писать <code>if (opt.isPresent()) { x = opt.get(); }</code> на каждом шагу. Это та же проверка на <code>null</code>, только длиннее. Для этого есть <code>map</code>, <code>orElse</code> и <code>ifPresent</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Optional.ofNullable(x)</code>, дальше <code>map</code>, <code>orElse</code>, <code>ifPresent</code>, <code>orElseThrow</code>.</p>
+      <p><code>Optional.of(null)</code> падает.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>Не нашли: что вернуть</h2>
+<pre><code>static int indexOfSentinel(List&lt;String&gt; list, String x) {
+    for (int i = 0; i &lt; list.size(); i++) {
+        if (list.get(i).equals(x)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static Optional&lt;Integer&gt; indexOfOptional(List&lt;String&gt; list, String x) {
+    for (int i = 0; i &lt; list.size(); i++) {
+        if (list.get(i).equals(x)) {
+            return Optional.of(i);
+        }
+    }
+    return Optional.empty();
+}</code></pre>
+<pre><code>List&lt;String&gt; names = List.of("Anton", "Mariya");
+int i = indexOfSentinel(names, "Boris");
+System.out.println(i);
+System.out.println(indexOfOptional(names, "Mariya"));
+System.out.println(indexOfOptional(names, "Boris").map(n -&gt; "место " + n).orElse("не нашли"));
+System.out.println(names.get(i));</code></pre>
+<pre><code>-1
+Optional[1]
+не нашли
+Exception in thread "main" java.lang.IndexOutOfBoundsException: Index: -1 Size: 2
+	at java.base/java.util.ImmutableCollections$AbstractImmutableList.outOfBounds(ImmutableCollections.java:340)
+	at java.base/java.util.ImmutableCollections$List12.get(ImmutableCollections.java:592)
+	at Main.main(Main.java:29)</code></pre>
+    <p class="novoe">Четыре способа сказать «не нашли». Особое значение, например −1, его ещё называют сигнальным: про него легко забыть, и −1 уходит дальше как обычный индекс, это пример <code>SentinelExample</code>. <code>null</code>: падает позже, шаг 9. Исключение: если «не нашли» значит, что что-то пошло не так, как отсутствие пользователя, которого точно должны были создать. <code>Optional</code> или <code>Result</code> из урока про sealed: если «не нашли» обычный исход, тип заставляет его обработать.</p>
+    <p>Антипаттерн со слайдов, то есть частый плохой приём: управлять ходом программы через <code>null</code>. Метод возвращает <code>null</code> как сигнал, а вызывающий по нему решает, куда идти дальше. Такой код читается как прыжки, и любой забытый <code>if</code> роняет его.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что не так с кодом: <code>int age = 0; try { age = Integer.parseInt("19 лет"); } catch (NumberFormatException e) { }</code>, дальше печать «Возраст » + age?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Напечатает <code>Возраст 0</code>, проверено. Пустой <code>catch</code> проглотил ошибку, и 0 выглядит как настоящий возраст. Это худший вариант из всех: ни падения, ни сообщения, только неверные данные дальше по программе.</p>
+          <p class="oshibka">Пустой <code>catch</code>, «чтобы не падало». В нём должно быть хотя бы сообщение и решение: запросить снова, взять запасное значение явно или передать ошибку наверх.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Обычное «нет»: <code>Optional</code> или Result. Поломка: исключение.</p>
+      <p>Не надо: −1, <code>null</code> без предупреждения, пустой <code>catch</code>.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Что спросят на зачёте</h2>
+    <ul>
+      <li>Что такое исключение, иерархия: шаг 1.</li>
+      <li>try-catch, try-catch-finally: шаги 2–4.</li>
+      <li>Checked и unchecked, throws: шаги 5–6.</li>
+      <li>Своё исключение и throw: шаг 7. try-with-resources и AutoCloseable: шаг 8.</li>
+      <li>null, ошибка на миллиард, как избежать, Optional, антипаттерн: шаги 9–11.</li>
+    </ul>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: исключения и null">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Программа читает со Scanner строки, пока не встретит «стоп», и считает сумму чисел. Строки, которые не числа, пропускает с сообщением, но не падает. Проверь на вводе <code>5</code>, <code>x</code>, <code>10</code>, <code>стоп</code>.
+      <textarea name="z1" placeholder="while (true) { String s = in.nextLine(); …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Проверяемое исключение <code>InvalidGradeException</code>. Метод <code>setGrade(int g)</code> бросает его, если оценка не от 2 до 5. Вызови для 4 и для 7 и поймай в <code>main</code>.
+      <textarea name="z2" placeholder="class InvalidGradeException extends Exception { …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Класс <code>Timer implements AutoCloseable</code>: в конструкторе запоминает время <code>System.currentTimeMillis()</code>, в <code>close()</code> печатает, сколько миллисекунд прошло. Оберни им цикл из миллиона сложений через try-with-resources.
+      <textarea name="z3" placeholder="class Timer implements AutoCloseable { …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Перепиши <code>findNickname</code> из шага 9 так, чтобы он возвращал <code>Optional&lt;String&gt;</code>, и одной строкой выведи ник или «ника нет» для Степана и для Ани.
+      <textarea name="z4" placeholder="static Optional&lt;String&gt; findNickname(String name) { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Объясни своими словами: когда метод должен бросить исключение, а когда вернуть <code>Optional</code>? Приведи по примеру из банка.
+      <textarea name="z5" placeholder="Исключение, когда…" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>try, catch, своё исключение</td><td>Модуль X1: при чтении датасета битую строку пропускают с записью в журнал, а не роняют загрузку на миллионе строк. В Python это <code>try</code> и <code>except ValueError</code>.</td></tr>
+      <tr><td>try-with-resources</td><td>Модуль A1: файлы с данными в Python открывают через <code>with open(…) as f</code>, файл закрывается сам, как ресурс в <code>try</code>.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="../java/">Дальше: страница Java →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

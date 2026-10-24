@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Инкапсуляция — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-inkapsulyaciya">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Инкапсуляция</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Инкапсуляция</h1>
+  <p class="tiho">Java · лаба 20.10, слайды «ООП часть I» · под ПР4, срок 1.12 · около 65 минут</p>
+
+  <p>Продолжение урока <a href="java-klassy.html">классы и объекты</a>, без него не начинай. Там поля были открыты, и любой код мог положить в них что угодно. Двенадцать шагов по слайдам «ООП часть I»: закрыть поля словом <code>private</code>, дать к ним доступ геттерами и сеттерами, проверять значения, сделать объект неизменяемым, а в конце научить объект печататься и сравниваться.</p>
+  <p>Вариант ПР4 «ООП» выдаёт тест на элеарне, попытка одна, тест до 1.12 23:59, ответ до 1.12 00:00. Пройди тест и сразу сохрани текст варианта. В уроке классы снова лежат в одном файле <code>Main.java</code>, в IDEA каждый в своём.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 12</div>
+    <h2>Чем плохи открытые поля</h2>
+<pre><code>class Dog {
+    String name;
+    int age;
+    double height;
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Dog dog = new Dog();
+        dog.name = "";
+        dog.age = -5;
+        dog.height = -0.75;
+        System.out.println("[" + dog.name + "] " + dog.age + " " + dog.height);
+    }
+}</code></pre>
+<pre><code>[] -5 -0.75</code></pre>
+    <p class="novoe">Инкапсуляция по слайдам это два правила: закрыть доступ к полям объекта и дать специальные методы, чтобы читать и менять их. Тогда объект сам решает, какие значения в нём допустимы, и собака без имени с возрастом −5 появиться не может.</p>
+    <p>У Корелина в seminar1-oop класс <code>Car</code> держит открытым поле <code>fuelLevel</code>, уровень топлива. Любой код может написать <code>car.fuelLevel = -100</code>, и метод заправки потом посчитает от этого числа.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В модели банка из прошлого урока что сломает строка <code>card.balance = -500;</code> в <code>main</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Баланс станет отрицательным в обход <code>withdraw</code>, где стояла проверка. Перевод потом будет считать от неправильного числа. Проверка в методе ничего не стоит, если поле можно поменять мимо метода.</p>
+          <p class="oshibka">Думать «я же сам так не напишу». В командном проекте и в ПР код пишут несколько человек, а через месяц и ты сам уже другой человек. Защищает только компилятор.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Инкапсуляция: поля закрыты, доступ через методы.</p>
+      <p>Открытое поле обходит любую проверку.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 12</div>
+    <h2>private: закрыть поле</h2>
+<pre><code>class Dog {
+    private String name;
+    private int age;
+
+    public void say() {
+        System.out.println(name + ": ГАВ!");
+    }
+}</code></pre>
+    <p>А в <code>main</code> по-старому <code>dog.age = -5;</code>:</p>
+<pre><code>Main.java:13: error: age has private access in Dog
+        dog.age = -5;
+           ^
+1 error</code></pre>
+    <p class="novoe">Модификатор доступа это слово перед полем или методом, которое говорит, кто его видит. <code>private</code> значит «только код внутри этого класса». <code>public</code> значит «все». Ошибка <code>age has private access in Dog</code>: поле закрыто, снаружи его не прочитать и не поменять, это проверяет компилятор.</p>
+    <p>Внутри класса поле доступно как раньше: метод <code>say</code> спокойно читает <code>name</code>. Правило слайдов: поля класса делаем всегда <code>private</code>, методы, которые нужны снаружи, <code>public</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Метод <code>say</code> пометили <code>private</code>, а в <code>main</code> вызвали <code>dog.say();</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:12: error: say() has private access in Dog
+        dog.say();
+           ^
+1 error</code></pre>
+          <p>Закрывать можно и методы. Закрытый метод это внутренняя кухня класса, его вызывают только другие методы того же класса.</p>
+          <p class="oshibka">Поставить <code>private</code> всему подряд, включая методы, которые нужны в <code>main</code>. Закрыты поля и вспомогательные методы, открыто то, ради чего класс существует.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>private</code>: видно только внутри класса. <code>public</code>: видно всем.</p>
+      <p>Поля всегда <code>private</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 12</div>
+    <h2>Геттер: прочитать закрытое поле</h2>
+<pre><code>class Student {
+    private String name;
+    private String surname;
+    private int age;
+
+    public Student(String name, String surname, int age) {
+        this.name = name;
+        this.surname = surname;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getFullName() {
+        return surname + " " + name;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Student s = new Student("Анна", "Иванова", 19);
+System.out.println(s.getName());
+System.out.println(s.getAge());
+System.out.println(s.getFullName());</code></pre>
+<pre><code>Анна
+19
+Иванова Анна</code></pre>
+    <p class="novoe">Геттер это публичный метод, который возвращает значение поля. Имя по соглашению <code>get</code> плюс имя поля с большой буквы: <code>getName</code>, <code>getAge</code>. Для <code>boolean</code> полей пишут <code>is</code>: <code>isVaccinated()</code>. По слайдам геттер может вернуть само значение, комбинацию полей, как <code>getFullName</code>, или отформатированное значение.</p>
+    <p>Поля по-прежнему закрыты: прочитать можно, поменять нельзя, потому что метода для записи нет.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши геттер <code>getInitials()</code>, который для Анны Ивановой вернёт <code>Иванова А.</code>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>public String getInitials() {
+    return surname + " " + name.charAt(0) + ".";
+}</code></pre>
+          <p><code>charAt(0)</code> из урока про строки берёт первую букву имени.</p>
+          <p class="oshibka">Завести ради этого отдельное поле <code>initials</code> и заполнять его в конструкторе. Если потом поменять имя, инициалы останутся старыми. То, что считается из других полей, лучше считать в геттере.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Геттер: <code>public Тип getПоле() { return поле; }</code>, для boolean <code>isПоле()</code>.</p>
+      <p>Может вернуть комбинацию полей.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 12</div>
+    <h2>Сеттер: поменять через метод</h2>
+<pre><code>class Dog {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Dog dog = new Dog();
+dog.setName("Мухтар");
+System.out.println(dog.getName());
+dog.setName("Рекс");
+System.out.println(dog.getName());</code></pre>
+<pre><code>Мухтар
+Рекс</code></pre>
+    <p class="novoe">Сеттер это публичный метод, который устанавливает значение поля. Имя <code>set</code> плюс имя поля, один параметр, тип возврата <code>void</code>. Внутри тот же <code>this.name = name</code>, что в конструкторе.</p>
+    <p>Пока сеттер просто кладёт значение, он ничем не лучше открытого поля. Польза появляется в шаге 5, когда в него встаёт проверка. Зато место для проверки уже есть, и менять код в <code>main</code> не придётся. IDEA пишет геттеры и сеттеры сама: Alt+Insert, Getter and Setter.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> По слайдам сеттер может преобразовать значение. Поле <code>private int angle</code> хранит угол в градусах, а сеттер получает радианы: <code>angle = (int) (180 * rad / Math.PI);</code>. Что окажется в <code>angle</code> после <code>setAngle(Math.PI / 2)</code> и после <code>setAngle(1)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>90 и 57. Пи пополам это 90 градусов ровно. Один радиан это 57,29… градуса, а <code>(int)</code> отбрасывает дробь, проверено запуском.</p>
+          <p class="oshibka">Забыть <code>this.</code> в сеттере с тем же именем параметра: <code>name = name;</code>. Как в конструкторе из прошлого урока, ничего не поменяется и компилятор промолчит.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Сеттер: <code>public void setПоле(Тип поле) { this.поле = поле; }</code></p>
+      <p>Может проверить или преобразовать значение.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 12</div>
+    <h2>Проверка в сеттере: тихий отказ</h2>
+    <p>Пример со слайдов: рост собаки бывает только больше нуля.</p>
+<pre><code>class Dog {
+    private double height;
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setHeight(double value) {
+        if (value &gt; 0) {
+            height = value;
+        }
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Dog dog = new Dog();
+dog.setHeight(0.75);
+System.out.println(dog.getHeight());
+dog.setHeight(-3);
+System.out.println(dog.getHeight());</code></pre>
+<pre><code>0.75
+0.75</code></pre>
+    <p class="novoe">Сеттер с проверкой пропускает в поле только допустимые значения. Плохое значение <code>-3</code> не прошло <code>if</code>, и поле осталось прежним, 0.75. Теперь сломать объект снаружи нельзя: другого пути к полю нет.</p>
+    <p>Минус тихого отказа: тот, кто вызвал <code>setHeight(-3)</code>, не узнал, что ничего не вышло.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Новая собака, первым вызовом <code>puppy.setHeight(-0.3);</code>. Что напечатает <code>puppy.getHeight()</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>0.0</code>. Значение не прошло проверку, а в поле осталось значение по умолчанию. Рост 0 тоже недопустим, а объект с ним живёт. Тихий отказ не спасает от пустого объекта, это решает конструктор, шаг 7.</p>
+          <p class="oshibka">Проверять строго наоборот: <code>if (value &lt; 0)</code> вместо <code>if (value &gt; 0)</code>. Тогда в поле пройдут только плохие значения. После проверки прогони сеттер на одном хорошем и одном плохом числе.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Сеттер с <code>if</code>: плохое значение в поле не попадает.</p>
+      <p>Тихий отказ: вызвавший не знает, что не вышло.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 12</div>
+    <h2>Громкий отказ: IllegalArgumentException</h2>
+<pre><code>public void setHeight(double value) {
+    if (value &lt;= 0) {
+        throw new IllegalArgumentException("Рост должен быть больше нуля: " + value);
+    }
+    height = value;
+}</code></pre>
+    <p>Тот же <code>main</code>, что в шаге 5, только после <code>setHeight(-3)</code> печатаем «Сюда не дойдём»:</p>
+<pre><code>0.75
+Exception in thread "main" java.lang.IllegalArgumentException: Рост должен быть больше нуля: -3.0
+	at Dog.setHeight(Main.java:10)
+	at Main.main(Main.java:21)</code></pre>
+    <p class="novoe"><code>throw new IllegalArgumentException("текст")</code> прерывает метод и бросает исключение «недопустимый аргумент» с твоим текстом. Это та же остановка программы, что деление на ноль, только причину объявил ты. Ошибку видно сразу, с понятным сообщением и строкой, откуда пришёл плохой вызов: <code>Main.main(Main.java:21)</code>.</p>
+    <p>Как поймать исключение и не дать программе упасть, разбирает лекция 12.10. Для ПР4 хватает того, что плохое значение не проходит молча.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши сеттер <code>setAge(int age)</code>: возраст от 0 до 30 включительно, иначе исключение с текстом и значением.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>public void setAge(int age) {
+    if (age &lt; 0 || age &gt; 30) {
+        throw new IllegalArgumentException("Возраст от 0 до 30: " + age);
+    }
+    this.age = age;
+}</code></pre>
+          <p>Сначала проверка, потом присваивание. <code>throw</code> выходит из метода, до <code>this.age = age</code> дело не доходит.</p>
+          <p class="oshibka">Присвоить, а потом проверять. Поле уже испорчено к моменту исключения, и если исключение кто-то поймает, объект останется с плохим возрастом.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>throw new IllegalArgumentException("что не так: " + value);</code></p>
+      <p>Проверка до присваивания.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 12</div>
+    <h2>Проверка в конструкторе</h2>
+<pre><code>class Account {
+    private final String number;
+    private double balance;
+
+    public Account(String number, double balance) {
+        if (number == null || number.isEmpty()) {
+            throw new IllegalArgumentException("Нужен номер счёта");
+        }
+        if (balance &lt; 0) {
+            throw new IllegalArgumentException("Баланс не может быть отрицательным: " + balance);
+        }
+        this.number = number;
+        this.balance = balance;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Account ok = new Account("A-1", 1000);
+System.out.println(ok.getNumber() + " " + ok.getBalance());
+Account bad = new Account("A-2", -500);</code></pre>
+<pre><code>A-1 1000.0
+Exception in thread "main" java.lang.IllegalArgumentException: Баланс не может быть отрицательным: -500.0
+	at Account.&lt;init&gt;(Main.java:10)
+	at Main.main(Main.java:29)</code></pre>
+    <p class="novoe">Конструктор проверяет данные так же, как сеттер. Если проверка не прошла, объект просто не создаётся, плохой счёт не появится ни на секунду. <code>&lt;init&gt;</code> в сообщении значит «конструктор». <code>number.isEmpty()</code> отвечает true для пустой строки.</p>
+    <p>Порядок в условии важен: <code>number == null</code> проверяется первым. Если номер <code>null</code>, дальше Java не идёт, и <code>isEmpty()</code> у <code>null</code> не вызовется. Слово <code>final</code> у номера разберём в шаге 9.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В прошлом уроке <code>new Computer(cpu, null)</code> создавался и падал позже. Допиши в его конструктор проверку.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>public Computer(Cpu cpu, Ram ram) {
+    if (cpu == null || ram == null) {
+        throw new IllegalArgumentException("Нужны процессор и память");
+    }
+    this.cpu = cpu;
+    this.ram = ram;
+}</code></pre>
+          <p>Теперь ошибка видна в момент сборки, а не где-то потом в <code>totalPrice</code>.</p>
+          <p class="oshibka">Поменять местами: <code>number.isEmpty() || number == null</code>. На <code>null</code> программа упадёт с NullPointerException раньше, чем дойдёт до проверки на <code>null</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Проверки в конструкторе: плохой объект не рождается.</p>
+      <p>Сначала <code>x == null</code>, потом методы у <code>x</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 12</div>
+    <h2>Не каждому полю сеттер</h2>
+    <p>У счёта нет <code>setBalance</code>. Баланс меняют только две операции, и каждая со своей проверкой.</p>
+<pre><code>public void deposit(double amount) {
+    if (amount &lt;= 0) {
+        throw new IllegalArgumentException("Сумма должна быть больше нуля: " + amount);
+    }
+    balance += amount;
+}
+
+public boolean withdraw(double amount) {
+    if (amount &lt;= 0 || amount &gt; balance) {
+        return false;
+    }
+    balance -= amount;
+    return true;
+}</code></pre>
+    <p>Оба метода стоят в классе <code>Account</code> из шага 7. Строки внутри <code>main</code>:</p>
+<pre><code>Account card = new Account("A-1", 1000);
+card.deposit(250);
+System.out.println(card.getBalance());
+System.out.println(card.withdraw(2000));
+System.out.println(card.withdraw(-100));
+System.out.println(card.withdraw(300));
+System.out.println(card.getBalance());</code></pre>
+<pre><code>1250.0
+false
+false
+true
+950.0</code></pre>
+    <p class="novoe">Геттеры и сеттеры не обязаны идти парами. Методы класса повторяют действия из жизни: в банке нельзя «установить баланс», можно положить и снять. Поэтому сеттера нет, а снаружи баланс меняется только через <code>deposit</code> и <code>withdraw</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Зачем в <code>withdraw</code> проверка <code>amount &lt;= 0</code>, если и так проверяется, что денег хватает?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Без неё <code>withdraw(-100)</code> пройдёт: −100 не больше баланса. А <code>balance -= -100</code> прибавит 100. Снятие отрицательной суммы превратится в бесплатное пополнение.</p>
+          <p class="oshibka">Проверять только один край, «не больше баланса», и забыть ноль и минус. Проверяй каждое число на трёх: нормальное, ноль, отрицательное.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Сеттер только там, где по смыслу можно «установить».</p>
+      <p>Иначе методы-действия со своими проверками.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 12</div>
+    <h2>final: неизменяемый объект</h2>
+    <p>Пример со слайдов: имя студента и номер студенческого после создания не меняются.</p>
+<pre><code>class Student {
+    private final String name;
+    private final String cardId;
+
+    public Student(String name, String cardId) {
+        this.name = name;
+        this.cardId = cardId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+}</code></pre>
+    <p class="novoe"><code>final</code> у поля значит «присвоить можно один раз». Значение задают при объявлении или в каждом конструкторе, потом поменять нельзя, это ошибка компиляции. Сеттер для <code>final</code> поля не нужен. Объект, у которого все поля <code>final</code>, неизменяемый: каким создали, таким и останется. По слайдам такие объекты полезны, когда с одним объектом одновременно работают несколько частей программы. Такую программу в курсе пока не пишем.</p>
+    <p>Попробуем всё же дописать сеттер:</p>
+<pre><code>public void setName(String name) {
+    this.name = name;
+}</code></pre>
+<pre><code>Main.java:15: error: cannot assign a value to final variable name
+        this.name = name;
+            ^
+1 error</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В классе <code>Group</code> поле <code>private final ArrayList&lt;String&gt; names = new ArrayList&lt;&gt;();</code> и геттер <code>getNames()</code>. Пройдёт ли <code>g.getNames().add("Борис");</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Пройдёт. Добавили «Борис», потом «Вера», и список печатается <code>[Борис, Вера]</code>. Слайды: для ссылок <code>final</code> делает неизменяемой только ссылку, а не объект, на который она указывает. Поменять <code>names</code> на другой список нельзя, а менять сам список можно.</p>
+          <p class="oshibka">Считать объект неизменяемым, раз все поля <code>final</code>, когда среди них список. Геттер отдал наружу сам список, и его меняет кто угодно.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>private final</code>: присвоить один раз, в конструкторе. Сеттера нет.</p>
+      <p>У ссылки <code>final</code> держит ссылку, а не содержимое.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 12</div>
+    <h2>static: общее для всех объектов</h2>
+<pre><code>class Dog {
+    private static final int COUNT_OF_PAWS = 4;
+    private static int count = 0;
+    private final String name;
+
+    public Dog(String name) {
+        this.name = name;
+        count++;
+    }
+
+    public static int getCount() {
+        return count;
+    }
+
+    public static int getPaws() {
+        return COUNT_OF_PAWS;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>System.out.println(Dog.getCount());
+new Dog("Мухтар");
+new Dog("Рекс");
+new Dog("Бим");
+System.out.println(Dog.getCount());
+System.out.println(Dog.getPaws() * Dog.getCount());</code></pre>
+<pre><code>0
+3
+12</code></pre>
+    <p class="novoe">Статическое поле одно на весь класс, а не своё у каждого объекта. Каждый конструктор прибавил к общему <code>count</code>, вышло 3. <code>static final</code> это константа, имя пишут большими буквами. Статический метод вызывают через имя класса, <code>Dog.getCount()</code>. По слайдам он не видит полей конкретного объекта: внутри <code>static</code> метода нет <code>this</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> На слайде статический метод расстояния между точками записан так: <code>Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - b.x, 2))</code>. Что он вернёт для точек (0, 0) и (3, 4) и где ошибка?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Вернёт <code>3.1622776601683795</code>, корень из 9 + 1, вместо 5.0. Во второй скобке опечатка: <code>b.y - b.x</code> вместо <code>b.y - a.y</code>. С исправлением выходит 5.0, проверено. Метод статический и получает обе точки параметрами, своего объекта у него нет.</p>
+          <p class="oshibka">Обратиться из статического метода к полю объекта: <code>public static String getName() { return name; }</code>. Компилятор ответит <code>non-static variable name cannot be referenced from a static context</code>, «у статического метода нет объекта, чьё имя брать».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>static</code> поле одно на класс, вызов <code>Класс.метод()</code>.</p>
+      <p><code>static final</code> константа, ИМЯ_БОЛЬШИМИ. В static методе нет <code>this</code>.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 12</div>
+    <h2>toString: как объект печатается</h2>
+    <p>Класс <code>Cat</code> без ничего лишнего, <code>System.out.println(new Cat("Мурка"));</code>:</p>
+<pre><code>Cat@3e3abc88</code></pre>
+    <p>Имя класса и служебный номер, на каждом запуске свой. Научим собаку печататься по-человечески, в стиле класса <code>SimpleCar</code> Корелина:</p>
+<pre><code>class Dog {
+    private final String name;
+    private final int age;
+
+    public Dog(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Dog{name='" + name + "', age=" + age + "}";
+    }
+}</code></pre>
+<pre><code>Dog dog = new Dog("Мухтар", 5);
+System.out.println(dog);
+System.out.println("Собака: " + dog);</code></pre>
+<pre><code>Dog{name='Мухтар', age=5}
+Собака: Dog{name='Мухтар', age=5}</code></pre>
+    <p class="novoe">У любого объекта Java есть метод <code>toString()</code>, он превращает объект в строку. <code>println</code> и склейка через <code>+</code> вызывают его сами. Свой <code>toString</code> заменяет стандартный. <code>@Override</code> над методом это пометка «я заменяю метод, который уже есть», её проверяет компилятор.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Метод назвали <code>tostring</code> с маленькой s и поставили над ним <code>@Override</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:8: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+1 error</code></pre>
+          <p>«Метод ничего не заменяет». Метода <code>tostring</code> у объектов нет, есть <code>toString</code>. Без <code>@Override</code> код бы собрался, а печать осталась бы <code>Dog@…</code>, и опечатку пришлось бы искать долго. Ради этого пометку и ставят.</p>
+          <p class="oshibka">Печатать поля в <code>main</code> вручную каждый раз: <code>dog.getName() + " " + dog.getAge()</code>. Один <code>toString</code> в классе, и печать работает везде, в том числе внутри списка.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>@Override public String toString() { return "…"; }</code></p>
+      <p><code>println(obj)</code> и <code>"…" + obj</code> вызывают его сами.</p>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="shag" id="shag-12" data-shag>
+    <div class="shag-nomer">Шаг 12 из 12</div>
+    <h2>equals: сравнить объекты по содержимому</h2>
+<pre><code>import java.util.Objects;
+
+class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Point)) {
+            return false;
+        }
+        Point p = (Point) o;
+        return x == p.x &amp;&amp; y == p.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+}</code></pre>
+<pre><code>Point a = new Point(3, 4);
+Point b = new Point(3, 4);
+Point c = new Point(4, 3);
+System.out.println(a == b);
+System.out.println(a.equals(b));
+System.out.println(a.equals(c));
+System.out.println(a.equals(null));</code></pre>
+<pre><code>false
+true
+false
+false</code></pre>
+    <p class="novoe">Стандартный <code>equals</code> у объекта сравнивает ссылки, как <code>==</code>. Свой <code>equals</code> сравнивает поля. Схема всегда одна: тот же объект, значит true. Не точка или <code>null</code>, значит false, это проверяет <code>instanceof</code>. Дальше привести <code>o</code> к <code>Point</code> и сравнить поля.</p>
+    <p>Новые слова по порядку. <code>Object</code> это общий тип для любого объекта Java, в такой параметр можно передать и точку, и строку, и собаку. <code>o instanceof Point</code> отвечает true, если в <code>o</code> лежит точка, и false для <code>null</code>. <code>(Point) o</code> говорит компилятору «считай <code>o</code> точкой», только после этого у неё можно взять <code>p.x</code>. Поле <code>p.x</code> закрыто, но код внутри класса <code>Point</code> видит закрытые поля любой точки, не только своей.</p>
+    <p>Параметр именно <code>Object</code>, а не <code>Point</code>, иначе это не замена, и <code>@Override</code> не соберётся. Вместе с <code>equals</code> всегда заменяют <code>hashCode</code> по тем же полям. Этот метод сворачивает поля в одно число, а <code>Objects.hash(x, y)</code> считает его за тебя. Нужен он, когда объекты кладут в наборы <code>HashMap</code> и <code>HashSet</code>, они ищут объект сначала по этому числу. Обычному <code>ArrayList</code> хватает <code>equals</code>. IDEA пишет оба метода сама: Alt+Insert, equals() and hashCode().</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В классе <code>RawPoint</code> своего <code>equals</code> нет. Что даст <code>new RawPoint(1).equals(new RawPoint(1))</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>false</code>, проверено. Без своего <code>equals</code> работает стандартный, а он сравнивает ссылки, а объекта два.</p>
+          <p class="oshibka">Сравнивать строковые поля внутри <code>equals</code> через <code>==</code>: <code>name == p.name</code>. Строки сравнивают через <code>equals</code>, урок про строки, шаг 6. Надёжно для любых полей: <code>Objects.equals(name, p.name)</code>, он ещё и не падает на <code>null</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>equals(Object o)</code>: <code>this == o</code>, <code>instanceof</code>, привести, сравнить поля.</p>
+      <p>Вместе с ним <code>hashCode</code> по тем же полям.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР4</h2>
+    <ul>
+      <li>Поля <code>private</code>, геттеры и сеттеры по слайдам: шаги 2–4.</li>
+      <li>Проверка значений в сеттере и конструкторе: шаги 5–8.</li>
+      <li>Неизменяемый объект и <code>static</code> поля: шаги 9–10.</li>
+      <li><code>toString</code> и <code>equals</code> для вывода и сравнения: шаги 11–12.</li>
+    </ul>
+    <p>Перед сдачей проверь каждый класс: все поля <code>private</code>, нет сеттера у того, что меняться не должно, плохие значения не проходят ни через сеттер, ни через конструктор. В разделе ПР4 есть и слайды «ООП часть II», наследование и полиморфизм. Они в следующем уроке, <a href="java-nasledovanie.html">наследование и полиморфизм</a>.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: инкапсуляция">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Класс <code>Product</code>: название, цена, количество на складе. Все поля закрыты, геттеры на всё, сеттер цены с проверкой «больше нуля» через исключение. Покажи вызов с ценой −10 и что напечатала программа.
+      <textarea name="z1" placeholder="class Product { private …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Тот же <code>Product</code>: вместо сеттера количества методы <code>add(int n)</code> и <code>boolean take(int n)</code>. Нельзя забрать больше, чем есть, и нельзя ноль и минус. Проверь: было 10, <code>take(3)</code>, <code>take(20)</code>, <code>take(-1)</code>, что осталось?
+      <textarea name="z2" placeholder="public boolean take(int n) { …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Неизменяемый класс <code>Passport</code>: серия, номер, ФИО, все <code>final</code>, проверка в конструкторе, что серия из 4 цифр, номер из 6. Добавь <code>toString</code>.
+      <textarea name="z3" placeholder="class Passport { private final …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Класс <code>Ticket</code> со статическим счётчиком: каждый новый билет получает номер по порядку, 1, 2, 3, в <code>final</code> поле. Создай три билета и выведи их номера через <code>toString</code>.
+      <textarea name="z4" placeholder="private static int next = 1; …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Класс <code>Money</code> с полями рубли и копейки. <code>equals</code> и <code>hashCode</code> по обоим полям. Покажи, что <code>new Money(10, 50)</code> равен другому <code>new Money(10, 50)</code> по <code>equals</code>, но не по <code>==</code>.
+      <textarea name="z5" placeholder="@Override public boolean equals(Object o) { …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Проверка в конструкторе</td><td>Модуль X1: класс настроек обучения проверяет числа сразу при создании. Скорость обучения 0 или отрицательная должна падать до запуска, а не через час обучения.</td></tr>
+      <tr><td>Неизменяемый объект, toString, equals</td><td>Модуль A2: в Python это <code>@dataclass(frozen=True)</code>, он сам пишет вывод и сравнение по полям. Удобно для записей датасета и настроек опыта.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-nasledovanie.html">Дальше: наследование →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

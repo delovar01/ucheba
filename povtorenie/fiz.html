@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: физика — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · физика</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Физика: проверь себя</h1>
+  <p class="tiho">Колебания и волновая оптика, по пять вопросов на урок. Числа новые, не из уроков. Перед НТК, 20 минут.</p>
+  <p>Не помнишь, вернись в урок: 1–5 <a href="../uroki/fiz-kolebaniya.html">колебания и затухание</a>, 6–10 <a href="../uroki/fiz-volnovaya-optika.html">волновая оптика</a>.</p>
+
+  <h2>Одной страницей</h2>
+  <div class="tablica"><table>
+    <tr><th>что</th><th>формула</th></tr>
+    <tr><td>колебание</td><td><code>x = A·cos(ωt + φ₀)</code>, <code>ω = 2πν = 2π/T</code></td></tr>
+    <tr><td>пружина</td><td><code>T = 2π√(m/k)</code></td></tr>
+    <tr><td>нить</td><td><code>T = 2π√(l/g)</code></td></tr>
+    <tr><td>контур, Томсон</td><td><code>T = 2π√(LC)</code></td></tr>
+    <tr><td>энергия контура</td><td><code>CU₀²/2 = LI₀²/2</code></td></tr>
+    <tr><td>затухание</td><td><code>A = A₀·e^(−βt)</code>, <code>β = R/(2L)</code>, <code>τ = 1/β</code></td></tr>
+    <tr><td>декремент</td><td><code>λ = ln(Aₙ/Aₙ₊₁) = βT</code>, <code>Q = π/λ</code>, <code>Nₑ = 1/λ</code></td></tr>
+    <tr><td>критическое R</td><td><code>R_кр = 2√(L/C)</code></td></tr>
+    <tr><td>max и min</td><td><code>Δ = mλ</code> и <code>Δ = (2m + 1)·λ/2</code></td></tr>
+    <tr><td>две щели</td><td><code>Δx = Lλ/d</code></td></tr>
+    <tr><td>плёнка</td><td><code>Δ = 2dn (+ λ/2 при одном перевороте)</code></td></tr>
+    <tr><td>кольца Ньютона</td><td><code>r = √(mRλ)</code> тёмные в отражённом</td></tr>
+    <tr><td>лаба 26</td><td><code>λ = (D_m² − D_k²) / (4(m − k)R)</code></td></tr>
+    <tr><td>решётка</td><td><code>d·sin φ = mλ</code>, m меньше d/λ</td></tr>
+  </table></div>
+
+  <h2>Вопросы</h2>
+
+  <details class="vopros">
+    <summary>1. Грузик 0,5 кг на пружине 200 Н/м. Найди ω₀ и период.</summary>
+    <div><p>ω₀ = √(200/0,5) = √400 = 20 рад/с. T = 2π/20 ≈ 0,314 с.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>2. Нить 2,45 м. Период маятника? Изменится ли он, если груз взять вдвое тяжелее?</summary>
+    <div><p>T = 2π√(2,45/9,81) ≈ 3,14 с. Не изменится: у математического маятника период от массы не зависит.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>3. Контур: L = 4 мГн, C = 100 нФ. Найди ω₀, T и ν.</summary>
+    <div><p>LC = 4·10⁻³ · 10⁻⁷ = 4·10⁻¹⁰. ω₀ = 1/(2·10⁻⁵) = 5·10⁴ рад/с. T = 2π/ω₀ ≈ 0,126 мс. ν ≈ 7,96 кГц.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>4. Соседние горбы на осциллограмме 50 и 40 мм, период 0,2 мс. Найди λ, β и Q.</summary>
+    <div><p>λ = ln(50/40) = ln 1,25 ≈ 0,223. β = λ/T ≈ 0,223/(2·10⁻⁴) ≈ 1116 с⁻¹. Q = π/λ ≈ 14,1.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>5. L = 90 мГн, C = 1 мкФ. При каком сопротивлении колебания пропадут?</summary>
+    <div><p>R_кр = 2√(L/C) = 2√(0,09/10⁻⁶) = 2√90000 = 2·300 = 600 Ом. При 600 Ом и больше режим апериодический.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>6. Две щели на расстоянии 1 мм, экран в 3 м, свет 500 нм. Ширина полосы?</summary>
+    <div><p>Δx = Lλ/d = 3 · 5·10⁻⁷ / 10⁻³ = 1,5·10⁻³ м = 1,5 мм.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>7. Разность хода 3 мкм. Что в точке при λ = 600 нм и при λ = 400 нм?</summary>
+    <div><p>3000/600 = 5, целое, максимум. 3000/400 = 7,5, полуцелое, минимум.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>8. Почему центр колец Ньютона в отражённом свете тёмный?</summary>
+    <div><p>В центре зазор почти нулевой, d ≈ 0. Остаётся только потеря полуволны при отражении от пластинки: Δ = λ/2, это условие минимума.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>9. Лаба 26: R = 1 м, диаметры тёмных колец D₂ = 2,15 мм и D₅ = 3,40 мм. Найди λ.</summary>
+    <div><p>D₅² − D₂² = 11,56 − 4,62 = 6,94 мм² = 6,94·10⁻⁶ м². Знаменатель 4·3·1 = 12. λ ≈ 5,78·10⁻⁷ м = 578 нм, жёлтый свет.</p></div>
+  </details>
+  <details class="vopros">
+    <summary>10. Решётка 400 штрихов на мм, свет 650 нм. Угол первого максимума и наибольший порядок?</summary>
+    <div><p>d = 1/400 мм = 2,5 мкм. sin φ₁ = 0,65/2,5 = 0,26, φ₁ ≈ 15,1°. d/λ ≈ 3,85, наибольший порядок 3.</p></div>
+  </details>
+
+  <p class="niz"><a href="../fizika/">← Физика</a> · <a href="./">Всё повторение</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Классы, объекты и композиция — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-klassy">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Классы и объекты</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Классы, объекты и композиция</h1>
+  <p class="tiho">Java · лекция 21.09 (Корелин), его примеры seminar1, слайды «ООП часть I» · под ПР4, срок 1.12 · около 60 минут</p>
+
+  <p>До сих пор весь код жил в одном <code>main</code>. На лекции 21.09 Корелин показал, как раскладывать программу на объекты: машины, компьютер из деталей, шахматное поле из фигур, банк с клиентами и счетами. Десять шагов: класс и объект, поля, методы, конструктор, <code>this</code>, ссылки и <code>null</code>, а в конце композиция, когда объект собран из других объектов. Следующий урок, <a href="java-inkapsulyaciya.html">инкапсуляция</a>, закрывает поля от чужих рук, вместе они готовят к ПР4.</p>
+  <p>Нужны уроки <a href="java-tipy-if.html">типы и if</a> и <a href="java-cikly-metody.html">циклы и методы</a>. В уроке несколько классов лежат в одном файле <code>Main.java</code>, так короче. В IDEA каждый класс кладут в свой файл, это шаг 1.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>Класс и объект</h2>
+<pre><code>class Dog {
+    String name;
+    int age;
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Dog dog = new Dog();
+        dog.name = "Мухтар";
+        dog.age = 5;
+        System.out.println(dog.name);
+        System.out.println(dog.age);
+    }
+}</code></pre>
+<pre><code>Мухтар
+5</code></pre>
+    <p class="novoe">Класс это шаблон: он описывает, какие данные есть у каждой собаки. Объект это одна конкретная собака, сделанная по шаблону, его ещё называют экземпляром класса. <code>new Dog()</code> создаёт новый объект, а <code>Dog dog</code> объявляет переменную, через которую с ним работают. Класс <code>Dog</code> стал новым типом, как <code>int</code> или <code>String</code>.</p>
+    <p>Слайды: «Один класс, один файл». В IDEA <code>Dog</code> лежит в <code>Dog.java</code>, <code>Main</code> в <code>Main.java</code>, оба в <code>src</code>. Здесь <code>Dog</code> без слова <code>public</code>, поэтому Java разрешает держать его в чужом файле.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Опиши класс <code>Car</code> с полями марка, модель и год, как у Корелина в seminar1-oop, и создай одну машину Lada Granta 2020.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>class Car {
+    String make;
+    String model;
+    int year;
+}
+
+Car car = new Car();
+car.make = "Lada";
+car.model = "Granta";
+car.year = 2020;</code></pre>
+          <p>Последние четыре строки пишутся внутри <code>main</code>.</p>
+          <p class="oshibka">Назвать класс с маленькой буквы, <code>class car</code>. Соберётся, но по соглашению Java классы с большой буквы, переменные с маленькой. <code>Car car</code> читается сразу: тип и переменная.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Класс шаблон, объект экземпляр: <code>Dog dog = new Dog();</code></p>
+      <p>Каждый класс в своём файле с тем же именем.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>Поля: у каждого объекта свои</h2>
+    <p>В классе <code>Dog</code> поля <code>String name</code>, <code>int age</code>, <code>double height</code>, <code>boolean vaccinated</code>. Строки внутри <code>main</code>:</p>
+<pre><code>Dog empty = new Dog();
+System.out.println(empty.name + " " + empty.age + " " + empty.height + " " + empty.vaccinated);
+
+Dog a = new Dog();
+Dog b = new Dog();
+a.name = "Мухтар";
+b.name = "Рекс";
+a.age = 5;
+System.out.println(a.name + " " + a.age);
+System.out.println(b.name + " " + b.age);</code></pre>
+<pre><code>null 0 0.0 false
+Мухтар 5
+Рекс 0</code></pre>
+    <p class="novoe">Поле это переменная внутри объекта. Обращение через точку: <code>a.name</code>. Поле, которому ничего не присвоили, получает значение по умолчанию: числа 0, <code>boolean</code> false, а строки и другие объекты <code>null</code>, «ни на что не указывает».</p>
+    <p>У каждого объекта свой набор полей. Возраст поставили только Мухтару, у Рекса он остался 0.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Внутри метода <code>int x;</code> и сразу <code>System.out.println(x);</code> не собирается. А поле <code>age</code> без значения печатается как 0. В чём разница?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Локальная переменная внутри метода значения по умолчанию не получает, компилятор требует присвоить её до чтения: <code>variable x might not have been initialized</code>. Поля объекта Java заполняет сама при <code>new</code>.</p>
+          <p class="oshibka">Надеяться на 0 по умолчанию у поля, которое по смыслу не может быть 0. Собака с возрастом 0 и без имени выглядит как ошибка в данных. Это лечит конструктор, шаг 4.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Поле: переменная объекта, <code>obj.pole</code>. У каждого объекта свои.</p>
+      <p>По умолчанию: 0, false, <code>null</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>Метод объекта работает со своими полями</h2>
+<pre><code>class Dog {
+    String name;
+    int age;
+
+    void say() {
+        System.out.println(name + ": ГАВ!");
+    }
+
+    int humanAge() {
+        return age * 7;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>: Мухтару 5 лет, Рексу 2.</p>
+<pre><code>a.say();
+b.say();
+System.out.println(a.humanAge());
+System.out.println(b.humanAge());</code></pre>
+<pre><code>Мухтар: ГАВ!
+Рекс: ГАВ!
+35
+14</code></pre>
+    <p class="novoe">Метод без слова <code>static</code> принадлежит объекту. Его вызывают через объект, <code>a.say()</code>, и внутри метода <code>name</code> и <code>age</code> это поля именно того объекта, у которого вызвали. Тот же код <code>say</code> печатает разное для <code>a</code> и <code>b</code>.</p>
+    <p>Статические методы из урока про циклы вызывались без объекта. Объектный метод без объекта вызвать нельзя: непонятно, чьё имя печатать.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Добавь в <code>Dog</code> метод <code>boolean isOld()</code>, который отвечает true, если собаке больше 10 лет. Что он вернёт для Мухтара?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>boolean isOld() {
+    return age &gt; 10;
+}</code></pre>
+          <p>Для Мухтара false, ему 5.</p>
+          <p class="oshibka">Передавать возраст параметром, <code>isOld(int age)</code>, и вызывать <code>a.isOld(a.age)</code>. Объект и так знает свой возраст, параметр лишний и даёт шанс передать чужой.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Метод без <code>static</code> вызывается через объект: <code>a.say()</code>.</p>
+      <p>Внутри метода поля того объекта, у которого вызвали.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>Конструктор: объект сразу с данными</h2>
+<pre><code>class Dog {
+    String name;
+    int age;
+
+    Dog(String n, int a) {
+        name = n;
+        age = a;
+    }
+
+    void say() {
+        System.out.println(name + ", возраст " + age + ": ГАВ!");
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Dog a = new Dog("Мухтар", 5);
+Dog b = new Dog("Рекс", 2);
+a.say();
+b.say();</code></pre>
+<pre><code>Мухтар, возраст 5: ГАВ!
+Рекс, возраст 2: ГАВ!</code></pre>
+    <p class="novoe">Конструктор это особый метод, который заполняет объект при создании. Имя совпадает с именем класса, типа возврата нет, даже <code>void</code>. Вызывается он сам, через <code>new</code>: значения в скобках <code>new Dog("Мухтар", 5)</code> попадают в параметры конструктора.</p>
+    <p>По слайдам: если в классе нет ни одного конструктора, Java сама добавляет пустой, конструктор по умолчанию. Поэтому в шагах 1–3 работал <code>new Dog()</code>. Конструкторов можно написать несколько, с разными параметрами.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В класс с конструктором выше дописали <code>Dog d = new Dog();</code>. Соберётся?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:13: error: constructor Dog in class Dog cannot be applied to given types;
+        Dog d = new Dog();
+                ^
+  required: String,int
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+1 error</code></pre>
+          <p>Нет. Как только написал свой конструктор, пустой по умолчанию пропал. Сообщение: нужны <code>String,int</code>, а дали ничего. Нужен пустой, допиши его сам: <code>Dog() {}</code>.</p>
+          <p class="oshibka">Перепутать порядок, <code>new Dog(5, "Мухтар")</code>. Компилятор тоже откажет, ведь первым ждёт String. А вот два параметра одного типа, например два <code>String</code>, перепутать легко и компилятор промолчит.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Конструктор: <code>Dog(параметры) { поля = … }</code>, имя класса, без типа.</p>
+      <p>Свой конструктор отменяет пустой по умолчанию.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>this: поле или параметр</h2>
+    <p>Пример со слайдов. Параметры назвали так же, как поля, это удобно, но вот что выходит:</p>
+<pre><code>class Student {
+    String name;
+    int age;
+
+    Student(String name, int age) {
+        name = name;
+        age = age;
+    }
+}</code></pre>
+    <p><code>new Student("Анна", 19)</code>, печатаем поля:</p>
+<pre><code>null 0</code></pre>
+    <p class="novoe">Параметр с тем же именем перекрывает поле. Внутри конструктора <code>name</code> значит параметр, и <code>name = name</code> присваивает параметр сам себе, поле не тронуто. <code>this</code> это ссылка на текущий объект, тот, который сейчас создаётся. <code>this.name</code> всегда поле.</p>
+<pre><code>Student(String name, int age) {
+    this.name = name;
+    this.age = age;
+}</code></pre>
+<pre><code>Анна 19</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В конструкторе <code>Dog(String n, int a)</code> из шага 4 нужен ли <code>this</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Не нужен: имена разные, <code>name</code> там может значить только поле. Но принято называть параметры как поля и писать <code>this.</code>, так читается, какой параметр куда идёт. IDEA сама так генерирует конструктор: Alt+Insert, Constructor.</p>
+          <p class="oshibka">Код <code>name = name</code> собирается без единого предупреждения от <code>javac</code>. Ошибка вылезает позже, <code>null</code> на выводе. Видишь <code>null</code> в только что созданном объекте, первым делом проверь <code>this</code> в конструкторе.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>this.name = name;</code> поле слева, параметр справа.</p>
+      <p><code>null</code> сразу после <code>new</code> значит забыт <code>this</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>Переменная хранит ссылку</h2>
+    <p>Класс <code>Dog</code> с конструктором и <code>this</code>. Строки внутри <code>main</code>:</p>
+<pre><code>Dog a = new Dog("Мухтар", 5);
+Dog b = a;
+b.age = 6;
+System.out.println(a.age);
+Dog c = new Dog("Мухтар", 6);
+System.out.println(a == b);
+System.out.println(a == c);</code></pre>
+<pre><code>6
+true
+false</code></pre>
+    <p class="novoe">Переменная объектного типа хранит не сам объект, а ссылку на него, адрес. <code>Dog b = a;</code> копирует ссылку, а не собаку: обе переменные смотрят на один объект. Поэтому меняли через <code>b</code>, а изменилось и у <code>a</code>. <code>==</code> у объектов сравнивает ссылки: <code>a</code> и <code>c</code> разные объекты, хоть поля и одинаковые.</p>
+    <p>Это то же правило, что со строками в уроке про строки: String тоже объект. Сравнивать объекты по содержимому учит следующий урок, метод <code>equals</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает?
+<pre><code>Dog x = new Dog("Бим", 3);
+Dog y = new Dog("Бим", 3);
+y.age = 4;
+Dog z = x;
+z.name = "Чёрное ухо";
+System.out.println(x.name + " " + x.age);
+System.out.println(y.name + " " + y.age);</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Чёрное ухо 3
+Бим 4</code></pre>
+          <p><code>z</code> и <code>x</code> один объект, имя поменялось у <code>x</code>. <code>y</code> отдельный объект, у него поменялся только возраст.</p>
+          <p class="oshibka">Думать, что <code>Dog z = x;</code> делает копию собаки. Копии нет, есть второе имя для того же объекта. Нужна копия, создай новый объект через <code>new</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>b = a</code> копирует ссылку, объект один.</p>
+      <p><code>==</code> у объектов: тот же ли это объект.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>null и NullPointerException</h2>
+    <p>Класс <code>Dog</code> с методом <code>say</code>. Строки внутри <code>main</code>:</p>
+<pre><code>Dog dog = null;
+System.out.println("Собака: " + dog);
+if (dog != null) {
+    dog.say();
+}
+dog.say();</code></pre>
+<pre><code>Собака: null
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "Dog.say()" because "dog" is null
+	at Main.main(Main.java:20)</code></pre>
+    <p class="novoe"><code>null</code> значит «ссылка никуда не указывает, объекта нет». Напечатать <code>null</code> можно. Вызвать у него метод или взять поле нельзя: программа падает с <code>NullPointerException</code>. Сообщение прямо говорит, что пытались вызвать и какая переменная оказалась пустой.</p>
+    <p>Защита: проверить <code>if (dog != null)</code> перед вызовом. Проверять на <code>null</code> через <code>==</code> и <code>!=</code> правильно. Подробно про исключения и <code>null</code> лекция 12.10.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Поле <code>String name</code> никто не заполнил. Что будет на <code>dog.name.length()</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Тот же <code>NullPointerException</code>: объект <code>dog</code> есть, а в поле <code>name</code> по умолчанию <code>null</code>, и у него вызвали <code>length()</code>. Сообщение скажет <code>because "dog.name" is null</code>.</p>
+          <p class="oshibka">Чинить падение, оборачивая всё подряд в проверки на <code>null</code>. Лучше не давать полю родиться пустым: заполнить его в конструкторе.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>null</code>: объекта нет. Метод у <code>null</code> даёт <code>NullPointerException</code>.</p>
+      <p>Проверка: <code>if (x != null)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>Композиция: объект из объектов</h2>
+    <p>Пример Корелина seminar1-composition: компьютер собран из деталей. Здесь упрощённо, две детали.</p>
+<pre><code>class Cpu {
+    String name;
+    double price;
+    int cores;
+
+    Cpu(String name, double price, int cores) {
+        this.name = name;
+        this.price = price;
+        this.cores = cores;
+    }
+}
+
+class Ram {
+    String name;
+    double price;
+    int sizeGb;
+
+    Ram(String name, double price, int sizeGb) {
+        this.name = name;
+        this.price = price;
+        this.sizeGb = sizeGb;
+    }
+}
+
+class Computer {
+    Cpu cpu;
+    Ram ram;
+
+    Computer(Cpu cpu, Ram ram) {
+        this.cpu = cpu;
+        this.ram = ram;
+    }
+
+    double totalPrice() {
+        return cpu.price + ram.price;
+    }
+
+    void printSpecs() {
+        System.out.println("CPU: " + cpu.name + ", ядер " + cpu.cores);
+        System.out.println("RAM: " + ram.name + ", " + ram.sizeGb + " ГБ");
+        System.out.println("Итого: $" + totalPrice());
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Cpu cpu = new Cpu("Intel i7", 300.0, 8);
+Ram ram = new Ram("Corsair Vengeance", 150.0, 16);
+Computer pc = new Computer(cpu, ram);
+pc.printSpecs();</code></pre>
+<pre><code>CPU: Intel i7, ядер 8
+RAM: Corsair Vengeance, 16 ГБ
+Итого: $450.0</code></pre>
+    <p class="novoe">Композиция это когда поле объекта само является объектом. У компьютера есть процессор и память, и каждая деталь отвечает за свои данные. Компьютер не повторяет поля деталей, он спрашивает их: <code>cpu.price</code>. Отношение читается словом «имеет»: компьютер имеет процессор.</p>
+    <p>В шахматах лектора, seminar1-chess, так же: поле <code>Field</code> имеет доску 8 на 8 из фигур, игра <code>Game</code> имеет список игроков.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> После сборки поменяли память: <code>pc.ram = new Ram("Kingston", 90.0, 8);</code>. Что вернёт <code>pc.totalPrice()</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>390.0</code>: 300 за процессор и 90 за новую память. Деталь заменили, компьютер считает по той, на которую сейчас ссылается поле.</p>
+          <p class="oshibka">Собрать компьютер без детали, <code>new Computer(cpu, null)</code>. Он создастся, а упадёт позже, на <code>totalPrice</code>: <code>Cannot read field "price" because "this.ram" is null</code>. Деталь обязательна, значит проверять её надо в конструкторе, об этом следующий урок.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Композиция: поле объекта это другой объект, «имеет».</p>
+      <p>Целое спрашивает части: <code>cpu.price + ram.price</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>Части списком: ArrayList</h2>
+    <p>У Корелина <code>Computer</code> хранит не по полю на деталь, а список: деталей может быть сколько угодно, две планки памяти тоже.</p>
+<pre><code>import java.util.ArrayList;
+
+class Part {
+    String name;
+    double price;
+
+    Part(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+}
+
+class Computer {
+    ArrayList&lt;Part&gt; parts = new ArrayList&lt;&gt;();
+
+    void add(Part p) {
+        parts.add(p);
+    }
+
+    double totalPrice() {
+        double sum = 0;
+        for (Part p : parts) {
+            sum += p.price;
+        }
+        return sum;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>, детали и цены из примера лектора:</p>
+<pre><code>Computer pc = new Computer();
+pc.add(new Part("ASUS ROG", 200.0));
+pc.add(new Part("Intel i7", 300.0));
+pc.add(new Part("Corsair Vengeance", 150.0));
+pc.add(new Part("Corsair Vengeance", 150.0));
+pc.add(new Part("NVIDIA GTX 1080", 500.0));
+pc.add(new Part("Samsung SSD", 200.0));
+pc.add(new Part("Corsair RM750x", 120.0));
+System.out.println("Деталей: " + pc.parts.size());
+System.out.println("Итого: $" + pc.totalPrice());</code></pre>
+<pre><code>Деталей: 7
+Итого: $1620.0</code></pre>
+    <p class="novoe"><code>ArrayList&lt;Part&gt;</code> это список объектов <code>Part</code>, который растёт сам, в отличие от массива. <code>add</code> кладёт в конец, <code>size()</code> возвращает число элементов. Цикл <code>for (Part p : parts)</code> читается «для каждой детали p из списка»: он проходит все элементы по очереди без индексов.</p>
+    <p>Цикл «для каждого» делает то же, что знакомый цикл по номерам, только короче. Взять элемент по номеру можно через <code>parts.get(i)</code>:</p>
+<pre><code>for (int i = 0; i &lt; parts.size(); i++) {
+    Part p = parts.get(i);
+    sum += p.price;
+}</code></pre>
+    <p>Тип в угловых скобках обязателен, а справа хватает пустых <code>&lt;&gt;</code>. Нужен <code>import java.util.ArrayList;</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько деталей дешевле 200? Напиши цикл в <code>main</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int cheap = 0;
+for (Part p : pc.parts) {
+    if (p.price &lt; 200) {
+        cheap++;
+    }
+}
+System.out.println("Дешевле 200: " + cheap);</code></pre>
+          <p><code>Дешевле 200: 3</code>: две планки по 150 и блок питания за 120. Детали ровно за 200 не дешевле 200.</p>
+          <p class="oshibka">Написать <code>ArrayList&lt;int&gt;</code> или забыть тип совсем. В угловых скобках только класс. Для чисел у Java есть классы <code>Integer</code> и <code>Double</code>, это те же int и double в виде объекта: <code>ArrayList&lt;Integer&gt;</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ArrayList&lt;T&gt; list = new ArrayList&lt;&gt;();</code> <code>add</code>, <code>size()</code>.</p>
+      <p>Обход: <code>for (T x : list)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>Модель банка: клиенты, счета, перевод</h2>
+    <p>Задача с лекции, seminar1-todo-bank: банк заводит счета клиентам и переводит деньги между ними. Сначала решить, какие классы нужны: счёт знает номер и баланс, клиент имеет список счетов, банк проводит перевод.</p>
+<pre><code>import java.util.ArrayList;
+
+class Account {
+    String number;
+    double balance;
+
+    Account(String number, double balance) {
+        this.number = number;
+        this.balance = balance;
+    }
+
+    void deposit(double amount) {
+        balance += amount;
+    }
+
+    boolean withdraw(double amount) {
+        if (amount &gt; balance) {
+            return false;
+        }
+        balance -= amount;
+        return true;
+    }
+}
+
+class Client {
+    String name;
+    ArrayList&lt;Account&gt; accounts = new ArrayList&lt;&gt;();
+
+    Client(String name) {
+        this.name = name;
+    }
+
+    void addAccount(Account a) {
+        accounts.add(a);
+    }
+
+    double total() {
+        double sum = 0;
+        for (Account a : accounts) {
+            sum += a.balance;
+        }
+        return sum;
+    }
+}
+
+class Bank {
+    static boolean transfer(Account from, Account to, double amount) {
+        if (!from.withdraw(amount)) {
+            return false;
+        }
+        to.deposit(amount);
+        return true;
+    }
+}</code></pre>
+    <p>У Анны карта на 1000 и накопительный на 5000, у Бориса карта на 200. Строки внутри <code>main</code>:</p>
+<pre><code>Client anna = new Client("Анна");
+Account card = new Account("A-1", 1000);
+Account savings = new Account("A-2", 5000);
+anna.addAccount(card);
+anna.addAccount(savings);
+
+Client boris = new Client("Борис");
+Account bCard = new Account("B-1", 200);
+boris.addAccount(bCard);
+
+System.out.println(Bank.transfer(card, bCard, 300));
+System.out.println(card.balance + " " + bCard.balance);
+System.out.println(Bank.transfer(card, bCard, 900));
+System.out.println(card.balance + " " + bCard.balance);
+System.out.println(anna.name + ": " + anna.total());</code></pre>
+<pre><code>true
+700.0 500.0
+false
+700.0 500.0
+Анна: 5700.0</code></pre>
+    <p class="novoe">Модель классов строят от существительных задачи: банк, клиент, счёт. Каждое действие кладут в тот класс, чьи данные оно меняет. Снять деньги меняет баланс счёта, значит <code>withdraw</code> в <code>Account</code>. Перевод касается двух счетов, значит он в <code>Bank</code>. Клиент имеет счета, это список из шага 9.</p>
+    <p><code>transfer</code> помечен <code>static</code>, как методы из урока про циклы. Объект банка ему не нужен, поэтому его зовут через имя класса: <code>Bank.transfer(...)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Почему в <code>transfer</code> сначала <code>withdraw</code>, а потом <code>deposit</code>? Что будет при переводе 900, если поменять их местами?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Снятие может не получиться, и тогда перевод отменяется целиком. Если сначала положить, Борис получит 900, потом снятие с карты Анны на 700 не пройдёт, и деньги появятся из воздуха: у Бориса 1400, у Анны так и 700.</p>
+          <p class="oshibka">Менять баланс напрямую из <code>main</code>: <code>card.balance -= 900;</code>. Проверки в <code>withdraw</code> обойдены, баланс уходит в минус. Как запретить так делать, разбирает урок про инкапсуляцию.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Классы от существительных задачи, действие в классе, чьи данные меняет.</p>
+      <p>Сначала проверить и снять, потом положить.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Что из этого нужно для ПР4</h2>
+    <ul>
+      <li>Описать класс с полями и методами, создать объекты: шаги 1–3.</li>
+      <li>Конструктор с <code>this</code>: шаги 4–5, без него ПР4 не обходится.</li>
+      <li>Объект из объектов и списки объектов: шаги 8–10.</li>
+    </ul>
+    <p>В примерах Корелина ещё есть <code>extends</code>, <code>abstract</code> и <code>interface</code>, это наследование и полиморфизм, слайды «ООП часть II». Здесь их нет намеренно.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: классы и объекты">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Класс <code>Book</code>: название, автор, число страниц, конструктор с <code>this</code>. Метод <code>boolean isLong()</code>, true при больше 400 страниц. Создай две книги и выведи для каждой название и <code>isLong()</code>.
+      <textarea name="z1" placeholder="class Book { …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Что напечатает этот код и почему? <code>Book a = new Book("Мы", "Замятин", 220); Book b = a; b.pages = 500; System.out.println(a.pages + " " + (a == b));</code>
+      <textarea name="z2" placeholder="Напечатает … потому что …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Класс <code>Point</code> с полями <code>x</code>, <code>y</code> и класс <code>Segment</code>, который имеет две точки и метод <code>double length()</code>. Длина по теореме Пифагора, корень считает <code>Math.sqrt(число)</code>. Проверь на точках (0, 0) и (3, 4), ответ 5.0.
+      <textarea name="z3" placeholder="class Point { … } class Segment { …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Класс <code>Order</code> имеет список товаров <code>ArrayList&lt;Item&gt;</code>, у товара название, цена и количество. Метод <code>total()</code> считает цену заказа. Проверь: 2 тетради по 45 и 1 ручка за 30, итог 120.0.
+      <textarea name="z4" placeholder="class Item { … } class Order { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Дополни модель банка из шага 10: метод <code>Account findAccount(String number)</code> в классе <code>Client</code>, который возвращает счёт по номеру или <code>null</code>, если такого нет. Покажи, как вызвать перевод так, чтобы на несуществующем номере программа не упала.
+      <textarea name="z5" placeholder="Account findAccount(String number) { …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Класс, конструктор, методы</td><td>Модуль A4: модель в PyTorch это класс. В конструкторе <code>__init__</code> создают слои, метод <code>forward</code> считает ответ, а <code>self</code> там значит то же, что <code>this</code>.</td></tr>
+      <tr><td>Композиция</td><td>Модуль A4: модель собирают из слоёв-объектов, как компьютер из деталей. Сеть имеет слои, слой имеет веса.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-inkapsulyaciya.html">Дальше: инкапсуляция →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

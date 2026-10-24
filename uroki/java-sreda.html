@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Среда разработки и первая программа — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-sreda">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Среда разработки</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Среда разработки и первая программа</h1>
+  <p class="tiho">Java · лаба 8.09, конспект 01 · до всех ПР · около 40 минут</p>
+
+  <p>Самый первый урок по Java, до <a href="java-tipy-if.html">типов и if</a>. Девять шагов: поставить JDK, собрать и запустить программу руками, завести проект в IntelliJ IDEA, читать сообщения об ошибках и остановить программу отладчиком на нужной строке. Это нужно на каждой лабе: половина времени уходит не на задачу, а на «почему не запускается».</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» и только потом открываешь ответ. Все сообщения об ошибках в уроке настоящие, получены запуском на JDK 21.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>JDK: что ставить и как проверить</h2>
+    <p>Чтобы писать на Java, на компьютере нужен JDK. Проверяют его в терминале, окне для текстовых команд: нажми Win+R, набери <code>cmd</code> и Enter. Две команды:</p>
+<pre><code>java -version
+javac -version</code></pre>
+<pre><code>openjdk version "21.0.12.1" 2026-08-18 LTS
+OpenJDK Runtime Environment Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.12.1+1 (build 21.0.12.1+1-LTS, mixed mode, sharing)
+javac 21.0.12.1</code></pre>
+    <p class="novoe">JDK, набор разработчика, состоит из двух главных программ. <code>javac</code> это компилятор: он проверяет твой код и переводит его в байт-код. <code>java</code> это виртуальная машина JVM: она исполняет байт-код. Байт-код это команды не для процессора, а для JVM, поэтому одна программа идёт и на Windows, и на Linux.</p>
+    <p>Где взять: сайт adoptium.net, Temurin 21, Windows x64, JDK, файл <code>.msi</code>. При установке проверь, что включена «Add to PATH», и включи «Set JAVA_HOME»: она по умолчанию выключена. PATH это список папок, где Windows ищет программу по имени. Без него терминал не найдёт <code>javac</code>. Проще всего поставить JDK прямо из IDEA, это шаг 3.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> На компьютере в аудитории <code>java -version</code> отвечает версией, а <code>javac -version</code> пишет «не является внутренней или внешней командой». Что стоит на этом компьютере?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Стоит только JRE, среда для запуска готовых программ, без компилятора. Запускать чужие программы можно, собрать свою нельзя. Нужен полный JDK. Второй вариант: JDK поставили, но терминал открыт ещё до установки и не знает нового PATH. Открой новое окно терминала.</p>
+          <p class="oshibka">Проверить только <code>java -version</code> и решить, что всё стоит. Ошибка вылезет позже, на первой сборке.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>JDK = <code>javac</code> (компилятор) + <code>java</code> (JVM, исполняет байт-код).</p>
+      <p>Проверка: обе команды <code>-version</code> отвечают версией.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>Собрать и запустить руками</h2>
+    <p>Файл <code>Main.java</code> в папке <code>C:\java</code>:</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Лаба 1 работает");
+    }
+}</code></pre>
+    <p>Каркас пока не разбирай по словам, переписывай как есть. Первая строка заводит класс <code>Main</code>, вторая его метод <code>main</code>, а <code>System.out.println("…")</code> печатает текст из кавычек. По словам каркас разберём в уроке про типы и if.</p>
+    <p>В терминале команда <code>cd</code> переходит в папку, дальше две команды Java:</p>
+<pre><code>cd C:\java
+javac Main.java
+java Main</code></pre>
+<pre><code>Лаба 1 работает</code></pre>
+    <p class="novoe">Две команды, два этапа. <code>javac Main.java</code> компилирует: рядом появляется файл <code>Main.class</code> с байт-кодом. <code>java Main</code> запускает: JVM берёт класс <code>Main</code> и выполняет его метод <code>main</code>. Метод <code>main</code> это точка входа, с его первой строки начинается любая программа.</p>
+    <p>Если ошибка в коде, <code>javac</code> скажет о ней и <code>.class</code> не создаст. Запускать тогда нечего. Есть короткий путь одной командой, <code>java Main.java</code>, он сам компилирует в памяти и запускает. На лабах всё равно работают в IDEA, но знать два этапа надо: так понятнее, какая ошибка откуда.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> После <code>javac Main.java</code> студент запускает <code>java Main.class</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Error: Could not find or load main class Main.class
+Caused by: java.lang.ClassNotFoundException: Main.class</code></pre>
+          <p>Команде <code>java</code> нужно имя класса, а не имя файла. Она ищет класс с именем «Main.class» и не находит. Правильно <code>java Main</code>.</p>
+          <p class="oshibka">Путать, кому что давать. <code>javac</code> получает имя файла с <code>.java</code>, <code>java</code> получает имя класса без всякого расширения.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>javac Main.java</code> даёт <code>Main.class</code>, <code>java Main</code> запускает.</p>
+      <p>Программа начинается с первой строки метода <code>main</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>Проект в IntelliJ IDEA</h2>
+    <p>IDE это редактор, который сам компилирует, запускает и подсвечивает ошибки. На лабах берут IntelliJ IDEA Community, она бесплатная. Новый проект:</p>
+    <ol>
+      <li>File, New, Project. Слева Java.</li>
+      <li>Name: <code>java-praktiki</code>. Build system: IntelliJ.</li>
+      <li>JDK: если в списке пусто, пункт Download JDK, версия 21, Eclipse Temurin. IDEA скачает и поставит его сама.</li>
+      <li>Галочка Add sample code, чтобы сразу был файл с <code>main</code>. Create.</li>
+    </ol>
+<pre><code>java-praktiki/
+  src/
+    Main.java
+  out/
+  java-praktiki.iml</code></pre>
+    <p class="novoe">Проект это папка, в которой IDEA хранит код и свои настройки. Твой код лежит в <code>src</code>, это папка исходников. В <code>out</code> IDEA складывает готовые <code>.class</code>, туда руками не ходят. Файл <code>.iml</code> и папка <code>.idea</code> это настройки проекта.</p>
+    <p>Новый класс: правой кнопкой по <code>src</code>, New, Java Class, имя <code>Task2</code>. IDEA сама создаст файл <code>Task2.java</code> с пустым классом.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Студент создал файл <code>Task2.java</code> не в <code>src</code>, а прямо в корне проекта, рядом с <code>.iml</code>. Иконка у файла серая, кнопки запуска нет. Почему?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>IDEA компилирует только то, что лежит в папке исходников <code>src</code>. Файл вне неё для неё просто текст. Перетащи файл в <code>src</code> или создай класс заново через New, Java Class на папке <code>src</code>.</p>
+          <p class="oshibka">Создавать файлы через проводник Windows в случайной папке. Создавай через IDEA, правой кнопкой по <code>src</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Код живёт в <code>src</code>, готовые классы в <code>out</code>.</p>
+      <p>Новый класс: правой по <code>src</code>, New, Java Class.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>Запуск в IDEA и имя файла</h2>
+    <p>Слева от строки <code>public static void main</code> зелёный треугольник. Нажал, Run. Или Shift+F10. Внизу открывается окно Run:</p>
+<pre><code>Лаба 1 работает
+
+Process finished with exit code 0</code></pre>
+    <p>Код выхода 0 значит «программа дошла до конца без сбоя». Если программа ждёт ввод, печатаешь прямо в окне Run и жмёшь Enter.</p>
+    <p class="novoe">Имя публичного класса, то есть класса со словом <code>public</code> впереди, совпадает с именем файла. <code>public class Main</code> может лежать только в <code>Main.java</code>, <code>public class Task2</code> только в <code>Task2.java</code>. Иначе компилятор откажется собирать.</p>
+    <p>Вот что выйдет, если в файле <code>Main.java</code> написать <code>public class Hello</code>:</p>
+<pre><code>Main.java:1: error: class Hello is public, should be declared in a file named Hello.java
+public class Hello {
+       ^
+1 error</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Переведи сообщение выше своими словами и назови два способа починить.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>«Класс Hello публичный, он должен лежать в файле Hello.java». Способ первый: переименовать класс в <code>Main</code>. Способ второй: переименовать файл в <code>Hello.java</code>. В IDEA это правой кнопкой по файлу, Refactor, Rename, тогда имя поменяется везде сразу.</p>
+          <p class="oshibka">Скопировать код задачи из чужого файла целиком, вместе со строкой <code>public class</code> чужого имени. Скопировал, первым делом поправь имя класса под свой файл.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Запуск: зелёный треугольник у <code>main</code> или Shift+F10. Ввод печатаешь в окне Run.</p>
+      <p><code>public class X</code> лежит только в <code>X.java</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>Читать сообщение компилятора</h2>
+    <p>Программа с ошибкой, в четвёртой строке нет точки с запятой. Строка <code>int a = 7;</code> заводит целое число <code>a</code>, равное 7, а <code>println(a * 2)</code> печатает удвоенное. Переменные подробно в следующем уроке.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        int a = 7;
+        System.out.println(a * 2)
+        System.out.println("Готово");
+    }
+}</code></pre>
+<pre><code>Main.java:4: error: ';' expected
+        System.out.println(a * 2)
+                                 ^
+1 error</code></pre>
+    <p class="novoe">Сообщение компилятора читается слева направо: файл <code>Main.java</code>, номер строки <code>4</code>, слово <code>error</code>, потом что не так. Ниже сама строка, а значок <code>^</code> показывает место, где компилятор споткнулся. Последняя строка говорит, сколько всего ошибок.</p>
+    <p>В IDEA та же ошибка видна дважды: строка подчёркнута красным ещё до запуска, а при запуске окно Build пишет <code>java: ';' expected</code> со ссылкой на строку. Чинить всегда с первой ошибки в списке. Одна пропущенная скобка часто даёт ещё несколько ошибок ниже, и они исчезают сами.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что сломано и в какой строке? Сначала найди глазами, потом открой ответ.
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Первая строка");
+        System.out.println("Вторая строка);
+    }
+}</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:4: error: unclosed string literal
+        System.out.println("Вторая строка);
+                           ^
+1 error</code></pre>
+          <p>«Незакрытая строка» в строке 4: после слова <code>строка</code> нет закрывающей кавычки. Значок стоит на открывающей кавычке, откуда строка началась. Правильно <code>"Вторая строка");</code>.</p>
+          <p class="oshibka">Искать ошибку там, где стоит <code>^</code>, буквально. Значок показывает, где компилятор понял, что что-то не так. Сама причина может быть чуть левее или в конце той же строки.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Файл:строка: error: что не так</code>, ниже строка и <code>^</code>.</p>
+      <p>Чини с первой ошибки, остальные часто уходят сами.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>cannot find symbol: опечатка в имени</h2>
+    <p>Самая частая ошибка на лабах. Переменная называется <code>total</code>, а напечатать пытаемся <code>totl</code>:</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        int total = 5;
+        System.out.println(totl);
+    }
+}</code></pre>
+<pre><code>Main.java:4: error: cannot find symbol
+        System.out.println(totl);
+                           ^
+  symbol:   variable totl
+  location: class Main
+1 error</code></pre>
+    <p class="novoe"><code>cannot find symbol</code> значит «не знаю такого имени». Две строки ниже уточняют: <code>symbol</code> что именно не найдено, здесь переменная <code>totl</code>, а <code>location</code> где искали, в классе <code>Main</code>. Причин три. Опечатка. Переменная заведена внутри других фигурных скобок и отсюда не видна. Забыт <code>import</code>, строка в начале файла, которая подключает готовый класс, о ней шаг 9.</p>
+    <p>Java различает большие и маленькие буквы. <code>Total</code> и <code>total</code> это два разных имени.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Студент написал <code>system.out.println("Привет");</code> с маленькой s. Что скажет компилятор?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:3: error: package system does not exist
+        system.out.println("Привет");
+              ^
+1 error</code></pre>
+          <p>Не <code>cannot find symbol</code>, а «пакета system не существует». Компилятор не нашёл класса <code>system</code> и решил, что это имя пакета, то есть папки с классами. Класс называется <code>System</code> с большой буквы.</p>
+          <p class="oshibka">Ждать дословно знакомое сообщение. Текст бывает разный, а причина одна и та же: имя написано не так. Сначала проверь буквы и регистр.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>cannot find symbol</code>: смотри строку <code>symbol</code>, там неизвестное имя.</p>
+      <p>Регистр важен: <code>System</code>, не <code>system</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>Ошибка во время работы: исключение</h2>
+    <p>Эта программа компилируется без ошибок. Падает она уже при запуске:</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        int apples = 10;
+        int people = 0;
+        System.out.println("Делим яблоки");
+        System.out.println(apples / people);
+        System.out.println("Конец");
+    }
+}</code></pre>
+<pre><code>Делим яблоки
+Exception in thread "main" java.lang.ArithmeticException: / by zero
+	at Main.main(Main.java:6)</code></pre>
+    <p class="novoe">Исключение это ошибка, которая случилась во время работы программы. Компилятор её не видит, ведь код написан правильно, просто данные плохие. Программа останавливается на этой строке, дальше не идёт: «Конец» не напечатан. В IDEA код выхода будет 1, а не 0.</p>
+    <p>Читать так: тип исключения <code>ArithmeticException</code>, «арифметическая ошибка», пояснение <code>/ by zero</code>, «деление на ноль». Строка <code>at Main.main(Main.java:6)</code> говорит, где: метод <code>main</code> класса <code>Main</code>, файл <code>Main.java</code>, строка 6. В IDEA <code>Main.java:6</code> синяя, по ней можно нажать и перейти к строке.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Ошибка компиляции или исключение? Разложи: пропущена <code>;</code>, деление на ноль, опечатка в имени переменной, ввели буквы там, где программа ждала число.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Компиляция: пропущенная <code>;</code> и опечатка в имени. Их видно по тексту программы, она даже не запустится. Исключения: деление на ноль и буквы вместо числа. Это зависит от данных, программа запустится и упадёт по ходу.</p>
+          <p class="oshibka">Думать, что раз программа собралась, она верная. Сборка проверяет только запись. Деление на ноль и плохой ввод ловятся только запуском на разных данных.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Исключение: программа собралась, но упала при запуске.</p>
+      <p>Читай тип, пояснение и строку <code>at …(Main.java:N)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>Отладчик: остановиться и посмотреть переменные</h2>
+    <p>Программа должна сложить 1 + 2 + 3 + 4 = 10, но печатает другое. Ошибки нет, просто ответ неверный.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        int sum = 0;
+        for (int i = 1; i &lt; 4; i++) {
+            sum += i;
+        }
+        System.out.println("Сумма от 1 до 4: " + sum);
+    }
+}</code></pre>
+<pre><code>Сумма от 1 до 4: 6</code></pre>
+    <p class="novoe">Отладчик запускает программу и останавливает её на точке останова, чтобы посмотреть значения переменных. Точку ставят кликом по полю слева от номера строки, появляется красный кружок. Запуск не Run, а Debug: значок жука рядом с треугольником или Shift+F9.</p>
+    <p>Поставь точку на строку <code>sum += i;</code> и запусти Debug. Программа встанет на ней, внизу окно Variables покажет <code>i</code> и <code>sum</code>. F9 (Resume) едет до следующей остановки. F8 (Step Over) делает ровно одну строку.</p>
+    <p>Цикл <code>for</code> подробно разберём в уроке про циклы. Пока хватит такого чтения: <code>i</code> начинается с 1, после каждого круга растёт на 1, и строка <code>sum += i;</code> повторяется, пока верно условие <code>i &lt; 4</code>. Сама строка <code>sum += i</code> прибавляет <code>i</code> к <code>sum</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Точка останова на <code>sum += i;</code>, жмёшь F9 после каждой остановки. Сколько раз программа встанет и какие <code>i</code> и <code>sum</code> покажет каждый раз? Где ошибка?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Три остановки. Окно показывает значения до выполнения строки: i = 1, sum = 0, потом i = 2, sum = 1, потом i = 3, sum = 3. Четвёртой остановки с i = 4 нет, цикл кончился раньше. Условие <code>i &lt; 4</code> не пускает четвёрку. Нужно <code>i &lt;= 4</code>, тогда ответ 10.</p>
+          <p class="oshibka">Думать, что на остановке строка уже выполнена. Отладчик стоит перед строкой: на первой остановке sum ещё 0, а не 1.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Точка останова: клик слева от номера строки. Запуск Debug, Shift+F9.</p>
+      <p>F8 одна строка, F9 до следующей точки. Значения в окне Variables.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>Подсказки IDEA, которые экономят лабу</h2>
+    <p>Каркас и <code>System.out.println</code> пишутся десятки раз за пару. IDEA набирает их сама по коротким словам.</p>
+    <div class="tablica"><table>
+      <tr><th>набрал</th><th>что получится</th></tr>
+      <tr><td><code>psvm</code> и Tab</td><td><code>public static void main(String[] args) { }</code></td></tr>
+      <tr><td><code>sout</code> и Tab</td><td><code>System.out.println();</code></td></tr>
+      <tr><td><code>fori</code> и Tab</td><td><code>for (int i = 0; i &lt; ; i++) { }</code></td></tr>
+      <tr><td>Alt+Enter на красном слове</td><td>варианты починки, например Import class</td></tr>
+      <tr><td>Ctrl+Alt+L</td><td>расставить отступы во всём файле</td></tr>
+    </table></div>
+    <p class="novoe">Alt+Enter это главная клавиша IDEA. Встань курсором на подчёркнутое красным или жёлтым и нажми: IDEA предложит, как исправить. Написал <code>Scanner</code>, класс для ввода с клавиатуры из следующего урока, он красный, Alt+Enter, Import class, и сверху сама появится строка <code>import java.util.Scanner;</code>.</p>
+    <p>Предложение читай, прежде чем соглашаться. IDEA не знает, что ты задумал, она чинит только запись.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В пустом классе <code>Task3</code> нужно напечатать «Готово». Какие два коротких слова набрать и где?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Внутри фигурных скобок класса <code>psvm</code> и Tab, появится <code>main</code>. Внутри <code>main</code> <code>sout</code> и Tab, в скобках вписать <code>"Готово"</code>.</p>
+<pre><code>public class Task3 {
+    public static void main(String[] args) {
+        System.out.println("Готово");
+    }
+}</code></pre>
+          <p class="oshibka">Набрать <code>sout</code> вне метода, прямо в теле класса. Команды живут только внутри методов, шаблон там не сработает, а строка будет красной.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>psvm</code>, <code>sout</code>, <code>fori</code> и Tab.</p>
+      <p>Alt+Enter на красном: варианты починки, в том числе import.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Что из этого нужно на каждой лабе</h2>
+    <ul>
+      <li>Проект <code>java-praktiki</code>, по классу на задачу в <code>src</code>: шаги 3–4.</li>
+      <li>Не собирается: читать первую ошибку, файл и строку, шаги 5–6.</li>
+      <li>Собралось и упало: тип исключения и строка <code>at</code>, шаг 7.</li>
+      <li>Работает, но ответ не тот: точка останова и окно Variables, шаг 8.</li>
+    </ul>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: среда разработки">
+    <h2>Мини-самостоятельная</h2>
+    <p>Четыре задачи. Ответов здесь нет: впиши ответы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Создай в IDEA проект <code>java-praktiki</code> и класс <code>Task1</code>, который печатает в две строки твою фамилию и группу. Впиши код и то, что показало окно Run, вместе со строкой про exit code.
+      <textarea name="z1" placeholder="public class Task1 { …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Найди все ошибки, не запуская. Файл называется <code>Main.java</code>. Потом проверь в IDEA и выпиши первое сообщение компилятора дословно.
+<pre><code>public class main {
+    public static void main(String[] args) {
+        int count = 3
+        System.out.println(Count);
+    }
+}</code></pre>
+      <textarea name="z2" placeholder="1. … 2. … 3. …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Программа упала с сообщением ниже. Что за ошибка, в каком методе и строке, и какая это ошибка: компиляции или исключение?
+<pre><code>Exception in thread "main" java.lang.ArithmeticException: / by zero
+	at Task4.average(Task4.java:12)
+	at Task4.main(Task4.java:5)</code></pre>
+      <textarea name="z3" placeholder="Ошибка … в методе … строка …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Программа должна напечатать произведение 1 · 2 · 3 · 4 · 5 = 120, а печатает 0. Поставь точку останова внутрь цикла, выпиши значения <code>i</code> и <code>p</code> на первых двух остановках и найди ошибку.
+<pre><code>int p = 0;
+for (int i = 1; i &lt;= 5; i++) {
+    p = p * i;
+}
+System.out.println(p);</code></pre>
+      <textarea name="z4" placeholder="Остановка 1: i = …, p = … Ошибка: …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Сообщения об ошибках</td><td>Модуль X1: ошибка Python читается так же, файл, строка, тип и пояснение. Только там главная строка внизу, а не вверху.</td></tr>
+      <tr><td>Отладчик</td><td>Модуль A1: точка останова в PyCharm или VS Code работает как в IDEA. Остановился и посмотрел форму массива, это быстрее десятка print.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-tipy-if.html">Дальше: типы, формулы и if →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

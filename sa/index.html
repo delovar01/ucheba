@@ -20,7 +20,7 @@
 </header>
 <main>
   <h1>Системная аналитика</h1>
-  <p>Лекции МТС: цикл разработки, роли, требования, диаграммы. Тетрадь не нужна, главное из каждого шага собрано в шпаргалку.</p>
+  <p>Лабы УрФУ: системный анализ, проблема и MVP, участники и риски. Лекции МТС: цикл разработки, роли, требования, диаграммы. Тетрадь не нужна, главное из каждого шага собрано в шпаргалку.</p>
 
   <h2>Сроки</h2>
   <ul class="gorit" data-predmet="Системная аналитика"><li><div class="kogda">…</div><div>Сроки загружаются</div></li></ul>
@@ -32,24 +32,30 @@
 
   <h2>Уроки</h2>
   <ul class="spisok-urokov">
+    <li data-urok-status="sa-chto-takoe" data-shagov="11"><a href="../uroki/sa-chto-takoe.html"><b>Что такое системный анализ</b></a><span class="tiho">Лаба 1, 16.09. Около 40 минут.</span></li>
     <li data-urok-status="sa-process" data-shagov="9"><a href="../uroki/sa-process.html"><b>Цикл, роли, модели</b></a><span class="tiho">Лекции МТС 16.09 и 23.09. Около 40 минут.</span></li>
+    <li data-urok-status="sa-problema-mvp" data-shagov="12"><a href="../uroki/sa-problema-mvp.html"><b>Проблема, ценность, границы, MVP</b></a><span class="tiho">Лаба 2, 30.09. Около 45 минут.</span></li>
     <li data-urok-status="sa-trebovaniya" data-shagov="10"><a href="../uroki/sa-trebovaniya.html"><b>Требования, User Story, Use Case, BPMN</b></a><span class="tiho">Лекции МТС 30.09, 7.10 и 14.10. Около 50 минут.</span></li>
     <li data-urok-status="sa-uchastniki-riski" data-shagov="9"><a href="../uroki/sa-uchastniki-riski.html"><b>Участники, типы требований, вопрос, риск, ограничение</b></a><span class="tiho">Лаба 14.10, под Тест 2. Около 45 минут.</span></li>
+    <li data-urok-status="sa-er-sequence" data-shagov="12"><a href="../uroki/sa-er-sequence.html"><b>Диаграммы ER и Sequence</b></a><span class="tiho">Лекция МТС 21.10, по плану курса, слайды не вышли. Около 50 минут.</span></li>
   </ul>
 
   <h2>Повторение</h2>
   <ul class="spisok-urokov">
-    <li><a href="../povtorenie/sa.html"><b>Системная аналитика: проверь себя</b></a><span class="tiho">Все пять лекций МТС, 21 вопрос. Перед тестом.</span></li>
+    <li><a href="../povtorenie/sa.html"><b>Системная аналитика: проверь себя</b></a><span class="tiho">Все шесть уроков, 38 вопросов. Перед тестом.</span></li>
   </ul>
   <h2>Шпаргалка</h2>
   <p class="tiho">Рамки «Главное из шага» из всех уроков предмета. Шаг открывается по ссылке.</p>
-  <div data-shpargalka="../uroki/sa-process.html ../uroki/sa-trebovaniya.html ../uroki/sa-uchastniki-riski.html"><p class="tiho">Собираю из уроков…</p></div>
+  <div data-shpargalka="../uroki/sa-chto-takoe.html ../uroki/sa-process.html ../uroki/sa-problema-mvp.html ../uroki/sa-trebovaniya.html ../uroki/sa-uchastniki-riski.html ../uroki/sa-er-sequence.html"><p class="tiho">Собираю из уроков…</p></div>
   <section class="ml-blok">
     <h2>Где пригодится в ML</h2>
     <div class="tablica"><table>
       <tr><th>здесь</th><th>в своей программе</th></tr>
       <tr><td>Цикл разработки</td><td>Модель выходит в работу по тому же циклу: требования, разработка, проверка, сопровождение.</td></tr>
       <tr><td>Требования</td><td>Прежде чем мерить модель, пишут, что значит «работает». Это нефункциональные требования про точность и скорость ответа.</td></tr>
+      <tr><td>Вход, выход, границы</td><td>ТЗ ML-проекта: что подаём модели, что ждём на выходе и что делает не модель, а остальная программа.</td></tr>
+      <tr><td>Показатель и MVP</td><td>Метрика бизнеса отдельно от accuracy. Первая версия это простой базовый вариант, но с законченным путём от данных до ответа на экране.</td></tr>
+      <tr><td>ER и Sequence</td><td>Схема данных под датасет: строка это экземпляр одной сущности, признаки приходят по связям. Sequence показывает запрос к модели и что будет, если она не ответила.</td></tr>
     </table></div>
     <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
     <p class="tiho">Открывается, пока включён компьютер дома.</p>

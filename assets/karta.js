@@ -13,7 +13,16 @@
   const SP = { id: 'sa-process', nazvanie: 'Цикл, роли, модели', ssylka: 'uroki/sa-process.html' };
   const ST = { id: 'sa-trebovaniya', nazvanie: 'Требования и диаграммы', ssylka: 'uroki/sa-trebovaniya.html' };
   const SR = { id: 'sa-uchastniki-riski', nazvanie: 'Участники, вопрос, риск, ограничение', ssylka: 'uroki/sa-uchastniki-riski.html' };
+  const SC = { id: 'sa-chto-takoe', nazvanie: 'Что такое системный анализ', ssylka: 'uroki/sa-chto-takoe.html' };
+  const SM = { id: 'sa-problema-mvp', nazvanie: 'Проблема, ценность, границы, MVP', ssylka: 'uroki/sa-problema-mvp.html' };
+  const SE = { id: 'sa-er-sequence', nazvanie: 'Диаграммы ER и Sequence', ssylka: 'uroki/sa-er-sequence.html' };
   const AK = { id: 'ach-nauchnaya-kommunikaciya', nazvanie: 'Научная коммуникация', ssylka: 'uroki/ach-nauchnaya-kommunikaciya.html' };
+  const AI = { id: 'ach-apparat-issledovaniya', nazvanie: 'Аппарат исследования', ssylka: 'uroki/ach-apparat-issledovaniya.html' };
+  const AG = { id: 'ach-gost-tz', nazvanie: 'ГОСТ и ТЗ', ssylka: 'uroki/ach-gost-tz.html' };
+  // Вводная 15.09 и ПР4 13.10 уроком не закрываются: условия курса и статус на странице предмета.
+  const AS = { id: 'ach-kak-sdat', nazvanie: 'Как сдать академ (страница предмета)', ssylka: 'ach/#kak-sdat' };
+  const FK = { id: 'fiz-kolebaniya', nazvanie: 'Колебания и затухание', ssylka: 'uroki/fiz-kolebaniya.html' };
+  const FO = { id: 'fiz-volnovaya-optika', nazvanie: 'Волновая оптика', ssylka: 'uroki/fiz-volnovaya-optika.html' };
   const TV = { id: 'tv-vyskazyvaniya', nazvanie: 'Высказывания и законы логики', ssylka: 'uroki/tv-vyskazyvaniya.html' };
   const TD = { id: 'tv-dnf', nazvanie: 'ДНФ, КНФ и схемы', ssylka: 'uroki/tv-dnf.html' };
   const TM = { id: 'tv-mnozhestva', nazvanie: 'События как множества', ssylka: 'uroki/tv-mnozhestva.html' };
@@ -32,6 +41,19 @@
   const JT = { id: 'java-tipy-if', nazvanie: 'Типы, формулы и if', ssylka: 'uroki/java-tipy-if.html' };
   const JC = { id: 'java-cikly-metody', nazvanie: 'Циклы и статические методы', ssylka: 'uroki/java-cikly-metody.html' };
   const JM = { id: 'java-massivy', nazvanie: 'Массивы и участки убывания', ssylka: 'uroki/java-massivy.html' };
+  const JS = { id: 'java-sreda', nazvanie: 'Среда разработки и первая программа', ssylka: 'uroki/java-sreda.html' };
+  const JP = { id: 'java-stroki-palindrom', nazvanie: 'Строки, Scanner и палиндром', ssylka: 'uroki/java-stroki-palindrom.html' };
+  const JK = { id: 'java-klassy', nazvanie: 'Классы, объекты и композиция', ssylka: 'uroki/java-klassy.html' };
+  const JI = { id: 'java-inkapsulyaciya', nazvanie: 'Инкапсуляция', ssylka: 'uroki/java-inkapsulyaciya.html' };
+  const JN = { id: 'java-nasledovanie', nazvanie: 'Наследование и полиморфизм', ssylka: 'uroki/java-nasledovanie.html' };
+  const JL = { id: 'java-lyambdy', nazvanie: 'Лямбды и Stream', ssylka: 'uroki/java-lyambdy.html' };
+  const JR = { id: 'java-sealed-record', nazvanie: 'sealed-типы и record', ssylka: 'uroki/java-sealed-record.html' };
+  const JE = { id: 'java-isklyucheniya', nazvanie: 'Исключения и null', ssylka: 'uroki/java-isklyucheniya.html' };
+  const NO = { id: 'seti-osnovy', nazvanie: 'Основы компьютерных сетей', ssylka: 'uroki/seti-osnovy.html' };
+  const NT = { id: 'seti-tcp-ip', nazvanie: 'Адреса, подсети и TCP', ssylka: 'uroki/seti-tcp-ip.html' };
+  const NH = { id: 'seti-http', nazvanie: 'Протокол HTTP', ssylka: 'uroki/seti-http.html' };
+  const NA = { id: 'seti-http-api', nazvanie: 'HTTP для API: REST, запросы, ключи', ssylka: 'uroki/seti-http-api.html' };
+  const ND = { id: 'seti-dns', nazvanie: 'DNS: имена и адреса', ssylka: 'uroki/seti-dns.html' };
   // Физика: темы пар нигде не подписаны, одна и та же запись для всех.
   const FN = 'не найдено, искал: Модеус (у пар только название «Лекционное занятие N», тем нет), элеарн 7500 (там только виртуальные лабы), exam1.urfu.ru курс 846 (в разделе Горы тестов и материалов нет), записи BBB комнаты p2w-k5g-y9a-obg (ни одной), сводки чатов. Курс по названию тестов и лаб (косвенно): колебания и волновая оптика';
   const FM = 'конспекты «Колебания» и «Волновая оптика» по учебнику (не со слов преподавателя)';
@@ -83,35 +105,35 @@
     {
       predmet: 'Java',
       pary: [
-        { data: 'вт 8.09', tip: 'лаба', tema: 'Среда разработки и первая программа', material: 'конспект' },
+        { data: 'вт 8.09', tip: 'лаба', tema: 'Среда разработки и первая программа', material: 'конспект', urok: JS },
         { data: 'пн 14.09', tip: 'лекция 1', tema: 'JVM, типы, переменные, Scanner, if', material: 'конспекты, запись', urok: JT },
-        { data: 'вт 15.09', tip: 'лаба', tema: 'Ввод через Scanner, палиндром двумя указателями', material: 'конспект' },
-        { data: 'пн 21.09', tip: 'лекция 2', tema: 'ООП: классы, объекты, композиция', material: 'запись, примеры лектора' },
+        { data: 'вт 15.09', tip: 'лаба', tema: 'Ввод через Scanner, палиндром двумя указателями', material: 'конспект', urok: JP },
+        { data: 'пн 21.09', tip: 'лекция 2', tema: 'ООП: классы, объекты, композиция', material: 'запись, примеры лектора', urok: JK },
         { data: 'вт 22.09', tip: 'лаба', tema: 'Работа по командам, ПР1', material: 'конспект', urok: JT },
-        { data: 'пн 28.09', tip: 'лекция 3', tema: 'Функциональное программирование', material: 'конспект, запись' },
+        { data: 'пн 28.09', tip: 'лекция 3', tema: 'Функциональное программирование', material: 'конспект, запись', urok: JL },
         { data: 'вт 29.09', tip: 'лаба', tema: 'Доделка ПР1: типы, ввод-вывод, if', material: 'конспект', urok: JT },
-        { data: 'пн 5.10', tip: 'лекция 4', tema: 'sealed-типы и record', material: 'конспект, запись' },
+        { data: 'пн 5.10', tip: 'лекция 4', tema: 'sealed-типы и record', material: 'конспект, запись', urok: JR },
         { data: 'вт 6.10', tip: 'лаба', tema: 'Циклы, статические методы, строки', material: 'конспекты, слайды', urok: JC },
-        { data: 'пн 12.10', tip: 'лекция 5', tema: 'Исключения и null', material: 'конспект, запись' },
+        { data: 'пн 12.10', tip: 'лекция 5', tema: 'Исключения и null', material: 'конспект, запись', urok: JE },
         { data: 'вт 13.10', tip: 'лаба', tema: 'Массивы', material: 'конспект, слайды', urok: JM },
         { data: 'пн 19.10', tip: 'лекция 6', tema: 'не найдено, искал: элеарн 10103 (слайдов лекции нет, форум пуст), java-demos Корелина (последний коммит 2.10, новых папок нет), записи BBB комнаты лекций w2m-z8c-rdr-myp (пусто), ktalk (запись по ссылке открывается, но ссылки на 19.10 нет, список записей закрыт), Модеус (тема не подписана), вольт', material: '' },
-        { data: 'вт 20.10', tip: 'лаба', tema: 'ООП: классы и объекты, инкапсуляция (косвенно: в элеарне раздел ПР4 «ООП. Инкапсуляция» и слайды «ООП часть I», выложены 22.10; записи нет)', material: 'слайды «ООП часть I» и «ООП часть II»' },
+        { data: 'вт 20.10', tip: 'лаба', tema: 'ООП: классы и объекты, инкапсуляция (косвенно: в элеарне раздел ПР4 «ООП. Инкапсуляция» и слайды «ООП часть I», выложены 22.10; записи нет)', material: 'слайды «ООП часть I» и «ООП часть II»', urok: [JI, JN] },
       ],
     },
     {
       predmet: 'Сети',
       pary: [
-        { data: 'пт 11.09', tip: 'лекция 1', tema: 'Основы компьютерных сетей', material: 'конспект, слайды' },
+        { data: 'пт 11.09', tip: 'лекция 1', tema: 'Основы компьютерных сетей', material: 'конспект, слайды', urok: NO },
         { data: 'сб 12.09', tip: 'лаба', tema: 'Пары не было: до смены расписания лаб нет', ne_bylo: true },
-        { data: 'пт 18.09', tip: 'лекция 2', tema: 'Сети TCP/IP', material: 'конспект, слайды' },
+        { data: 'пт 18.09', tip: 'лекция 2', tema: 'Сети TCP/IP', material: 'конспект, слайды', urok: NT },
         { data: 'сб 19.09', tip: 'лаба', tema: 'Пары не было: отменили', ne_bylo: true },
-        { data: 'пт 25.09', tip: 'лекция 3', tema: 'Протокол HTTP', material: 'конспект, запись' },
+        { data: 'пт 25.09', tip: 'лекция 3', tema: 'Протокол HTTP', material: 'конспект, запись', urok: NH },
         { data: 'сб 26.09', tip: 'лаба', tema: 'не найдено, искал: записи BBB комнаты лаб mk8-pmv-fhq-uem (ни одной), Яндекс.Диск курса (только слайды лекций 1–2), элеарн 10105 (не зачислен), Модеус (везде «Лабораторная 1»), сводки чатов. Инструменты лаб по слайдам лекции 1: Wireshark и Postman', material: 'шпаргалка для лабы (Wireshark, Postman)' },
-        { data: 'пт 2.10', tip: 'лекция 4', tema: 'HTTP для API: REST, запросы, API-ключи', material: 'конспект, запись' },
+        { data: 'пт 2.10', tip: 'лекция 4', tema: 'HTTP для API: REST, запросы, API-ключи', material: 'конспект, запись', urok: NA },
         { data: 'сб 3.10', tip: 'лаба', tema: 'не найдено, искал: записи BBB комнаты лаб mk8-pmv-fhq-uem (ни одной), Яндекс.Диск курса, элеарн 10105 (не зачислен), Модеус, сводки чатов. Лекция недели (HTTP для API) шла 2.10', material: 'шпаргалка для лабы (Wireshark, Postman)' },
         { data: 'пт 9.10', tip: 'лекция', tema: 'Пары не было', ne_bylo: true },
         { data: 'сб 10.10', tip: 'лаба', tema: 'не найдено, искал: записи BBB комнаты лаб mk8-pmv-fhq-uem (ни одной), Яндекс.Диск курса, элеарн 10105 (не зачислен), Модеус, сводки чатов', material: 'шпаргалка для лабы (Wireshark, Postman)' },
-        { data: 'пт 16.10', tip: 'лекция', tema: 'Система доменных имён DNS (по названию записи BBB; в чате лекции: nslookup, домены верхнего уровня, .ai и .tv, IPv6)', material: 'запись BBB (92 мин, без слайдов), заготовка конспекта про DNS' },
+        { data: 'пт 16.10', tip: 'лекция', tema: 'Система доменных имён DNS (по названию записи BBB; в чате лекции: nslookup, домены верхнего уровня, .ai и .tv, IPv6)', material: 'запись BBB (92 мин, без слайдов), заготовка конспекта про DNS', urok: ND },
         { data: 'сб 17.10', tip: 'лаба', tema: 'не найдено, искал: записи BBB комнаты лаб mk8-pmv-fhq-uem (ни одной), Яндекс.Диск курса (всё ещё только лекции 1–2), элеарн 10105 (не зачислен), Модеус, вольт. Лекция недели была про DNS, возможно лаба про nslookup (догадка)', material: '' },
         { data: 'пт 23.10', tip: 'лекция', tema: 'не найдено, искал: записи BBB комнаты лекций 3u7-bqf-sg0-hq7 (на 24.10 последняя запись 16.10, этой нет), Яндекс.Диск курса (только слайды лекций 1–2), Модеус (тема не подписана), вольт', material: '' },
         { data: 'сб 24.10', tip: 'лаба', tema: 'не найдено, искал: записи BBB комнаты лаб mk8-pmv-fhq-uem (ни одной), Яндекс.Диск курса (только лекции 1–2), элеарн 10105 (не зачислен), Модеус (тема не подписана), вольт', material: '' },
@@ -120,27 +142,27 @@
     {
       predmet: 'Системная аналитика',
       pary: [
-        { data: 'ср 16.09', tip: 'лаба 1', tema: 'Что такое системный анализ', material: 'конспект, слайды' },
+        { data: 'ср 16.09', tip: 'лаба 1', tema: 'Что такое системный анализ', material: 'конспект, слайды', urok: SC },
         { data: 'ср 16.09', tip: 'лекция МТС 1', tema: 'Жизненный цикл ПО, роли в команде', material: 'конспект, слайды, запись', urok: SP },
         { data: 'ср 23.09', tip: 'лекция МТС 2', tema: 'Модели разработки ПО: водопад, V-модель, спираль, итерации и инкременты, Scrum, Kanban', material: 'конспект, слайды, запись', urok: SP },
-        { data: 'ср 30.09', tip: 'лаба 2', tema: 'Проблема, ценность, границы, MVP', material: 'конспект, слайды, запись' },
+        { data: 'ср 30.09', tip: 'лаба 2', tema: 'Проблема, ценность, границы, MVP', material: 'конспект, слайды, запись', urok: SM },
         { data: 'ср 30.09', tip: 'лекция МТС 3', tema: 'Анализ проблем и бизнес-требований', material: 'конспект, слайды', urok: ST },
         { data: 'ср 7.10', tip: 'лекция МТС 4', tema: 'Требования: функциональные и нефункциональные', material: 'слайды, запись', urok: ST },
         { data: 'ср 14.10', tip: 'лаба 3', tema: 'Участники, требования, риски (по плану курса)', material: 'конспект, слайды', urok: SR },
         { data: 'ср 14.10', tip: 'лекция МТС 5', tema: 'Прототипы и диаграммы: Use Case, BPMN', material: 'слайды, запись, шпаргалки BPMN', urok: ST },
-        { data: 'ср 21.10', tip: 'лекция МТС 6', tema: 'Диаграммы: ER и Sequence (по плану курса: раздел 6 «Диаграммы (ER, Sequence)» в TeachBase). Слайдов нет: раздел там ещё черновик, запись МТС Линк закрыта организатором (403); искал также элеарн 10012', material: '' },
+        { data: 'ср 21.10', tip: 'лекция МТС 6', tema: 'Диаграммы: ER и Sequence (по плану курса: раздел 6 «Диаграммы (ER, Sequence)» в TeachBase). Слайдов нет: раздел там ещё черновик, запись МТС Линк закрыта организатором (403); искал также элеарн 10012. Урок по плану курса, стандартное содержание тем', material: '', urok: SE },
       ],
     },
     {
       predmet: 'Академ. чтение',
       pary: [
-        { data: 'вт 15.09', tip: 'практика', tema: 'Вводная: условия курса', material: 'страница «Условия прохождения курса» (текст в вольте)' },
-        { data: 'вт 22.09', tip: 'практика', tema: 'ПР1 «Элементы научного знания»', material: 'конспект' },
-        { data: 'ср 23.09', tip: 'лекция 1', tema: 'Исследование в академической науке и IT', material: 'конспект, слайды, запись' },
-        { data: 'вт 29.09', tip: 'практика', tema: 'ПР2 «Научное исследование в IT-сфере»', material: 'конспект' },
-        { data: 'ср 30.09', tip: 'лекция 2', tema: 'Логика научного исследования', material: 'конспект, слайды, запись' },
-        { data: 'вт 6.10', tip: 'практика', tema: 'ПР3 «Работа с ГОСТами»', material: 'конспект' },
-        { data: 'вт 13.10', tip: 'практика', tema: 'ПР4 «ИИ в планировании научного исследования»', material: 'конспект' },
+        { data: 'вт 15.09', tip: 'практика', tema: 'Вводная: условия курса', material: 'страница «Условия прохождения курса» (текст в вольте)', urok: AS },
+        { data: 'вт 22.09', tip: 'практика', tema: 'ПР1 «Элементы научного знания»', material: 'конспект', urok: AI },
+        { data: 'ср 23.09', tip: 'лекция 1', tema: 'Исследование в академической науке и IT', material: 'конспект, слайды, запись', urok: AI },
+        { data: 'вт 29.09', tip: 'практика', tema: 'ПР2 «Научное исследование в IT-сфере»', material: 'конспект', urok: AI },
+        { data: 'ср 30.09', tip: 'лекция 2', tema: 'Логика научного исследования', material: 'конспект, слайды, запись', urok: [AI, AG] },
+        { data: 'вт 6.10', tip: 'практика', tema: 'ПР3 «Работа с ГОСТами»', material: 'конспект', urok: AG },
+        { data: 'вт 13.10', tip: 'практика', tema: 'ПР4 «ИИ в планировании научного исследования» (сдана 20.10)', material: 'конспект', urok: AS },
         { data: 'ср 14.10', tip: 'лекция 3', tema: 'Научная коммуникация в цифровую эпоху', material: 'текст лекции', urok: AK },
         { data: 'вт 20.10', tip: 'практика', tema: 'ПР5 «Научная коммуникация. Научный язык»', material: 'задание', urok: AK },
       ],
@@ -172,9 +194,9 @@
         { data: 'чт 24.09', tip: 'лекция', tema: FN, material: FM },
         { data: 'чт 24.09', tip: 'практика', tema: FN, material: FM },
         { data: 'чт 1.10', tip: 'лекция', tema: FN, material: FM },
-        { data: 'чт 1.10', tip: 'лаба', tema: 'Лаба 17 или 26 (колебания или кольца Ньютона), какая — не подтверждено', material: 'конспекты' },
+        { data: 'чт 1.10', tip: 'лаба', tema: 'Лаба 17 или 26, колебания или кольца Ньютона, какая именно не подтверждено', material: 'конспекты', urok: [FK, FO] },
         { data: 'чт 8.10', tip: 'лекция', tema: FN, material: FM },
-        { data: 'чт 8.10', tip: 'лаба', tema: 'Лаба 17 или 26, какая — не подтверждено', material: 'конспекты' },
+        { data: 'чт 8.10', tip: 'лаба', tema: 'Лаба 17 или 26, какая именно не подтверждено', material: 'конспекты', urok: [FK, FO] },
         { data: 'чт 15.10', tip: 'лекция', tema: FN, material: FM },
         { data: 'чт 15.10', tip: 'практика', tema: FN, material: FM },
         { data: 'чт 22.10', tip: 'лекция', tema: FN, material: FM },

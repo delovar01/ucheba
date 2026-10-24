@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Протокол HTTP — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="seti-http">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Сети · HTTP</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Протокол HTTP</h1>
+  <p class="tiho">Сети · лекция 3, пт 25.09, «Прикладной уровень. Протокол HTTP» · на зачёт и к лабам с Postman · около 60 минут</p>
+
+  <p>HTTP это протокол прикладного уровня, по которому браузер, бот или Postman, программа для ручной отправки запросов из шага 11, просит у сервера ресурс и получает ответ. Тема лекции подтверждена записью, но слайдов и текста лекции нет, поэтому урок по учебнику Куроуза и Росса, глава 2. Одиннадцать шагов: запрос и ответ, адрес URL, устройство запроса, методы, ответ, коды состояния, свойства методов, cookie, соединения, HTTPS и инструменты лабы.</p>
+  <p>Все запросы урока настоящие, их можно повторить командой <code>curl</code>. Это программа, которая отправляет HTTP-запрос из командной строки и печатает ответ. Она есть в Windows 10 и 11. Ключом называют добавку к команде через минус, например <code>-I</code>, она меняет поведение команды. Запускай в «Командной строке», <code>cmd</code>. В PowerShell слово <code>curl</code> занято другой командой, там пиши <code>curl.exe</code>. Нужны уроки <a href="seti-osnovy.html">основы сетей</a> и <a href="seti-tcp-ip.html">адреса и TCP</a>.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>Запрос и ответ</h2>
+<pre><code>curl -I http://example.com</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Date: Sat, 24 Oct 2026 16:52:33 GMT
+Content-Type: text/html; charset=utf-8
+Connection: keep-alive
+Server: cloudflare
+Allow: GET, HEAD
+alt-svc: h3=":443"; ma=86400</code></pre>
+    <p class="novoe">HTTP, HyperText Transfer Protocol, работает по схеме «запрос и ответ». Клиент, например браузер или <code>curl</code>, открывает TCP-соединение с сервером, отправляет запрос и получает ответ. Сервер сам разговор не начинает. Обычный HTTP идёт на порт 80. Ключ <code>-I</code> просит у сервера только заголовки ответа, без самой страницы. Заголовки здесь это строки вида <code>Имя: значение</code> под первой строкой, служебные сведения об ответе: дата, тип содержимого, кто сервер. Подробно они в шагах 3 и 5.</p>
+    <p><code>200 OK</code> в первой строке значит «всё хорошо, вот ресурс». Ресурс это то, что лежит по адресу: страница, картинка, файл, данные.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запусти <code>curl -I http://example.com</code> у себя. Какая версия HTTP и какой код в первой строке?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>HTTP/1.1 200 OK</code>: версия 1.1, код 200. Дата и строки вроде <code>Age</code> у тебя будут другими. Если твой <code>curl</code> умеет HTTP/2, к сайтам по <code>https</code> первая строка будет <code>HTTP/2 200</code>, а имена заголовков строчными буквами. Смысл тот же.</p>
+          <p class="oshibka">Запустить в PowerShell просто <code>curl -I</code> и получить красную ошибку про параметр. Там <code>curl</code> это другая команда, нужен <code>curl.exe -I</code> или окно <code>cmd</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>HTTP: клиент спрашивает, сервер отвечает, поверх TCP, порт 80.</p>
+      <p><code>curl -I адрес</code> показывает заголовки ответа.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>URL по частям</h2>
+<pre><code>https://urfu.ru:443/ru/students/?page=2
+|___|   |_____||__||__________||_____|
+схема   хост   порт  путь       параметры</code></pre>
+    <p class="novoe">URL это адрес ресурса. Схема говорит, каким протоколом идти: <code>http</code> или <code>https</code>. Хост это имя сервера. Порт можно не писать, тогда берётся порт схемы по умолчанию: 80 для http, 443 для https. Путь указывает ресурс на сервере. После знака <code>?</code> идут параметры вида <code>имя=значение</code>, между собой через <code>&amp;</code>.</p>
+    <p>Имя хоста браузер сначала переводит в IP-адрес через DNS, это последний урок предмета. Потом открывает TCP-соединение на IP и порт.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Разбери <code>https://api.telegram.org/bot123/sendMessage?chat_id=5&amp;text=hi</code>: схема, хост, порт, путь, параметры.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Схема <code>https</code>, хост <code>api.telegram.org</code>, порт не написан, значит 443, путь <code>/bot123/sendMessage</code>, параметры <code>chat_id=5</code> и <code>text=hi</code>.</p>
+          <p class="oshibka">Считать <code>bot123</code> частью хоста. Всё, что после первого <code>/</code> за хостом, уже путь. Хост кончается на <code>.org</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>схема://хост:порт/путь?имя=значение&amp;имя=значение</code></p>
+      <p>Порт по умолчанию: http 80, https 443.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>Из чего состоит запрос</h2>
+<pre><code>curl -v http://example.com/ -o nul</code></pre>
+<pre><code>&gt; GET / HTTP/1.1
+&gt; Host: example.com
+&gt; User-Agent: curl/8.21.0
+&gt; Accept: */*
+&gt;</code></pre>
+    <p class="novoe">Запрос HTTP/1.1 это обычный текст из четырёх частей. Стартовая строка: метод, путь, версия. Метод говорит, что сделать, <code>GET</code> значит «дай», остальные методы в шаге 4. Заголовки: по одному на строку, в виде <code>Имя: значение</code>. Пустая строка: «заголовки кончились». Тело: данные, которые клиент отправляет, у <code>GET</code> его нет. В новой версии HTTP/2 те же части едут не текстом, а в двоичной записи, но смысл полей тот же. Заголовок <code>Host</code> обязателен: на одном IP живёт много сайтов, и сервер по нему понимает, какой нужен.</p>
+    <p>Ключ <code>-v</code> показывает весь разговор, строки со знаком <code>&gt;</code> ушли от тебя. <code>-o nul</code> выбрасывает тело страницы, чтобы оно не мешало. <code>User-Agent</code> сообщает, кто спрашивает, <code>Accept</code> какие ответы клиент примет, <code>*/*</code> значит любые.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши запрос, который браузер отправит при открытии <code>http://example.com/news?id=5</code>. Хватит стартовой строки и заголовка <code>Host</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>GET /news?id=5 HTTP/1.1
+Host: example.com
+</code></pre>
+          <p>Параметры остаются в пути, хост уходит в заголовок, в конце пустая строка.</p>
+          <p class="oshibka">Писать в стартовой строке весь URL со схемой и хостом, <code>GET http://example.com/news</code>. Обычному серверу шлют только путь, а хост отдельно в <code>Host</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Запрос: стартовая строка, заголовки, пустая строка, тело.</p>
+      <p><code>Host</code> обязателен в HTTP/1.1.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>Методы: что клиент хочет</h2>
+<pre><code>GET     получить ресурс              тела нет, параметры в URL
+POST    отправить данные, создать    данные в теле
+PUT     положить ресурс по адресу    целиком заменяет
+DELETE  удалить ресурс
+HEAD    как GET, но только заголовки</code></pre>
+    <p class="novoe">Метод это первое слово стартовой строки, он говорит серверу, что сделать с ресурсом. Самые частые GET и POST. Данные формы или JSON у POST и PUT идут в теле запроса. JSON это текстовый формат данных, пары «ключ: значение» в фигурных скобках, например <code>{"name": "Аня", "age": 19}</code>, живой пример будет в шаге 5. У GET тела нет, всё нужное он передаёт параметрами после <code>?</code>.</p>
+    <p><code>curl -I</code> из шага 1 отправлял метод HEAD, поэтому в ответе были только заголовки. Строка ответа <code>Allow: GET, HEAD</code> про другое: сервер сообщает, какие методы он вообще принимает, тут только два.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой метод нужен: открыть страницу новости, отправить форму регистрации, проверить размер файла, не скачивая его?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Новость GET. Форма регистрации POST: создаётся новый пользователь, данные в теле. Размер файла HEAD, ответ придёт с заголовком <code>Content-Length</code> без самого файла.</p>
+          <p class="oshibka">Отправлять пароль через GET: <code>/login?password=12345</code>. Параметры URL остаются в истории браузера и журналах сервера. Пароли и ключи идут в теле или в заголовках, и только по HTTPS.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>GET получить, POST создать, PUT заменить, DELETE удалить, HEAD только заголовки.</p>
+      <p>У GET нет тела, данные POST в теле.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>Из чего состоит ответ</h2>
+<pre><code>curl -i https://jsonplaceholder.typicode.com/posts/1</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Content-Length: 292
+Connection: keep-alive
+
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati ...",
+  "body": "quia et suscipit ..."
+}</code></pre>
+    <p class="novoe">Ответ устроен так же, как запрос, только первая строка другая. Строка статуса: версия, код, короткое пояснение. Потом заголовки, пустая строка и тело. <code>Content-Type</code> говорит, что в теле: <code>text/html</code> страница, <code>application/json</code> данные, <code>image/png</code> картинка. <code>Content-Length</code> сколько байт в теле.</p>
+    <p>Ключ <code>-i</code> печатает заголовки и тело вместе. Настоящих заголовков у этого сервера около двадцати, здесь оставлены главные. jsonplaceholder это учебный сервер с ненастоящими постами, на нём удобно пробовать запросы.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> По заголовкам ответа выше: браузер нарисует страницу или покажет данные? Сколько байт занимает тело?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>application/json</code> значит данные в формате JSON, а не HTML-страница. Браузер покажет их текстом. Тело 292 байта.</p>
+          <p class="oshibka">Искать тело сразу после первой строки. Тело начинается только после пустой строки, всё до неё заголовки.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ответ: строка статуса, заголовки, пустая строка, тело.</p>
+      <p><code>Content-Type</code> что в теле, <code>Content-Length</code> сколько байт.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>Коды состояния</h2>
+<pre><code>curl -I http://github.com</code></pre>
+<pre><code>HTTP/1.1 301 Moved Permanently
+Content-Length: 0
+Location: https://github.com/</code></pre>
+<pre><code>curl -s -o nul -w "%{http_code}" https://jsonplaceholder.typicode.com/posts/999</code></pre>
+<pre><code>404</code></pre>
+    <p class="novoe">Код состояния это трёхзначное число в строке статуса, по первой цифре понятно, что случилось. 1xx информация. 2xx успех: 200 OK, 201 создано. 3xx перенаправление: 301 переехал навсегда, новый адрес в заголовке <code>Location</code>, 304 не изменился, бери из кэша, то есть из копии, которую браузер сохранил в прошлый раз. 4xx ошибка клиента: 400 кривой запрос, 401 нужно войти, 403 запрещено, 404 не найдено. 5xx ошибка сервера: 500 внутренняя ошибка, например в коде сервера вылетело исключение, 502 плохой шлюз, промежуточный сервер получил кривой ответ от следующего, 503 сервис временно недоступен, перегружен или на обслуживании. Коды описаны в RFC 9110.</p>
+    <p>GitHub по <code>http</code> сразу отправляет на <code>https</code>, отсюда 301. Поста 999 на учебном сервере нет, отсюда 404. Ключ <code>-s</code> убирает полосу загрузки, <code>-o nul</code> выбрасывает тело, а <code>-w "%{http_code}"</code> печатает только код.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой код вернёт сервер: страницу перенесли на новый адрес навсегда, ты не вошёл в аккаунт, вошёл, но страница чужая, сервер перегружен?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>301, 401, 403, 503.</p>
+          <p class="oshibka">Путать 401 и 403. 401: «ты не представился», нужен вход или ключ. 403: «я знаю, кто ты, но тебе нельзя». Ещё путают 404 и 500: в 404 виноват запрос клиента, в 500 сам сервер.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>2xx успех, 3xx перенаправление, 4xx клиент, 5xx сервер.</p>
+      <p>200, 201, 301, 304, 400, 401, 403, 404, 500, 502, 503.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Безопасные и идемпотентные методы</h2>
+    <p>Пользователь дважды нажал «Оформить заказ», и запрос POST ушёл два раза. В базе два заказа.</p>
+    <p class="novoe">Безопасный метод ничего не меняет на сервере: GET и HEAD. Идемпотентный метод при повторе даёт тот же результат, что один раз: GET, HEAD, PUT, DELETE. POST не идемпотентный: каждый вызов создаёт новый ресурс. PUT говорит «положи вот это по такому адресу», и повтор кладёт то же самое на то же место.</p>
+    <p>DELETE идемпотентный, хотя второй вызов может вернуть 404: ресурса уже нет. Важен не код ответа, а состояние сервера после запроса, оно одно и то же.</p>
+    <p>Как всё же повторять POST без двойного заказа. Клиент придумывает для заказа уникальный номер и шлёт его в заголовке, часто его зовут <code>Idempotency-Key</code>. Сервер запоминает номера. Пришёл тот же номер второй раз, новый заказ он не создаёт и возвращает прошлый ответ.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Связь оборвалась, и программа не знает, дошёл ли запрос. Какие запросы можно смело отправить ещё раз: GET новостей, POST платежа, PUT профиля, DELETE файла?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>GET, PUT и DELETE можно повторить, результат не изменится. POST платежа повторять опасно: может списать деньги дважды.</p>
+          <p class="oshibka">Считать, что безопасный и идемпотентный одно и то же. PUT и DELETE меняют сервер, значит не безопасные, но повтор ничего не добавляет, значит идемпотентные.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Безопасные: GET, HEAD. Идемпотентные: GET, HEAD, PUT, DELETE.</p>
+      <p>POST повторять опасно.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>Без состояния и cookie</h2>
+<pre><code>curl -I https://github.com/</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Set-Cookie: logged_in=no; expires=Sun, 24 Oct 2027 16:58:52 GMT; domain=.github.com; path=/; HttpOnly; secure; SameSite=Lax</code></pre>
+    <p class="novoe">HTTP без состояния, по-английски stateless: сервер обрабатывает каждый запрос как первый и не помнит прошлые. Чтобы сайт «помнил» вход или корзину, есть cookie. Сервер отдаёт заголовок <code>Set-Cookie: имя=значение</code>, браузер запоминает и в каждом следующем запросе к этому сайту шлёт <code>Cookie: имя=значение</code>.</p>
+    <p>У GitHub в ответе три <code>Set-Cookie</code>, здесь один. <code>logged_in=no</code> значит «не вошёл». После входа сервер выдаёт cookie с номером сессии, то есть твоего входа от логина до выхода, и по нему узнаёт тебя в каждом запросе. Слова после <code>logged_in=no</code> это настройки cookie: до какой даты хранить, для какого сайта, слать только по HTTPS.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Ты вошёл на сайт, а потом в браузере очистил cookie. Что будет при следующем открытии страницы и почему?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сайт попросит войти снова. Браузер больше не отправляет cookie сессии, а сам сервер прошлых запросов не помнит.</p>
+          <p class="oshibka">Думать, что сервер помнит тебя по IP. IP меняется и бывает общим у целого общежития, сайты узнают пользователя по cookie или по ключу в заголовке.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>HTTP stateless, память через cookie.</p>
+      <p>Сервер <code>Set-Cookie</code>, браузер потом <code>Cookie</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Одно соединение на много запросов</h2>
+    <p>В ответах выше были строки <code>Connection: keep-alive</code> и <code>alt-svc: h3=":443"</code>.</p>
+    <p class="novoe">В HTTP/1.0 на каждый файл открывалось новое TCP-соединение: страница с 20 картинками стоила 20 рукопожатий. В HTTP/1.1 соединение постоянное, keep-alive: после ответа его не закрывают, и следующие запросы идут по нему же. HTTP/2 гонит много запросов по одному соединению одновременно. HTTP/3 работает поверх UDP и протокола QUIC, по плану курса это отдельная тема.</p>
+    <p><code>alt-svc: h3=":443"</code> сервер сообщает: «я умею HTTP/3 на порту 443». Браузер в следующий раз может пойти туда.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Страница из HTML, стиля и 8 картинок. Сколько TCP-рукопожатий нужно в HTTP/1.0 и сколько в HTTP/1.1 с keep-alive, если браузер держит одно соединение?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Файлов 1 + 1 + 8 = 10. В HTTP/1.0 десять рукопожатий. С keep-alive одно, все десять запросов идут по нему подряд.</p>
+          <p class="oshibka">Думать, что HTTP/3 «просто новее HTTP/1.1» и работает так же поверх TCP. Он ушёл на UDP, чтобы не ждать рукопожатие TCP и не тормозить все запросы из-за одного потерянного пакета.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>HTTP/1.1: keep-alive, одно соединение на много запросов.</p>
+      <p>HTTP/3 поверх UDP и QUIC.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>HTTPS: тот же HTTP в шифре</h2>
+<pre><code>http://example.com    TCP, порт 80,  текст виден по дороге
+https://example.com   TCP, порт 443, сначала TLS, внутри тот же HTTP</code></pre>
+    <p class="novoe">HTTPS это HTTP внутри зашифрованного соединения TLS, порт 443. Сначала клиент и сервер по TLS договариваются о ключах, секретных числах, которыми шифруют данные. Ещё клиент проверяет сертификат сайта. Это электронный документ, заверенный доверенной организацией, по нему видно, что сервер правда <code>github.com</code>, а не подделка. Потом идут обычные запросы и ответы, только зашифрованные. Сообщения те же, что в шагах 3 и 5.</p>
+    <p>По HTTP пароль, cookie и ключ летят открытым текстом, их видит любой в той же Wi-Fi сети. Поэтому почти все сайты переводят на HTTPS, как GitHub кодом 301 в шаге 6.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В кафе ты открыл сайт по HTTPS. Что видит человек, который перехватывает пакеты в той же сети: адрес сервера, путь страницы, текст ответа?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>IP-адрес сервера и порт 443 видны, они в заголовках IP и TCP снаружи шифра. Обычно видно и имя сайта, его клиент называет в начале TLS. Путь, заголовки, cookie и текст ответа зашифрованы.</p>
+          <p class="oshibka">Считать, что HTTPS прячет всё, включая то, на какой сайт ты зашёл. Прячет содержимое, а сервер, к которому идёт соединение, остаётся виден.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>HTTPS = HTTP поверх TLS, порт 443.</p>
+      <p>Видно сервер, не видно путь, заголовки и тело.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>Postman и Wireshark на лабе</h2>
+    <p>По слайдам лекции 1 на лабах два инструмента. Оба бесплатные, ставятся с официальных сайтов.</p>
+<pre><code>Postman:    New → HTTP → метод GET → URL → Send
+            внизу: Status 200 OK, вкладки Body и Headers
+Wireshark:  интерфейс Wi-Fi → синий плавник (старт)
+            фильтр: http   → видны строки GET и HTTP/1.1 200
+            фильтр: tls    → видно соединение на 443, текста нет</code></pre>
+    <p class="novoe">Postman это программа, которая отправляет HTTP-запросы с окнами вместо командной строки: выбрал метод, вписал URL, во вкладках Headers и Body добавил заголовки и тело, нажал Send. Wireshark перехватывает все пакеты на сетевом адаптере и раскладывает каждый по уровням: Ethernet или Wi-Fi, IP, TCP, HTTP. Это та самая инкапсуляция из урока про основы.</p>
+    <p>Чтобы увидеть HTTP открытым текстом, в Wireshark открой <code>http://example.com</code>, без S. По <code>https</code> фильтр <code>http</code> ничего не покажет: содержимое зашифровано.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В Postman отправь GET на <code>https://jsonplaceholder.typicode.com/posts/1</code>. Какой статус и какое значение <code>Content-Type</code> на вкладке Headers ответа?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>200 OK</code> и <code>application/json; charset=utf-8</code>, как в шаге 5. На вкладке Body тот же JSON с <code>"id": 1</code>.</p>
+          <p class="oshibka">Смотреть вкладку Headers запроса вверху, а не ответа внизу. Сверху то, что отправляешь, снизу то, что пришло.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Postman: метод, URL, Headers, Body, Send.</p>
+      <p>Wireshark: старт, фильтр <code>http</code>, текст виден только без шифра.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: HTTP">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши ответы в поля и отправь учителю кнопкой ниже.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Разбери URL <code>http://shop.example.ru:8080/catalog/phones?brand=xiaomi&amp;page=3</code>: схема, хост, порт, путь, параметры. Напиши стартовую строку и заголовок <code>Host</code> запроса GET по нему.
+      <textarea name="z1" placeholder="Схема … хост … GET … HTTP/1.1" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Какой код ответа и какого класса: новый пост создан, в запросе забыли закрыть фигурную скобку JSON, в коде сервера вылетело исключение, файла нет по такому адресу, сайт переехал на новый домен навсегда?
+      <textarea name="z2" placeholder="201 (2xx) …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Бот после обрыва связи сам повторяет запрос. Для каких методов это безопасно и почему для POST нет? Как бы ты сделал повтор POST без двойного заказа?
+      <textarea name="z3" placeholder="Можно повторять … потому что …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Выполни <code>curl -I https://github.com/</code>. Выпиши код, <code>Content-Type</code> и сколько строк <code>Set-Cookie</code>. Объясни, зачем серверу cookie, если в HTTP нет состояния.
+      <textarea name="z4" placeholder="Код … Content-Type … Set-Cookie …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> В Wireshark с фильтром <code>http</code> открой <code>http://example.com</code>. Найди строку запроса и строку ответа. Какие уровни Wireshark показывает в пакете ответа сверху вниз?
+      <textarea name="z5" placeholder="Запрос … ответ … уровни: …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Запрос и ответ, <code>Content-Type</code></td><td>Модуль A6: запрос к API модели это POST с JSON в теле и <code>Content-Type: application/json</code>. Ответ модели приходит тоже JSON.</td></tr>
+      <tr><td>Коды состояния</td><td>Модуль A7: сервис модели на FastAPI отвечает 200 на хороший запрос, 422 на кривые входные данные и 500, если упала сама модель. По коду видно, где искать ошибку.</td></tr>
+      <tr><td>Идемпотентность</td><td>Модуль A6: запрос к модели после таймаута повторяют автоматически. Повтор GET безвреден, а повтор платного POST к API стоит денег дважды.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../seti/">← Сети</a> · <a href="../povtorenie/seti.html">Повторение</a> · <a href="seti-http-api.html">Дальше: HTTP для API →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

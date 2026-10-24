@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>DNS: имена и адреса — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="seti-dns">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Сети · DNS</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>DNS: имена и адреса</h1>
+  <p class="tiho">Сети · лекция пт 16.10, «Система доменных имён DNS» · на зачёт и к лабам · около 60 минут</p>
+
+  <p>Лекция 16.10 есть только записью, без слайдов. В чате лекции упоминали nslookup, домены верхнего уровня, зоны .ai и .tv и IPv6. Урок держится этих тем и стандартного устройства DNS по учебнику Куроуза и Росса. Одиннадцать шагов: зачем DNS, дерево имён, домены верхнего уровня, записи A, AAAA и IPv6, CNAME, MX и NS, резолвер, поиск по цепочке, кэш и TTL, диагностика.</p>
+  <p>Все ответы DNS в уроке настоящие, получены 24.10 через публичный сервер Google. Адреса со временем меняются, у тебя могут быть другие. Команды набирай в <code>cmd</code>: Пуск, набрать <code>cmd</code>, Enter. Нужны уроки <a href="seti-tcp-ip.html">адреса и TCP</a> и <a href="seti-http.html">протокол HTTP</a>.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>Зачем DNS</h2>
+<pre><code>nslookup ya.ru</code></pre>
+<pre><code>Сервер:  UnKnown
+Address:  192.168.0.1
+
+Не заслуживающий доверия ответ:
+Имя:     ya.ru
+Addresses:  2a02:6b8::2:242
+          77.88.44.242
+          5.255.255.242
+          77.88.55.242</code></pre>
+    <p class="novoe">Компьютеры соединяются по IP-адресам, а люди помнят имена. DNS, Domain Name System, система доменных имён, переводит имя вроде <code>ya.ru</code> в IP-адрес. DNS одновременно база данных, разложенная по тысячам серверов по всему миру, и протокол, по которому эту базу спрашивают. <code>nslookup имя</code> спрашивает DNS и печатает ответ.</p>
+    <p>Первые две строки показывают, какой сервер DNS ответил. Здесь домашний роутер <code>192.168.0.1</code>, имени у него нет, отсюда UnKnown. Ниже адреса <code>ya.ru</code>: один длинный с двоеточиями и три обычных. Что за длинный, разберёт шаг 5.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запусти <code>nslookup urfu.ru</code>. Какой IP у сайта университета и какой сервер DNS тебе ответил?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>На 24.10 адрес <code>93.88.179.201</code>. Сервер в строках «Сервер» и «Address» тот, что прописан у тебя в <code>ipconfig /all</code> строкой «DNS-серверы»: роутер, провайдер или VPN.</p>
+          <p class="oshibka">Принять адрес в строке «Address» под «Сервер» за адрес сайта. Это адрес того, кто отвечал, а адрес сайта ниже, после строки «Имя».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>DNS: имя в IP-адрес, распределённая база и протокол.</p>
+      <p><code>nslookup имя</code>: сверху кто ответил, снизу адреса.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>Дерево имён</h2>
+<pre><code>                     . (корень)
+          /          |           \
+        ru          com          ai
+       /   \          |
+    urfu    ya      github
+    /  \
+elearn  www
+
+elearn.urfu.ru.   читается справа налево:
+корень . → ru → urfu → elearn</code></pre>
+    <p class="novoe">Имена в DNS устроены деревом. Наверху корень, его обозначают точкой. Под ним домены верхнего уровня: <code>ru</code>, <code>com</code>, <code>ai</code>. Под ними домены второго уровня: <code>urfu</code>, <code>ya</code>. Ниже поддомены: <code>elearn</code>. Полное имя читают справа налево, от корня вниз. Точку корня в конце обычно не пишут, но она подразумевается: <code>elearn.urfu.ru.</code></p>
+    <p>Владелец домена второго уровня сам заводит любые поддомены. УрФУ завёл <code>elearn</code>, <code>www</code> и другие, ни у кого не спрашивая.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Разбери <code>api.telegram.org</code>: какой домен верхнего уровня, какой второго, что поддомен?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Верхний уровень <code>org</code>, второй <code>telegram</code>, поддомен <code>api</code>.</p>
+          <p class="oshibka">Читать имя слева направо, как текст, и считать <code>api</code> главным. Главнее всех самый правый кусок, слева идут всё более мелкие части.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Дерево: корень ., верхний уровень, второй, поддомены.</p>
+      <p>Имя читается справа налево.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>Домены верхнего уровня</h2>
+<pre><code>nslookup -type=ns ru</code></pre>
+<pre><code>Не заслуживающий доверия ответ:
+ru      nameserver = a.dns.ripn.net
+ru      nameserver = b.dns.ripn.net
+ru      nameserver = c.tld-servers.ru
+ru      nameserver = d.dns.ripn.net
+ru      nameserver = e.dns.ripn.net
+ru      nameserver = f.dns.ripn.net</code></pre>
+    <p class="novoe">Домен верхнего уровня, по-английски TLD, бывает двух видов. Общие: <code>com</code>, <code>org</code>, <code>net</code>, <code>info</code>. Национальные из двух букв, по одному на страну: <code>ru</code> Россия, <code>kz</code> Казахстан. Список верхних доменов ведёт IANA, а каждым доменом управляет своя организация, у <code>ru</code> это Координационный центр доменов .RU и .РФ. Зоной называют кусок дерева имён, за который отвечают одни и те же серверы. Команда выше показывает серверы, которые отвечают за всю зону <code>ru</code>.</p>
+    <p>Некоторые страны продают свой национальный домен всем желающим. <code>ai</code> принадлежит острову Ангилья, а <code>tv</code> государству Тувалу. Их охотно берут компании, потому что буквы совпали с «artificial intelligence» и «television», а страны зарабатывают на этом заметную часть бюджета.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой домен верхнего уровня и какого вида у <code>github.io</code>, <code>yandex.kz</code>, <code>wikipedia.org</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>io</code> национальный, Британская территория в Индийском океане, популярен у программистов. <code>kz</code> национальный, Казахстан. <code>org</code> общий.</p>
+          <p class="oshibka">Считать, что <code>.ai</code> создали для компаний про машинное обучение. Это обычный национальный домен, просто буквы удачно совпали.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Верхний уровень бывает общим, как com и org, и национальным, как ru и kz.</p>
+      <p><code>.ai</code> Ангилья, <code>.tv</code> Тувалу.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>Запись A</h2>
+<pre><code>nslookup -type=a ya.ru</code></pre>
+<pre><code>Не заслуживающий доверия ответ:
+Имя:     ya.ru
+Addresses:  77.88.44.242
+          5.255.255.242
+          77.88.55.242</code></pre>
+    <p class="novoe">Данные DNS хранятся записями, у каждой записи тип. Запись A связывает имя с адресом IPv4. У одного имени может быть несколько записей A: тогда клиенты расходятся по разным серверам, и сайт работает, даже если один сервер упал. Ключ <code>-type=</code> у <code>nslookup</code> выбирает тип записи.</p>
+    <p>Порядок адресов в ответе от раза к разу меняется. Так нагрузка распределяется между тремя серверами Яндекса сама собой.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запусти <code>nslookup -type=a api.telegram.org</code>. Сколько адресов и какой у тебя?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>На 24.10 один: <code>149.154.166.110</code>. Именно на него ходит бот, когда шлёт запросы к API Телеграма.</p>
+          <p class="oshibka">Сравнивать свой адрес с чужим и решать, что у кого-то «неправильный DNS». Крупные сервисы отдают разным людям разные адреса, ближайшие к ним.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Запись A: имя в IPv4. Их может быть несколько.</p>
+      <p><code>nslookup -type=a имя</code></p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>Запись AAAA и IPv6</h2>
+<pre><code>nslookup -type=aaaa ya.ru</code></pre>
+<pre><code>Не заслуживающий доверия ответ:
+Имя:     ya.ru
+Address:  2a02:6b8::2:242</code></pre>
+    <p class="novoe">Адресов IPv4 всего 2<sup>32</sup>, около 4,3 миллиарда, и они давно кончились. Поэтому есть IPv6: адрес в 128 бит, записанный восемью группами по четыре шестнадцатеричных знака через двоеточие. Ведущие нули в группе можно не писать, группа из одних нулей становится <code>0</code>. Один подряд идущий кусок из нулевых групп заменяют на <code>::</code>. Если таких кусков несколько, <code>::</code> ставят на самый длинный. Запись AAAA связывает имя с адресом IPv6.</p>
+<pre><code>2a02:6b8::2:242
+= 2a02:06b8:0000:0000:0000:0000:0002:0242</code></pre>
+    <p>Четыре буквы A, потому что адрес IPv6 в четыре раза длиннее IPv4: 128 бит против 32.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сократи адрес <code>2001:0db8:0000:0000:0000:ff00:0042:8329</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>2001:db8::ff00:42:8329</code>. Ведущий ноль убрали в <code>0db8</code> и <code>0042</code>, три нулевые группы подряд стали <code>::</code>.</p>
+          <p class="oshibka">Ставить <code>::</code> два раза: <code>2001::ff00::8329</code>. Тогда непонятно, сколько нулей в каком месте, такой адрес неправильный. <code>::</code> бывает один раз на адрес.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>IPv6: 128 бит, 8 групп hex, <code>::</code> один раз вместо нулевых групп.</p>
+      <p>Запись AAAA: имя в IPv6.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>Запись CNAME: псевдоним</h2>
+<pre><code>nslookup www.github.com</code></pre>
+<pre><code>Не заслуживающий доверия ответ:
+Имя:     github.com
+Address:  140.82.112.4
+Aliases:  www.github.com</code></pre>
+    <p class="novoe">Запись CNAME говорит: «это имя псевдоним, настоящее имя вот такое». У <code>www.github.com</code> запись CNAME указывает на <code>github.com</code>, а уже у него запись A с адресом. DNS сам проходит по псевдониму до конца. <code>nslookup</code> показывает настоящее имя в строке «Имя», а псевдоним в «Aliases».</p>
+    <p>Зачем это нужно: адрес меняют в одном месте, у настоящего имени, и все псевдонимы следуют за ним. Так подключают свой домен к хостингу, сервису, на чьих серверах лежит твой сайт, например к GitHub Pages.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У <code>shop.example.ru</code> запись CNAME на <code>example.ru</code>, у <code>example.ru</code> запись A <code>5.6.7.8</code>. Сервер переехал на <code>9.9.9.9</code>. Сколько записей нужно поменять?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Одну, запись A у <code>example.ru</code>. Псевдоним <code>shop</code> указывает на имя, а не на адрес, и сам пойдёт на новый адрес.</p>
+          <p class="oshibka">Думать, что CNAME перенаправляет браузер, как код 301. Браузер ничего не замечает и в адресной строке остаётся <code>shop.example.ru</code>. CNAME работает только внутри DNS.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>CNAME: имя-псевдоним указывает на другое имя.</p>
+      <p>Адрес меняют в одном месте.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Записи MX и NS</h2>
+<pre><code>nslookup -type=mx urfu.ru</code></pre>
+<pre><code>Не заслуживающий доверия ответ:
+urfu.ru MX preference = 10, mail exchanger = ironport10.urfu.ru
+urfu.ru MX preference = 100, mail exchanger = ironport11.urfu.ru</code></pre>
+    <p class="novoe">Запись MX называет почтовый сервер домена: куда доставлять письма на адреса вида <code>имя@urfu.ru</code>. Число preference это приоритет, меньше значит главнее. Письмо сначала идёт на сервер с 10, а на сервер с 100 только если первый не отвечает. Запись NS называет серверы, которые отвечают за зону домена окончательно.</p>
+<pre><code>nslookup -type=ns urfu.ru</code></pre>
+<pre><code>urfu.ru nameserver = ns1.urfu.ru
+urfu.ru nameserver = ns2.urfu.ru
+urfu.ru nameserver = ns3.urfu.ru</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Письмо отправляют на адрес в <code>urfu.ru</code>, а <code>ironport10</code> выключен. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Отправляющий сервер попробует <code>ironport11</code> с приоритетом 100, запасной. Письмо дойдёт.</p>
+          <p class="oshibka">Решить, что приоритет 100 главнее, потому что число больше. В MX наоборот: меньшее число пробуют первым.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>MX: почтовый сервер домена, меньший приоритет первым.</p>
+      <p>NS: серверы, которые отвечают за зону.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>Резолвер и авторитетный сервер</h2>
+<pre><code>nslookup ya.ru 8.8.8.8</code></pre>
+<pre><code>Сервер:  dns.google
+Address:  8.8.8.8
+
+Не заслуживающий доверия ответ:
+Имя:     ya.ru
+Addresses:  2a02:6b8::2:242
+          77.88.44.242
+          5.255.255.242
+          77.88.55.242</code></pre>
+    <p class="novoe">В DNS две роли серверов. Резолвер, или рекурсивный сервер, ищет ответ за тебя: это сервер провайдера, роутера или публичный вроде <code>8.8.8.8</code> у Google и <code>77.88.8.8</code> у Яндекса. Авторитетный сервер хранит записи своей зоны и отвечает за неё окончательно, это серверы из записи NS. «Не заслуживающий доверия ответ» значит, что ответил резолвер, а не авторитетный сервер. Ошибки тут нет, так выглядит почти любой ответ.</p>
+    <p>Второе слово после имени в <code>nslookup</code> выбирает, какого резолвера спросить. Так проверяют, виноват ли твой DNS-сервер или само имя.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Как получить ответ, который будет «заслуживающим доверия» для <code>urfu.ru</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Спросить авторитетный сервер зоны напрямую: <code>nslookup urfu.ru ns1.urfu.ru</code>. Тогда строки «Не заслуживающий доверия ответ» не будет.</p>
+          <p class="oshibka">Пугаться надписи «Не заслуживающий доверия» и менять настройки. Это не про подделку, а только про то, что ответ пришёл не из первых рук.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Резолвер ищет за тебя, авторитетный хранит зону.</p>
+      <p><code>nslookup имя сервер</code> спрашивает нужный сервер.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Как резолвер находит ответ</h2>
+    <p>Кэш резолвера, его память для уже найденных ответов, пока пустой. Ищем <code>elearn.urfu.ru</code>. Подробно про кэш шаг 10.</p>
+<pre><code>ты --(1) рекурсивный--&gt; Резолвер --(2)--&gt; корневой: «за ru отвечают вон те»
+                           |      --(3)--&gt; сервер ru: «за urfu.ru вон те»
+                           |      --(4)--&gt; сервер urfu.ru: «вот A: 93.88.176.91»
+ты &lt;--(5) ответ---------- Резолвер (кладёт ответ в кэш)</code></pre>
+    <p class="novoe">Запрос от тебя к резолверу рекурсивный: «найди и принеси готовый ответ». Запросы резолвера к серверам итеративные: каждый отвечает «не знаю, спроси вот этих» и называет серверы следующего уровня из своих записей NS. Резолвер идёт по дереву из шага 2 сверху вниз: корень, сервер <code>ru</code>, авторитетный сервер <code>urfu.ru</code>.</p>
+    <p>Корневых серверов 13 имён, от <code>a.root-servers.net</code> до <code>m.root-servers.net</code>, их адреса записаны в каждом резолвере заранее. Одна общая таблица на весь интернет не выдержала бы нагрузки, поэтому база разрезана по дереву.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Резолвер только что нашёл <code>elearn.urfu.ru</code>. Через минуту у него спросили <code>www.urfu.ru</code>. С какой стрелки схемы он начнёт?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сразу со стрелки 4. Из прошлого поиска в кэше лежат серверы зоны <code>urfu.ru</code>, корень и сервер <code>ru</code> спрашивать не нужно.</p>
+          <p class="oshibka">Путать, кто чей запрос делает рекурсивным. Ты просишь резолвер рекурсивно. Резолвер ходит по серверам итеративно, сам корневой сервер никого не ищет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ты к резолверу рекурсивно, резолвер к серверам итеративно.</p>
+      <p>Путь: корень, верхний уровень, авторитетный.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Кэш и TTL</h2>
+<pre><code>ipconfig /displaydns</code></pre>
+<pre><code>    ya.ru
+    ----------------------------------------
+    Имя записи. . . . . . : ya.ru
+    Тип записи. . . . . . : 1
+    Срок жизни. . . . . . : 478
+    Длина данных. . . . . : 4
+    Раздел. . . . . . . . : Ответ
+    A-запись (узла) . . . : 77.88.55.242</code></pre>
+    <p class="novoe">Ответы DNS хранят в кэше: у резолвера, в Windows и в браузере. Сколько секунд ответ можно хранить, говорит TTL записи, его задаёт владелец домена. Здесь «Срок жизни» 478 секунд, около восьми минут. Пока TTL не истёк, имя берётся из кэша без запросов в сеть. Команда <code>ipconfig /flushdns</code> очищает кэш Windows.</p>
+    <p>Не путай с TTL в <code>ping</code> из первого урока. Сокращение то же, Time To Live, «время жизни», но там это счётчик маршрутизаторов на пути пакета, а здесь срок хранения ответа в секундах.</p>
+    <p>«Тип записи 1» это номер типа A, у AAAA номер 28, у CNAME 5, у MX 15. Поэтому после смены адреса сайт у части людей ещё какое-то время открывается по старому: у них в кэше старый ответ.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У записи A домена TTL 3600. В 12:00 адрес поменяли. До какого времени в худшем случае кто-то будет ходить на старый адрес?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>3600 секунд это час. Резолвер, который получил старый ответ в 11:59:59, будет отдавать его почти до 13:00. Поэтому перед переездом TTL заранее уменьшают, например до 300.</p>
+          <p class="oshibka">Думать, что <code>ipconfig /flushdns</code> обновит адрес у всех. Он чистит только кэш твоего Windows. Резолвер провайдера и браузер держат свои копии.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ответ живёт в кэше TTL секунд.</p>
+      <p><code>ipconfig /displaydns</code> показать, <code>/flushdns</code> очистить.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>DNS на UDP и диагностика</h2>
+<pre><code>ping 8.8.8.8      ответы идут
+ping ya.ru        «При проверке связи не удалось обнаружить узел ya.ru»
+nslookup ya.ru    «DNS request timed out»</code></pre>
+    <p class="novoe">Запросы DNS идут в основном по UDP на порт 53: вопрос и ответ помещаются в одно короткое сообщение, рукопожатие TCP было бы дольше самого запроса. Если ответ слишком большой для одного сообщения, DNS переходит на TCP, тот же порт 53. Браузеры умеют спрашивать DNS и через HTTPS, тогда запросы зашифрованы и идут на 443. Отсюда главная проверка. Если <code>ping</code> по IP отвечает, а по имени нет, сеть работает, а сломан именно DNS. Тогда смотрят строку «DNS-серверы» в <code>ipconfig /all</code> и пробуют <code>nslookup имя 8.8.8.8</code>.</p>
+    <p>В Wireshark запросы видно фильтром <code>dns</code>: строка Standard query A ya.ru и следом Standard query response с адресами. Так видно и всю цепочку из урока про HTTP: сначала DNS, потом рукопожатие TCP, потом HTTP.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> <code>nslookup ya.ru</code> молчит, а <code>nslookup ya.ru 8.8.8.8</code> отвечает. Где поломка и как её обойти?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сломан твой резолвер, тот, что в настройках: роутер или провайдер. Сама сеть и имя в порядке. Обойти можно, прописав в настройках адаптера другой DNS-сервер, например <code>8.8.8.8</code> или <code>77.88.8.8</code>.</p>
+          <p class="oshibka">Путать DNS-сервер и шлюз, раз дома у них один адрес. Шлюз пересылает пакеты наружу, DNS переводит имена. Сломаться может одно без другого.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>DNS: в основном UDP, порт 53.</p>
+      <p>По IP отвечает, по имени нет: сломан DNS.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: DNS">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши ответы в поля и отправь учителю кнопкой ниже. Где нужна команда, вставь и её, и вывод.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Через <code>nslookup</code> узнай для <code>yandex.ru</code> записи A, AAAA и MX. Сколько почтовых серверов и какой главный?
+      <textarea name="z1" placeholder="nslookup -type=a yandex.ru …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Распиши по шагам, как резолвер с пустым кэшем найдёт адрес <code>mail.google.com</code>. Какие запросы рекурсивные, какие итеративные и что окажется в кэше после?
+      <textarea name="z2" placeholder="1. Ты спрашиваешь резолвер …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Разверни <code>fe80::1</code> до полной записи IPv6 и сократи <code>2001:0db8:0000:0042:0000:0000:0000:0001</code>.
+      <textarea name="z3" placeholder="fe80:0000:… и 2001:db8:…" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Ты подключаешь свой домен <code>mysite.ru</code> к хостингу. Хостинг просит: «для <code>www</code> сделайте псевдоним на <code>host.example.net</code>, почту принимает <code>mx.example.net</code>». Какие записи каких типов ты создашь?
+      <textarea name="z4" placeholder="www.mysite.ru CNAME …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Друг пишет: «телега открывается, а сайты по имени нет, хотя ping 8.8.8.8 идёт». Напиши три команды, которые ты попросишь его запустить, и что каждая покажет.
+      <textarea name="z5" placeholder="1. ipconfig /all … 2. …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Записи A и CNAME</td><td>Модуль A7: демо модели на облачной машине открывают по имени, а не по IP. Для этого заводят запись A на адрес машины или CNAME на имя хостинга.</td></tr>
+      <tr><td>Кэш и TTL</td><td>Модуль A7: после переезда сервиса на новую машину часть запросов ещё идёт на старую, пока не истечёт TTL. Старую машину выключают не сразу.</td></tr>
+      <tr><td>Диагностика DNS</td><td>Модуль A6: ошибка «getaddrinfo failed» или «Name or service not known» при запросе к API модели значит, что не нашлось имя. Проверяешь <code>nslookup</code>, а не ключ.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../seti/">← Сети</a> · <a href="../povtorenie/seti.html">Повторение</a> · <a href="../seti/">Дальше: все уроки Сетей →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

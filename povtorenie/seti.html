@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: Сети — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · Сети</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Сети: проверь себя</h1>
+  <p class="tiho">Пять уроков, 20 вопросов. Адреса и числа в вопросах новые, не из уроков, все расчёты подсетей пересчитаны. Ответь вслух или в голове, потом открывай ответ.</p>
+  <p>Не помнишь, вернись в урок: 1–4 <a href="../uroki/seti-osnovy.html">основы сетей</a>, 5–8 <a href="../uroki/seti-tcp-ip.html">адреса, подсети и TCP</a>, 9–12 <a href="../uroki/seti-http.html">протокол HTTP</a>, 13–16 <a href="../uroki/seti-http-api.html">HTTP для API</a>, 17–20 <a href="../uroki/seti-dns.html">DNS</a>.</p>
+
+  <h2>Одной страницей</h2>
+  <div class="tablica"><table>
+    <tr><th>что</th><th>как</th></tr>
+    <tr><td>уровни TCP/IP</td><td>прикладной, транспортный, интернет, сетевых интерфейсов</td></tr>
+    <tr><td>сообщения</td><td>на транспортном уровне сегмент, на сетевом пакет, на канальном кадр</td></tr>
+    <tr><td>адреса</td><td>MAC 48 бит в одной сети, IP 32 бита между сетями, порт 1–65535 до программы</td></tr>
+    <tr><td>подсеть</td><td><i>h</i> = 32 − число после косой черты, блок 2<sup><i>h</i></sup>, узлов 2<sup><i>h</i></sup> − 2, начало блока сеть, конец broadcast</td></tr>
+    <tr><td>порты</td><td>22 SSH, 25 SMTP, 53 DNS, 80 HTTP, 443 HTTPS</td></tr>
+    <tr><td>TCP и UDP</td><td>TCP: соединение, SYN, SYN-ACK, ACK. UDP: без соединения, без гарантий, меньше задержка</td></tr>
+    <tr><td>HTTP</td><td>стартовая строка, заголовки, пустая строка, тело. <code>Host</code> обязателен</td></tr>
+    <tr><td>коды</td><td>2xx успех, 3xx перенаправление, 4xx клиент, 5xx сервер. 401 нет ключа, 403 нет прав, 429 лимит</td></tr>
+    <tr><td>REST</td><td>ресурс в адресе, действие в методе. POST в коллекцию, PUT, PATCH, DELETE на элемент</td></tr>
+    <tr><td>ключ</td><td><code>Authorization: Bearer ключ</code>, хранить в <code>.env</code>, утёк: отозвать</td></tr>
+    <tr><td>DNS</td><td>A IPv4, AAAA IPv6, CNAME псевдоним, MX почта, NS серверы зоны. В основном UDP 53, кэш на TTL</td></tr>
+    <tr><td>команды</td><td><code>ping</code>, <code>tracert</code>, <code>ipconfig /all</code>, <code>netstat -ano</code>, <code>nslookup</code>, <code>curl -i</code></td></tr>
+  </table></div>
+
+  <h2>Вопросы</h2>
+
+  <details class="vopros">
+    <summary>1. Чем интерфейс отличается от протокола и входят ли интерфейсы в архитектуру сети?</summary>
+    <div><p>Интерфейс связывает соседние уровни внутри одного устройства, протокол связывает один и тот же уровень двух разных устройств. В архитектуру входят уровни и протоколы, интерфейсы нет: внутри устройства их можно делать как угодно.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>2. Бот отправляет запрос по HTTPS. Назови по порядку, во что превращается сообщение на транспортном, сетевом и канальном уровне.</summary>
+    <div><p>Транспортный добавляет заголовок TCP, получается сегмент. Сетевой добавляет заголовок IP, получается пакет. Канальный добавляет MAC-адреса и концевик с контрольной суммой, получается кадр.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>3. Каких уровней OSI нет в TCP/IP и какая из двух моделей стандарт de facto?</summary>
+    <div><p>Нет сеансового и уровня представления, их работу делает приложение. De facto TCP/IP: им все пользуются. OSI de jure, её приняли формально.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>4. В <code>tracert</code> на хопе 5 три звёздочки, а хопы 6–9 отвечают и трассировка завершена. Связь рвётся на хопе 5?</summary>
+    <div><p>Нет. Этот маршрутизатор просто не отвечает на служебные запросы, а пакеты пропускает дальше. Потеря настоящая, только если после звёздочек до конца ничего не приходит.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>5. <code>172.20.14.99/28</code>: адрес сети, broadcast, сколько узлов?</summary>
+    <div><p><i>h</i> = 32 − 28 = 4, блок 2<sup>4</sup> = 16. Блоки в последнем байте от нуля: 0–15, 16–31 и так дальше до 80–95, 96–111. 99 в блоке 96–111. Сеть <code>172.20.14.96</code>, broadcast <code>172.20.14.111</code>, узлов 2<sup>4</sup> − 2 = 14.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>6. <code>192.168.8.20/22</code>: адрес сети и broadcast? Сколько узлов?</summary>
+    <div><p><i>h</i> = 32 − 22 = 10, больше 8, поэтому последний байт целиком узловой, а блок ищем в третьем: 2<sup>10 − 8</sup> = 4. Блоки 0–3, 4–7, 8–11, третий байт 8 попадает в 8–11. Сеть <code>192.168.8.0</code>, broadcast <code>192.168.11.255</code>, узлов 2<sup>10</sup> − 2 = 1022.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>7. Маска <code>255.255.255.224</code>. Это сколько через косую черту и сколько узлов?</summary>
+    <div><p>224 = 128 + 64 + 32, это <code>11100000</code>, три единицы. Каждое 255 даёт 8 единиц: 24 + 3 = /27. Узлов 2<sup>5</sup> − 2 = 30.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>8. Видеозвонок и скачивание файла: какой транспорт у каждого и почему? С чего начинается соединение TCP?</summary>
+    <div><p>Звонок UDP: опоздавший кусок картинки бесполезен, лучше пропустить. Файл TCP: нужен каждый байт по порядку. TCP начинается с рукопожатия SYN, SYN-ACK, ACK.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>9. Разбери <code>https://api.example.com/v1/users?page=2</code>: схема, хост, порт, путь, параметр. Как выглядит стартовая строка GET?</summary>
+    <div><p>Схема <code>https</code>, хост <code>api.example.com</code>, порт 443 по умолчанию, путь <code>/v1/users</code>, параметр <code>page=2</code>. Стартовая строка <code>GET /v1/users?page=2 HTTP/1.1</code>, хост уходит в заголовок <code>Host</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>10. Какие коды: страница переехала навсегда, не вошёл, вошёл, но нельзя, в коде сервера вылетело исключение?</summary>
+    <div><p>301, 401, 403, 500.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>11. Какие методы идемпотентные и почему двойное нажатие «Оплатить» опасно?</summary>
+    <div><p>GET, HEAD, PUT, DELETE. «Оплатить» это POST: каждый вызов создаёт новый ресурс, два нажатия дают два платежа.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>12. HTTP без состояния. Как сайт помнит, что ты вошёл?</summary>
+    <div><p>Через cookie. Сервер отдаёт <code>Set-Cookie</code> с номером сессии, браузер шлёт его в заголовке <code>Cookie</code> в каждом следующем запросе.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>13. По правилам REST: создать заказ, получить заказ 9, удалить заказ 9, заказы пользователя 4.</summary>
+    <div><p><code>POST /orders</code>, <code>GET /orders/9</code>, <code>DELETE /orders/9</code>, <code>GET /users/4/orders</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>14. POST с JSON прошёл, пришёл 201, но сервер не увидел ни одного поля. Что забыли?</summary>
+    <div><p>Заголовок <code>Content-Type: application/json</code>. Без него тело ушло как данные формы, и сервер не разобрал его как JSON.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>15. Чем PUT отличается от PATCH?</summary>
+    <div><p>PUT заменяет ресурс целиком, в теле все поля. PATCH меняет только присланные поля, остальные не трогает.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>16. Токен бота случайно попал в публичный коммит. Удалить файл следующим коммитом достаточно? Где хранить ключ правильно?</summary>
+    <div><p>Нет, токен остался в истории и мог быть скопирован. Его отзывают и выпускают новый. Ключ хранят в <code>.env</code> или переменной окружения, а <code>.env</code> вписывают в <code>.gitignore</code> до первого коммита.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>17. Какие записи DNS: адрес IPv4, адрес IPv6, псевдоним, почтовый сервер, серверы зоны?</summary>
+    <div><p>A, AAAA, CNAME, MX, NS.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>18. Сократи IPv6 <code>fd00:0000:0000:0000:0abc:0000:0000:0001</code>.</summary>
+    <div><p><code>fd00::abc:0:0:1</code>. <code>::</code> ставят один раз, на самый длинный кусок нулей, здесь три группы. Ведущий ноль в <code>0abc</code> убирают. Две нулевые группы справа второй раз в <code>::</code> не сворачивают, каждая пишется просто <code>0</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>19. Чем рекурсивный запрос отличается от итеративного и кто какой делает?</summary>
+    <div><p>Рекурсивный: «найди и принеси готовое», так ты спрашиваешь резолвер. Итеративный: «не знаю, спроси вон тех», так резолвер обходит корневой сервер, сервер верхнего уровня и авторитетный.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>20. <code>ping 1.1.1.1</code> отвечает, а <code>ping github.com</code> пишет «не удалось обнаружить узел». Что сломано и чем проверить?</summary>
+    <div><p>Сеть работает, сломан DNS. Проверить <code>nslookup github.com</code> и <code>nslookup github.com 8.8.8.8</code>, а строку «DNS-серверы» посмотреть в <code>ipconfig /all</code>.</p></div>
+  </details>
+
+  <p class="niz"><a href="../seti/">← Сети</a> · <a href="./">Всё повторение</a> · <a href="../uroki/index.html">Уроки</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

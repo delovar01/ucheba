@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>sealed и record — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-sealed-record">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · sealed и record</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>sealed-типы и record</h1>
+  <p class="tiho">Java · лекция 4, 5.10 (Корелин), его код seminar3: герои-бандиты, Range, Result · на зачёт · около 60 минут</p>
+
+  <p>Две вещи из Java 16–21. <code>record</code> заменяет целый класс с данными одной строкой. <code>sealed</code> закрывает список наследников. Вместе они дают <code>switch</code>, который сам проверяет, что ты разобрал все варианты. Нужны уроки <a href="java-inkapsulyaciya.html">инкапсуляция</a> и <a href="java-nasledovanie.html">наследование</a>, лямбды из <a href="java-lyambdy.html">урока про ФП</a> встретятся в последнем шаге.</p>
+  <p>Код требует Java 21, в IDEA проверь, что у проекта стоит JDK 21.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>record: класс данных одной строкой</h2>
+<pre><code>record User(String name, int age) {
+}
+
+public class Main {
+    public static void main(String[] args) {
+        User anton = new User("Anton", 17);
+        User copy = new User("Anton", 17);
+        System.out.println(anton);
+        System.out.println(anton.name() + " " + anton.age());
+        System.out.println(anton.equals(copy));
+        System.out.println(anton == copy);
+    }
+}</code></pre>
+<pre><code>User[name=Anton, age=17]
+Anton 17
+true
+false</code></pre>
+    <p class="novoe">Запись, <code>record</code>, это неизменяемый класс для данных. В скобках после имени перечислены компоненты. По ним Java сама делает то, что в уроке про инкапсуляцию ты писал руками: поля <code>private final</code>, конструктор со всеми полями, у него тот же доступ, что у самой записи, методы чтения, <code>toString</code>, <code>equals</code> и <code>hashCode</code> по всем полям. Методы чтения называются как поле, без <code>get</code>: <code>name()</code>, а не <code>getName()</code>.</p>
+    <p><code>equals</code> сравнивает содержимое, поэтому true. <code>==</code> по-прежнему сравнивает ссылки, объектов два. Пользователь <code>User("Anton", 17)</code> взят из seminar3 Корелина.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько строк заняла бы та же <code>User</code> обычным классом по правилам урока про инкапсуляцию? Перечисли, что пришлось бы написать.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Два <code>private final</code> поля, конструктор, два геттера, <code>toString</code>, <code>equals</code> со схемой из шага 12 того урока и <code>hashCode</code>. Это около 40 строк. На лекции такой класс называли POJO, простой объект с полями и геттерами. Слайд: писать его руками долго и небезопасно, легко забыть поле в <code>equals</code>.</p>
+          <p class="oshibka">Вызывать <code>anton.getName()</code> по привычке. У record такого метода нет, компилятор скажет <code>cannot find symbol</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>record Имя(Тип поле, …) { }</code>: поля, конструктор, <code>поле()</code>, toString, equals, hashCode готовы.</p>
+      <p>Чтение <code>name()</code>, без <code>get</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>Чего record не умеет и что можно</h2>
+    <p>Три попытки, и все не собираются. Поменять поле в методе:</p>
+<pre><code>record User(String name, int age) {
+    void birthday() {
+        age = age + 1;
+    }
+}</code></pre>
+<pre><code>Main.java:3: error: cannot assign a value to final variable age
+        age = age + 1;
+        ^
+1 error</code></pre>
+    <p>Добавить поле сверх заголовка:</p>
+<pre><code>record User(String name, int age) {
+    private int score;
+}</code></pre>
+<pre><code>Main.java:2: error: field declaration must be static
+    private int score;
+                ^
+  (consider replacing field with record component)
+1 error</code></pre>
+    <p>Унаследовать: <code>record Vip(String name, int age) extends User { }</code> даёт <code>'{' expected</code>, как два родителя в уроке про наследование.</p>
+    <p class="novoe">Слайды лекции: поля record финальные, новых полей объекта сверх заголовка нельзя, record нельзя наследовать, и сам он не наследует другие классы. Зато можно писать свои методы, статические поля и реализовывать интерфейсы:</p>
+<pre><code>interface Describable {
+    String describe();
+}
+
+record User(String name, int age) implements Describable {
+    static final int ADULT_AGE = 18;
+
+    boolean isAdult() {
+        return age &gt;= ADULT_AGE;
+    }
+
+    @Override
+    public String describe() {
+        return name + ", " + age + " лет";
+    }
+}</code></pre>
+<pre><code>User mariya = new User("Mariya", 18);
+System.out.println(mariya.isAdult());
+System.out.println(mariya.describe());
+System.out.println(new User("Anton", 17).isAdult());</code></pre>
+<pre><code>true
+Mariya, 18 лет
+false</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Компилятор подсказал «consider replacing field with record component». Как добавить <code>score</code> в запись правильно?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Дописать в заголовок: <code>record User(String name, int age, int score) { }</code>. Компонент записи это и есть поле, только объявленное в скобках. Конструктор станет с тремя аргументами, появится <code>score()</code>.</p>
+          <p class="oshibka">Объявить <code>static int score</code>, чтобы ошибка ушла. Соберётся, но счёт станет общим для всех пользователей, как <code>count</code> у собак в уроке про инкапсуляцию.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Нельзя: менять поля, свои поля объекта, <code>extends</code>.</p>
+      <p>Можно: методы, <code>static</code>, <code>implements</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>Компактный конструктор: проверка данных</h2>
+    <p>Пример Range со слайдов: промежуток, начало включительно, конец нет.</p>
+<pre><code>record Range(int start, int end) {
+    Range {
+        if (end &lt;= start) {
+            throw new IllegalArgumentException("конец должен быть больше начала: " + start + ", " + end);
+        }
+    }
+
+    int length() {
+        return end - start;
+    }
+}</code></pre>
+<pre><code>Range r = new Range(2, 7);
+System.out.println(r + " длина " + r.length());
+Range bad = new Range(5, 1);</code></pre>
+<pre><code>Range[start=2, end=7] длина 5
+Exception in thread "main" java.lang.IllegalArgumentException: конец должен быть больше начала: 5, 1
+	at Range.&lt;init&gt;(Main.java:4)
+	at Main.main(Main.java:17)</code></pre>
+    <p class="novoe">Компактный конструктор пишут без скобок с параметрами: <code>Range { … }</code>. Параметры в нём уже есть, это компоненты <code>start</code> и <code>end</code>, а присваивание полям Java допишет сама после твоего кода. Так проверка из урока про инкапсуляцию, шаг 7, ставится без повторения всех полей. Слайд: при чтении record из файла или сети он создаётся только через этот конструктор, проверку не обойти.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В компактном конструкторе можно поменять параметр до присваивания. <code>record Email(String value)</code>: убери пробелы, переведи в нижний регистр, без <code>@</code> брось исключение. Что напечатает <code>new Email("  Bob@Example.com ")</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>record Email(String value) {
+    Email {
+        value = value.trim().toLowerCase();
+        if (!value.contains("@")) {
+            throw new IllegalArgumentException("нет @: " + value);
+        }
+    }
+}</code></pre>
+<pre><code>Email[value=bob@example.com]</code></pre>
+          <p>Присваивается уже очищенное значение. И <code>new Email("bob@example.com").equals(new Email(" BOB@example.com"))</code> теперь true, проверено.</p>
+          <p class="oshibka">Писать в компактном конструкторе <code>this.value = value;</code>. Компилятор ответит <code>cannot assign a value to final variable value</code>: присваивание полям в нём делает только Java, в конце.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Имя { проверки }</code>: компактный конструктор, без списка параметров.</p>
+      <p>Параметр можно поправить, <code>this.поле =</code> не писать.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>Изменить record: новая копия</h2>
+<pre><code>record User(String name, int age) {
+    User withAge(int newAge) {
+        return new User(name, newAge);
+    }
+}</code></pre>
+<pre><code>User anton = new User("Anton", 17);
+User older = anton.withAge(18);
+System.out.println(anton);
+System.out.println(older);</code></pre>
+<pre><code>User[name=Anton, age=17]
+User[name=Anton, age=18]</code></pre>
+    <p class="novoe">Раз поля поменять нельзя, «изменение» записи это новая запись с другим значением. Старая остаётся как была. Методы таких копий принято называть <code>withПоле</code>. Это неизменяемость из лекции про ФП: данные не правят на месте, а создают новые.</p>
+    <p>Где record нужен по слайдам: вместо POJO и вместо DTO. DTO, объект передачи данных, это пачка полей, которую одна часть программы отдаёт другой, на слайде пример с запросом на платёж. Записи безопасно передавать куда угодно, их никто не испортит.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает код: <code>User u = new User("Anton", 17); u.withAge(30); System.out.println(u.age());</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>17</code>. <code>withAge</code> вернул новую запись, а её никуда не положили, она пропала. <code>u</code> не изменился.</p>
+          <p class="oshibka">Вызывать <code>withAge</code> и не сохранять результат, как <code>toUpperCase</code> у строки. Нужно <code>u = u.withAge(30);</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Изменить record: <code>return new Имя(…)</code> с новым значением.</p>
+      <p>Результат сохранить, старая запись не меняется.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>sealed: закрытый список наследников</h2>
+    <p>Пример лекции: шутер, где герой бывает бандитом или контрбандитом.</p>
+<pre><code>sealed interface Hero permits Bandit, CounterBandit {
+}
+
+final class Bandit implements Hero {
+    public void detonateBomb() {
+        System.out.println("Бомба заложена");
+    }
+}
+
+final class CounterBandit implements Hero {
+    public void defuseBomb() {
+        System.out.println("Бомба обезврежена");
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>new Bandit().detonateBomb();
+new CounterBandit().defuseBomb();</code></pre>
+<pre><code>Бомба заложена
+Бомба обезврежена</code></pre>
+    <p class="novoe"><code>sealed</code>, запечатанный, значит «реализовать или наследовать можно только тем, кто перечислен». Список идёт после <code>permits</code>, «разрешает». Если все классы лежат в одном файле, <code>permits</code> можно не писать, Java соберёт список сама. Иначе наследники должны быть в том же пакете.</p>
+    <p>Зачем запрещать наследование, три причины со слайдов. Класс входит в готовую библиотеку, которой пользуются другие программисты, и не должен меняться под чужих наследников. Класс неизменяемый, и наследник может это сломать. Предпочитай композицию наследованию, урок про наследование, шаг 12. <code>final class</code> запрещает всех наследников, <code>sealed</code> разрешает только известных.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Дописали <code>final class Doctor implements Hero { }</code>, а <code>permits</code> не поменяли. Что скажет компилятор?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:10: error: class is not allowed to extend sealed class: Hero (as it is not listed in its 'permits' clause)
+final class Doctor implements Hero {
+      ^
+1 error</code></pre>
+          <p>«Классу нельзя наследовать запечатанный Hero, его нет в списке permits». Нового наследника добавляют осознанно: дописывают в список, и компилятор потом заставит обработать его везде, шаг 8.</p>
+          <p class="oshibka">Убрать <code>sealed</code>, чтобы ошибка ушла. Ошибка пропадёт, а вместе с ней и проверка всех вариантов в <code>switch</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>sealed interface X permits A, B</code>: наследники только A и B.</p>
+      <p><code>final</code>: наследников нет совсем.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>final, sealed или non-sealed у наследника</h2>
+<pre><code>sealed interface Hero permits Bandit {
+}
+
+class Bandit implements Hero {
+}</code></pre>
+<pre><code>Main.java:4: error: sealed, non-sealed or final modifiers expected
+class Bandit implements Hero {
+^
+1 error</code></pre>
+    <p class="novoe">Наследник запечатанного типа обязан сказать, что дальше. <code>final</code>: на нём иерархия кончается. <code>sealed</code>: у него свой закрытый список. <code>non-sealed</code>: дальше наследовать может кто угодно. Запись record сама <code>final</code>, ей писать ничего не надо.</p>
+    <p>Так устроена иерархия игры из seminar3: персонаж бывает героем или врагом, герои Alex и Steve, враги зомби и боссы, боссы Dragon и Warden. Упрощённая версия с открытой веткой врагов:</p>
+<pre><code>sealed abstract class Character permits Hero, Enemy {
+}
+
+final class Hero extends Character {
+}
+
+non-sealed class Enemy extends Character {
+}
+
+class Zombie extends Enemy {
+}
+
+class Dragon extends Enemy {
+}</code></pre>
+    <p>Собирается: <code>Zombie</code> и <code>Dragon</code> наследуют <code>Enemy</code> без пометок, потому что <code>Enemy</code> открыл ветку словом <code>non-sealed</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В коде выше захотели, чтобы врагов было ровно два вида, зомби и дракон. Что поменять?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>sealed class Enemy extends Character permits Zombie, Dragon {
+}
+
+final class Zombie extends Enemy {
+}
+
+final class Dragon extends Enemy {
+}</code></pre>
+          <p><code>Enemy</code> сам становится запечатанным со своим списком, а его наследники получают <code>final</code>.</p>
+          <p class="oshibka">Поставить <code>sealed</code> у <code>Enemy</code> и забыть <code>final</code> у зомби и дракона. Будет та же ошибка «sealed, non-sealed or final modifiers expected», уже для них.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Наследник sealed: <code>final</code>, <code>sealed</code> или <code>non-sealed</code>.</p>
+      <p>record уже <code>final</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>switch по типу: и зачем там default</h2>
+    <p>Сначала обычный, не запечатанный интерфейс героя:</p>
+<pre><code>interface Hero {
+}
+
+class Bandit implements Hero {
+}
+
+class CounterBandit implements Hero {
+}
+
+public class Main {
+    static String role(Hero h) {
+        return switch (h) {
+            case Bandit b -&gt; "закладывает бомбу";
+            case CounterBandit c -&gt; "обезвреживает";
+        };
+    }
+}</code></pre>
+<pre><code>Main.java:12: error: the switch expression does not cover all possible input values
+        return switch (h) {
+               ^
+1 error</code></pre>
+    <p class="novoe">Здесь сразу две новые вещи, разберём по одной. Первая: <code>switch (h)</code> берёт значение <code>h</code> и проверяет ветки <code>case</code> сверху вниз, как цепочка <code>else if</code>. Срабатывает первая подходящая. Справа от стрелки <code>-&gt;</code> стоит значение ветки, и весь <code>switch</code> возвращает его, поэтому его можно сразу отдать в <code>return</code>. Такой <code>switch</code> называют выражением, после закрывающей скобки ставят <code>;</code>. Вторая: <code>case Bandit b</code> это шаблон по типу: ветка срабатывает, если объект бандит, и сразу кладёт его в переменную <code>b</code>, как <code>instanceof Bandit b</code> из урока про наследование.</p>
+    <p>Ошибка «switch не покрывает все возможные значения». Интерфейс открыт, завтра кто-то напишет третьего героя, и компилятор этого не знает. Приходится писать <code>default -&gt; "неизвестный герой";</code>. Тогда всё собирается, и класс <code>Doctor</code>, о котором <code>switch</code> не знает, тихо попадает в <code>default</code>: для доктора печатается «неизвестный герой».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Пример лектора: метод <code>ban(Hero h)</code> банит бандитов и контрбандитов, а для остальных стоит <code>default -&gt; false</code>. Добавили доктора и забыли про <code>ban</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Программа соберётся и запустится, а доктора нельзя будет забанить, он уходит в <code>default</code>. Компилятор промолчит. Это ровно история со слайда, и <code>default</code> тут прячет ошибку.</p>
+          <p class="oshibka">Считать <code>default</code> страховкой. Он ловит и то, что ты забыл обработать, и делает это молча.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>return switch (x) { case Тип t -&gt; …; };</code>: switch-выражение с шаблоном типа.</p>
+      <p>По открытому интерфейсу нужен <code>default</code>, и он прячет новые варианты.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>Исчерпывающий switch без default</h2>
+<pre><code>sealed interface Hero permits Bandit, CounterBandit {
+}
+
+final class Bandit implements Hero {
+}
+
+final class CounterBandit implements Hero {
+}
+
+public class Main {
+    static String role(Hero h) {
+        return switch (h) {
+            case Bandit b -&gt; "закладывает бомбу";
+            case CounterBandit c -&gt; "обезвреживает";
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(role(new Bandit()));
+        System.out.println(role(new CounterBandit()));
+    }
+}</code></pre>
+<pre><code>закладывает бомбу
+обезвреживает</code></pre>
+    <p class="novoe">Тот же <code>switch</code>, но интерфейс запечатан. Компилятор знает полный список наследников, видит, что оба разобраны, и <code>default</code> не нужен. Такой <code>switch</code> называют исчерпывающим: он покрывает все варианты.</p>
+    <p>Добавим доктора в <code>permits</code>, а в <code>role</code> ветку не допишем: компилятор выдаст ту же <code>the switch expression does not cover all possible input values</code>. Теперь это полезно: нового героя без обработки программа не соберёт. На лекции сравнивали с <code>enum</code>, типом из списка именованных вариантов вроде <code>BANDIT</code> и <code>COUNTER_BANDIT</code>. Он тоже обходится без <code>default</code>, но разрастается, и у каждого варианта видны чужие методы, бандиту доступно обезвреживание.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Доктора добавили в <code>permits</code>. Где теперь надо поправить код, и как об этом узнать?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:15: error: the switch expression does not cover all possible input values
+        return switch (h) {
+               ^
+1 error</code></pre>
+          <p>Компилятор сам покажет каждый <code>switch</code>, где доктора нет, с номером строки. Дописываешь <code>case Doctor d -&gt; "лечит";</code> в каждом, и всё собирается.</p>
+          <p class="oshibka">Дописать <code>default</code> по старой привычке. Ошибка уйдёт, но вернётся проблема шага 7: следующего героя компилятор уже не заметит.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>switch по sealed без <code>default</code>: компилятор проверяет, что разобраны все.</p>
+      <p>Новый вариант без ветки не собирается.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>Разбор record в switch</h2>
+    <p>Фигуры из seminar2 Корелина: пустой запечатанный интерфейс, фигуры записями, периметр отдельным методом.</p>
+<pre><code>sealed interface Shape permits Circle, Rectangle {
+}
+
+record Circle(double radius) implements Shape {
+}
+
+record Rectangle(double width, double height) implements Shape {
+}
+
+public class Main {
+    static double getPerimeter(Shape shape) {
+        return switch (shape) {
+            case Circle c -&gt; 2 * Math.PI * c.radius();
+            case Rectangle(double w, double h) -&gt; 2 * (w + h);
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getPerimeter(new Circle(1)));
+        System.out.println(getPerimeter(new Rectangle(2, 3)));
+    }
+}</code></pre>
+<pre><code>6.283185307179586
+10.0</code></pre>
+    <p class="novoe"><code>case Rectangle(double w, double h)</code> это шаблон записи, record pattern из Java 21. Он проверяет тип и сразу раскладывает запись на компоненты: <code>w</code> получает ширину, <code>h</code> высоту. Писать <code>r.width()</code> не нужно. Первая ветка показывает старый способ, через переменную <code>c</code> и <code>c.radius()</code>, оба работают.</p>
+    <p>Слайд: новые операции над фигурами добавляются отдельными методами со <code>switch</code>, фигуры при этом не трогают.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Добавь квадрат <code>Square(double side)</code> и метод <code>area</code> только шаблонами записей. Что вернут <code>area(new Rectangle(2, 3))</code> и <code>area(new Square(4))</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>sealed interface Shape permits Circle, Rectangle, Square {
+}
+
+record Square(double side) implements Shape {
+}
+
+static double area(Shape shape) {
+    return switch (shape) {
+        case Circle(double r) -&gt; Math.PI * r * r;
+        case Rectangle(double w, double h) -&gt; w * h;
+        case Square(double s) -&gt; s * s;
+    };
+}</code></pre>
+<pre><code>6.0
+16.0</code></pre>
+          <p>Квадрат пришлось дописать в <code>permits</code>, иначе ошибка из шага 5. А в старом <code>getPerimeter</code> компилятор теперь потребует ветку для квадрата.</p>
+          <p class="oshibka">Перепутать порядок компонентов: <code>case Rectangle(double h, double w)</code>. Имена переменных любые, значения кладутся по порядку из заголовка записи, и <code>h</code> получит ширину.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>case Запись(Тип a, Тип b) -&gt;</code>: проверить тип и разложить на поля.</p>
+      <p>Поля раскладываются по порядку заголовка.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>Практика лекции: Result</h2>
+    <p>Результат операции бывает успехом со значением или ошибкой с текстом. Решение из seminar3, билеты получают только с 18 лет. У Корелина в билете случайный номер и время, здесь вместо них имя владельца, чтобы вывод не менялся от запуска к запуску.</p>
+<pre><code>import java.util.function.Consumer;
+
+sealed interface Result&lt;T&gt; permits Success, Failure {
+    default void ifSuccess(Consumer&lt;T&gt; action) {
+        if (this instanceof Success&lt;T&gt;(T value)) {
+            action.accept(value);
+        }
+    }
+
+    default void ifFailure(Consumer&lt;String&gt; action) {
+        if (this instanceof Failure&lt;T&gt;(String message)) {
+            action.accept(message);
+        }
+    }
+
+    default boolean isSuccess() {
+        return switch (this) {
+            case Success&lt;T&gt; s -&gt; true;
+            case Failure&lt;T&gt; f -&gt; false;
+        };
+    }
+}
+
+record Success&lt;T&gt;(T result) implements Result&lt;T&gt; {
+}
+
+record Failure&lt;T&gt;(String message) implements Result&lt;T&gt; {
+}
+
+record Ticket(String owner) {
+}
+
+record User(String name, int age) {
+    Result&lt;Ticket&gt; takeTicket() {
+        if (age &lt; 18) {
+            return new Failure&lt;&gt;("Age must be at least 18");
+        }
+        return new Success&lt;&gt;(new Ticket(name));
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Result&lt;Ticket&gt; anton = new User("Anton", 17).takeTicket();
+        Result&lt;Ticket&gt; mariya = new User("Mariya", 18).takeTicket();
+        System.out.println("Anton: " + anton.isSuccess());
+        System.out.println("Mariya: " + mariya.isSuccess());
+        anton.ifFailure(msg -&gt; System.out.println("Ошибка: " + msg));
+        mariya.ifSuccess(t -&gt; System.out.println("Билет: " + t));
+        anton.ifSuccess(t -&gt; System.out.println("сюда не попадём"));
+    }
+}</code></pre>
+<pre><code>Anton: false
+Mariya: true
+Ошибка: Age must be at least 18
+Билет: Ticket[owner=Mariya]</code></pre>
+    <p class="novoe">Всё из урока в одном месте. Запечатанный интерфейс фиксирует два варианта, каждый вариант запись. <code>&lt;T&gt;</code> значит, что успех может нести значение любого типа, здесь билет. Слово <code>default</code> здесь значит другое, чем в <code>switch</code>: <code>default</code>-метод в интерфейсе имеет тело, и его получают все реализации: <code>ifSuccess</code> написан один раз для обоих вариантов. Внутри шаблон записи работает и в <code>instanceof</code>: <code>this instanceof Success&lt;T&gt;(T value)</code> проверяет и достаёт значение. Действие передаётся лямбдой, <code>Consumer</code> из урока про ФП.</p>
+    <p>Метод не бросает исключение и не возвращает <code>null</code>, он честно говорит типом: «тут может быть ошибка». Вызывающий не может про неё забыть.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Метод <code>divide(a, b)</code> возвращает <code>Result&lt;Double&gt;</code>: на ноль ошибка «деление на ноль», иначе частное. Напиши <code>show</code> через <code>switch</code> с шаблонами записей. Что напечатают <code>show(divide(7, 2))</code> и <code>show(divide(7, 0))</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>static Result&lt;Double&gt; divide(double a, double b) {
+    if (b == 0) {
+        return new Failure&lt;&gt;("деление на ноль");
+    }
+    return new Success&lt;&gt;(a / b);
+}
+
+static String show(Result&lt;Double&gt; r) {
+    return switch (r) {
+        case Success&lt;Double&gt;(Double v) -&gt; "ответ " + v;
+        case Failure&lt;Double&gt;(String msg) -&gt; "ошибка: " + msg;
+    };
+}</code></pre>
+<pre><code>ответ 3.5
+ошибка: деление на ноль</code></pre>
+          <p><code>default</code> не нужен, вариантов ровно два. Это пример из конспекта лекции, проверен запуском.</p>
+          <p class="oshibka">Писать в шаблоне <code>double v</code> вместо <code>Double v</code>. Компилятор ответит <code>pattern of type double is not applicable at Double</code>: внутри дженерика лежит класс-обёртка, и тип в шаблоне должен ему соответствовать.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>sealed + record + switch: варианты результата, которые нельзя забыть обработать.</p>
+      <p><code>default</code> метод интерфейса с телом достаётся всем реализациям.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Что спросят на зачёте</h2>
+    <ul>
+      <li>Что record делает сам и чего не умеет: шаги 1–2.</li>
+      <li>Компактный конструктор и неизменяемость: шаги 3–4.</li>
+      <li>sealed, permits, три пометки наследника, зачем запрещать наследование: шаги 5–6.</li>
+      <li>Почему по sealed можно без default: шаги 7–8.</li>
+      <li>Шаблоны записей и Result: шаги 9–10. История: record в Java 14 как проба, в 16 насовсем, шаблоны записей в 21.</li>
+    </ul>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: sealed и record">
+    <h2>Мини-самостоятельная</h2>
+    <p>Четыре задачи. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Запись <code>Money(long rubles, int kopecks)</code>. В компактном конструкторе: копейки от 0 до 99, рубли не меньше нуля. Метод <code>plus(Money other)</code> возвращает новую сумму с переносом копеек. Проверь: 10 р. 70 к. плюс 5 р. 50 к.
+      <textarea name="z1" placeholder="record Money(long rubles, int kopecks) { …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Запечатанный интерфейс <code>Payment</code> с записями <code>Card(String number)</code>, <code>Cash(double amount)</code>, <code>Sbp(String phone)</code>. Метод <code>commission(Payment p, double sum)</code> через <code>switch</code> без <code>default</code>: карта 1%, наличные 0, СБП 0.5%.
+      <textarea name="z2" placeholder="sealed interface Payment permits …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Добавь в задачу 2 вариант <code>Crypto</code>. Покажи, что сказал компилятор, и почини.
+      <textarea name="z3" placeholder="Компилятор написал…" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Метод <code>parseAge(String text)</code> возвращает <code>Result&lt;Integer&gt;</code> из шага 10: не число, ошибка «не число», меньше 0 или больше 150, ошибка «нет такого возраста». Выведи результат для «19», «abc», «200». Подсказка: «число ли это» проверь циклом по символам и <code>Character.isDigit</code>.
+      <textarea name="z4" placeholder="static Result&lt;Integer&gt; parseAge(String text) { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>record и компактный конструктор</td><td>Модуль A2: запись датасета и настройки опыта в Python пишут <code>@dataclass(frozen=True)</code>, проверку кладут в <code>__post_init__</code>, как в компактный конструктор.</td></tr>
+      <tr><td>sealed и разбор вариантов</td><td>Модуль A6: ответ модели с вызовом инструментов бывает текстом или вызовом функции. Его разбирают <code>match</code> в Python по вариантам, как <code>switch</code> по Result.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-isklyucheniya.html">Дальше: исключения и null →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

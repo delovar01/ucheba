@@ -20,16 +20,40 @@
 </header>
 <main>
   <h1>Сети</h1>
-  <p>Уроков пока нет. Пока здесь все пары с темами.</p>
+  <p>Уроки по порядку лекций. По учебному плану зачёт, условия не объявлены. Лабы идут по субботам с Wireshark и Postman, но тем лаб нет ни в одном источнике, поэтому уроков к ним нет. Тетрадь не нужна: команды запускаешь у себя в <code>cmd</code> и сверяешь с выводом в уроке, правила собраны в шпаргалку ниже.</p>
 
   <h2>Сроки</h2>
   <ul class="gorit" data-predmet="Сети"><li><div class="kogda">…</div><div>Сроки загружаются</div></li></ul>
 
   <h2>Уроки</h2>
   <ul class="spisok-urokov">
-    <li class="net">Уроков пока нет.</li>
+    <li data-urok-status="seti-osnovy" data-shagov="11"><a href="../uroki/seti-osnovy.html"><b>Основы компьютерных сетей</b></a><span class="tiho">Лекция 11.09. Уровни, протоколы, инкапсуляция, OSI и TCP/IP, ping и tracert. Около 45 минут.</span></li>
+    <li data-urok-status="seti-tcp-ip" data-shagov="13"><a href="../uroki/seti-tcp-ip.html"><b>Адреса, подсети и TCP</b></a><span class="tiho">Лекция 18.09. MAC, IP, маска и расчёт подсети, порт, TCP и UDP, рукопожатие. Около 70 минут.</span></li>
+    <li data-urok-status="seti-http" data-shagov="11"><a href="../uroki/seti-http.html"><b>Протокол HTTP</b></a><span class="tiho">Лекция 25.09. Запрос и ответ, методы, коды, cookie, HTTPS, Postman. Около 60 минут.</span></li>
+    <li data-urok-status="seti-http-api" data-shagov="11"><a href="../uroki/seti-http-api.html"><b>HTTP для API: REST, запросы, ключи</b></a><span class="tiho">Лекция 2.10. JSON, REST, POST с телом, API-ключ, .env, лимиты. Около 65 минут.</span></li>
+    <li data-urok-status="seti-dns" data-shagov="11"><a href="../uroki/seti-dns.html"><b>DNS: имена и адреса</b></a><span class="tiho">Лекция 16.10. nslookup, домены, записи A, AAAA, CNAME, MX, кэш и TTL, IPv6. Около 60 минут.</span></li>
   </ul>
 
+  <h2>Повторение</h2>
+  <ul class="spisok-urokov">
+    <li><a href="../povtorenie/seti.html"><b>Сети: проверь себя</b></a><span class="tiho">Уровни и модели, адреса и подсети, порты и TCP, HTTP, API и ключи, DNS. 20 вопросов, 25 минут.</span></li>
+  </ul>
+  <h2>Шпаргалка</h2>
+  <p class="tiho">Рамки «Главное из шага» из всех уроков предмета. Шаг открывается по ссылке.</p>
+  <div data-shpargalka="../uroki/seti-osnovy.html ../uroki/seti-tcp-ip.html ../uroki/seti-http.html ../uroki/seti-http-api.html ../uroki/seti-dns.html"><p class="tiho">Собираю из уроков…</p></div>
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Уровни, ping и tracert</td><td>Сервис модели не отвечает: проверяешь снизу вверх, связь, порт, ответ.</td></tr>
+      <tr><td>Порты и адреса</td><td>Jupyter на 8888, FastAPI на 8000, <code>127.0.0.1</code> только для себя, <code>0.0.0.0</code> для всей сети.</td></tr>
+      <tr><td>HTTP</td><td>Запрос к модели это POST с JSON, по коду ответа видно, где ошибка.</td></tr>
+      <tr><td>API и ключи</td><td>Ключ к API моделей в <code>.env</code>, заголовок <code>Authorization: Bearer</code>, повтор после 429.</td></tr>
+      <tr><td>DNS</td><td>Демо по имени через запись A, «Name or service not known» значит не нашлось имя.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
 
   <h2>Все пары</h2>
   <div id="karta" data-predmet="Сети" data-zakryto="1"><p class="tiho">Пары загружаются</p></div>

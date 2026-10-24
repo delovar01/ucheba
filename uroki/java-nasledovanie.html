@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Наследование и полиморфизм — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-nasledovanie">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Наследование и полиморфизм</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Наследование и полиморфизм</h1>
+  <p class="tiho">Java · лаба 20.10, слайды «ООП часть II» и примеры Корелина seminar1 · под ПР4, срок 1.12 · около 70 минут</p>
+
+  <p>Третий урок про ООП, после <a href="java-klassy.html">классов</a> и <a href="java-inkapsulyaciya.html">инкапсуляции</a>. Там каждый класс жил сам по себе. Здесь один класс строится на основе другого: <code>extends</code>, <code>super</code>, переопределение с <code>@Override</code>, полиморфизм, абстрактный класс и интерфейс. Примеры с машинами и шахматами взяты из кода лектора seminar1 и слайдов части II.</p>
+  <p>Классы снова лежат в одном файле <code>Main.java</code>, чтобы код можно было запустить целиком. В IDEA каждый класс в своём файле.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 12</div>
+    <h2>extends: класс на основе другого</h2>
+<pre><code>class Car {
+    private String model = "без названия";
+
+    public void drive() {
+        System.out.println("Еду");
+    }
+
+    public String getModel() {
+        return model;
+    }
+}
+
+class ElectricCar extends Car {
+    public void charge() {
+        System.out.println("Заряжаюсь");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        ElectricCar tesla = new ElectricCar();
+        tesla.drive();
+        tesla.charge();
+        System.out.println(tesla.getModel());
+    }
+}</code></pre>
+<pre><code>Еду
+Заряжаюсь
+без названия</code></pre>
+    <p class="novoe">Наследование по слайдам: механизм, с помощью которого один класс создают на основе другого, уже существующего. <code>class ElectricCar extends Car</code> читается «электромобиль расширяет машину». <code>Car</code> называют суперклассом, или родителем. <code>ElectricCar</code> называют подклассом, или наследником. Наследник получает все открытые методы родителя: у <code>tesla</code> есть <code>drive</code> и <code>getModel</code>, хотя в <code>ElectricCar</code> их никто не писал. Свой метод <code>charge</code> он добавил сверху.</p>
+    <p>Наследование описывает отношение «является»: электромобиль является машиной, треугольник является фигурой.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Гибрид хочет быть и машиной, и автобусом: <code>class Hybrid extends Car, Bus { }</code>. Что ответит компилятор?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:7: error: '{' expected
+class Hybrid extends Car, Bus {
+                        ^
+1 error</code></pre>
+          <p>Слайд 13: в Java можно наследоваться только от одного класса. После имени родителя компилятор ждёт фигурную скобку, а встретил запятую. Как дать классу несколько «ролей», разберём в шаге 10, это интерфейсы.</p>
+          <p class="oshibka">Читать ошибку буквально и искать пропущенную скобку. Сообщение <code>'{' expected</code> после <code>extends</code> почти всегда значит «два родителя».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>class Наследник extends Родитель</code>: наследник получает методы родителя и добавляет свои.</p>
+      <p>Родитель у класса один.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 12</div>
+    <h2>private родителя и protected</h2>
+    <p>Наследник пробует прочитать поле родителя напрямую:</p>
+<pre><code>class Car {
+    private String model = "Нива";
+}
+
+class ElectricCar extends Car {
+    public void show() {
+        System.out.println(model);
+    }
+}</code></pre>
+<pre><code>Main.java:7: error: model has private access in Car
+        System.out.println(model);
+                           ^
+1 error</code></pre>
+    <p class="novoe">Слайд 15: скрытые, <code>private</code>, поля суперкласса недоступны вне этого класса, поэтому подкласс не может их использовать напрямую. Наследник тоже «снаружи». Поле у объекта есть, но обращаться к нему можно только через методы родителя, как <code>getModel()</code> в шаге 1.</p>
+    <p>Если наследникам доступ нужен, поле помечают <code>protected</code>: его видят сам класс, его наследники и классы того же пакета. Пакет это папка с классами, все классы урока лежат в одной. С <code>protected String model = "Нива";</code> тот же <code>show()</code> собирается и печатает <code>Нива</code>. У Корелина так сделано в <code>Vehicle</code>: <code>protected FuelType fuelType</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Поле <code>model</code> осталось <code>private</code>, а наследнику нужно его напечатать. Как это сделать, ничего не меняя в <code>Car</code> из шага 1?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>public void show() {
+    System.out.println(getModel());
+}</code></pre>
+          <p>Публичный геттер родителя наследник получил по наследству, его можно звать прямо по имени. Инкапсуляция при этом не ломается.</p>
+          <p class="oshibka">Сделать поле <code>public</code>, «чтобы наследник видел». Тогда его увидит и сможет поменять весь остальной код, это ровно то, от чего защищал урок про инкапсуляцию.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>private</code> поле родителя наследнику не видно, только через геттер.</p>
+      <p><code>protected</code>: видно классу, наследникам и пакету.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 12</div>
+    <h2>super(...): конструктор родителя</h2>
+<pre><code>class Car {
+    private final String model;
+
+    public Car(String model) {
+        this.model = model;
+        System.out.println("Конструктор Car: " + model);
+    }
+
+    public String getModel() {
+        return model;
+    }
+}
+
+class ElectricCar extends Car {
+    private final int battery;
+
+    public ElectricCar(String model, int battery) {
+        super(model);
+        this.battery = battery;
+        System.out.println("Конструктор ElectricCar: " + battery + " кВт·ч");
+    }
+
+    public int getBattery() {
+        return battery;
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>ElectricCar e = new ElectricCar("Tesla", 75);
+System.out.println(e.getModel() + " " + e.getBattery());</code></pre>
+<pre><code>Конструктор Car: Tesla
+Конструктор ElectricCar: 75 кВт·ч
+Tesla 75</code></pre>
+    <p class="novoe"><code>super(model)</code> вызывает конструктор родителя и передаёт ему модель. Поле <code>model</code> закрыто, поэтому заполнить его может только конструктор <code>Car</code>. Слайд 20: вызов конструктора суперкласса всегда первая инструкция в конструкторе подкласса. Слайд 22: конструкторы работают в порядке наследования, сначала родитель, потом наследник. Это видно по выводу.</p>
+    <p>Если <code>super(...)</code> переставить ниже <code>this.battery = battery;</code>, компилятор скажет <code>call to super must be first statement in constructor</code>. У Корелина так устроены все машины: <code>GasCar()</code> начинается с <code>super("Gasoline Car", "Gasoline", 20013, "Brown")</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В конструкторе <code>ElectricCar</code> строку <code>super(model);</code> удалили совсем. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:12: error: constructor Car in class Car cannot be applied to given types;
+    public ElectricCar(String model, int battery) {
+                                                  ^
+  required: String
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+1 error</code></pre>
+          <p>Без явного вызова Java сама подставляет <code>super()</code> без аргументов. А пустого конструктора у <code>Car</code> нет, есть только с <code>String</code>: «нужна строка, найдено ничего».</p>
+          <p class="oshibka">Чинить ошибку пустым конструктором <code>public Car() { }</code> в родителе. Соберётся, но модель останется <code>null</code>. Правильно передать данные наверх через <code>super(model)</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>super(аргументы)</code> первой строкой конструктора наследника.</p>
+      <p>Сначала работает конструктор родителя, потом наследника.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 12</div>
+    <h2>Переопределение и @Override</h2>
+<pre><code>class Car {
+    public void startEngine() {
+        System.out.println("Двигатель запущен");
+    }
+
+    public void honk() {
+        System.out.println("Би-би");
+    }
+}
+
+class GasCar extends Car {
+    @Override
+    public void startEngine() {
+        System.out.println("Бензиновый мотор рычит");
+    }
+}</code></pre>
+    <p>Строки внутри <code>main</code>:</p>
+<pre><code>Car car = new Car();
+GasCar gas = new GasCar();
+car.startEngine();
+gas.startEngine();
+gas.honk();</code></pre>
+<pre><code>Двигатель запущен
+Бензиновый мотор рычит
+Би-би</code></pre>
+    <p class="novoe">Переопределение: наследник пишет свою версию метода родителя с той же сигнатурой, то есть тем же именем и теми же типами параметров. У объекта <code>GasCar</code> работает новая версия, родительская скрыта. <code>honk</code> не переопределён, поэтому работает версия <code>Car</code>. Так у Корелина <code>GasCar</code> переопределяет <code>startEngine</code>.</p>
+    <p><code>@Override</code> ты уже видел у <code>toString</code>: пометка «заменяю метод родителя», компилятор проверяет, что такой метод у родителя правда есть.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши <code>DieselCar</code>, который запускается словами «Дизель тарахтит» и сигналит «БУ-У». Что напечатают <code>new DieselCar().startEngine()</code>, <code>new DieselCar().honk()</code> и <code>new GasCar().honk()</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>class DieselCar extends Car {
+    @Override
+    public void startEngine() {
+        System.out.println("Дизель тарахтит");
+    }
+
+    @Override
+    public void honk() {
+        System.out.println("БУ-У");
+    }
+}</code></pre>
+<pre><code>Дизель тарахтит
+БУ-У
+Би-би</code></pre>
+          <p><code>GasCar</code> сигнал не трогал, у него родительский «Би-би». Переопределение одного наследника не меняет других.</p>
+          <p class="oshibka">Думать, что переопределение в одном наследнике меняет метод родителя для всех. Родитель и остальные наследники остаются как были.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Переопределение: та же сигнатура в наследнике, работает новая версия.</p>
+      <p>Над ним всегда <code>@Override</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 12</div>
+    <h2>super.метод(): дополнить, а не заменить</h2>
+    <p>Пример из <code>ElectricCar</code> Корелина: электромобиль запускается по-родительски, но только если есть заряд.</p>
+<pre><code>class ElectricCar extends Car {
+    private int charge;
+
+    public ElectricCar(int charge) {
+        this.charge = charge;
+    }
+
+    @Override
+    public void startEngine() {
+        if (charge &gt; 0) {
+            super.startEngine();
+        } else {
+            System.out.println("Батарея пуста, заряд " + charge);
+        }
+    }
+}</code></pre>
+<pre><code>new ElectricCar(80).startEngine();
+new ElectricCar(0).startEngine();</code></pre>
+<pre><code>Двигатель запущен
+Батарея пуста, заряд 0</code></pre>
+    <p class="novoe"><code>super.startEngine()</code> вызывает версию метода из родителя. Слайд 24: чтобы вызвать версию суперкласса, нужна ссылка <code>super</code>. Так наследник добавляет проверку или действие вокруг готового поведения и не копирует код родителя.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В переопределённом <code>startEngine</code> написали <code>System.out.println("Проверка батареи"); startEngine();</code> без слова <code>super</code>. Что будет при запуске?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Проверка батареи
+Проверка батареи
+Проверка батареи
+…
+Exception in thread "main" java.lang.StackOverflowError</code></pre>
+          <p>Без <code>super</code> метод вызывает сам себя, свою же новую версию, тот снова себя, и так без конца. Такой вызов самого себя называют рекурсией. Каждый незаконченный вызов Java держит в особой памяти, стеке вызовов. Она кончается, и программа падает с <code>StackOverflowError</code>, «стек переполнен». Проверено запуском.</p>
+          <p class="oshibka">Забыть <code>super.</code> перед вызовом родительской версии. Компилятор не ругается, ошибка видна только при запуске.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>super.метод()</code>: вызвать версию родителя изнутри наследника.</p>
+      <p>Без <code>super</code> метод зовёт сам себя.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 12</div>
+    <h2>Перегрузка или переопределение</h2>
+<pre><code>class Car {
+    public void refuel(double liters) {
+        System.out.println("Car: залил " + liters + " л");
+    }
+
+    public void refuel(double liters, String type) {
+        System.out.println("Car: залил " + liters + " л, " + type);
+    }
+}
+
+class GasCar extends Car {
+    public void refuel(int liters) {
+        System.out.println("GasCar: залил " + liters + " л");
+    }
+}</code></pre>
+<pre><code>Car c = new GasCar();
+c.refuel(5.0);
+c.refuel(5.0, "АИ-95");
+GasCar g = new GasCar();
+g.refuel(5);</code></pre>
+<pre><code>Car: залил 5.0 л
+Car: залил 5.0 л, АИ-95
+GasCar: залил 5 л</code></pre>
+    <p class="novoe">Слайд 25. Перегрузка: несколько методов с одним именем и разными списками параметров. Два <code>refuel</code> в <code>Car</code> перегружены, Java выбирает по аргументам. Переопределение: та же сигнатура в наследнике. <code>refuel(int)</code> в <code>GasCar</code> выглядит как замена, но тип параметра другой, <code>int</code> вместо <code>double</code>. Это ещё одна перегрузка, и вызов с <code>5.0</code> ушёл в родительскую версию.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Над <code>refuel(int liters)</code> в <code>GasCar</code> поставили <code>@Override</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:8: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+1 error</code></pre>
+          <p>Компилятор поймал, что метод ничего не заменяет. Без пометки код собрался бы, и машина молча заправлялась бы версией родителя.</p>
+          <p class="oshibka">Считать, что одинакового имени хватает для переопределения. Нужны совпадающие типы параметров, иначе получилась перегрузка.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Перегрузка: то же имя, другие параметры.</p>
+      <p>Переопределение: та же сигнатура в наследнике, проверяет <code>@Override</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 12</div>
+    <h2>Полиморфизм: одна переменная, разные объекты</h2>
+    <p>Пример со слайда 23: шахматные фигуры.</p>
+<pre><code>import java.util.Arrays;
+
+class ChessPiece {
+    public String[] getPossibleMoves() {
+        return new String[0];
+    }
+}
+
+class Knight extends ChessPiece {
+    @Override
+    public String[] getPossibleMoves() {
+        return new String[] {"g1f3", "g1h3"};
+    }
+}
+
+class Pawn extends ChessPiece {
+    @Override
+    public String[] getPossibleMoves() {
+        return new String[] {"e2e3", "e2e4"};
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        ChessPiece[] pieces = {new Knight(), new Pawn(), new ChessPiece()};
+        for (ChessPiece p : pieces) {
+            System.out.println(Arrays.toString(p.getPossibleMoves()));
+        }
+    }
+}</code></pre>
+<pre><code>[g1f3, g1h3]
+[e2e3, e2e4]
+[]</code></pre>
+    <p class="novoe">Слайд 26: переменной типа суперкласса можно присвоить ссылку на объект любого подкласса. Массив <code>ChessPiece[]</code> держит коня, пешку и просто фигуру. Полиморфизм: один и тот же вызов <code>p.getPossibleMoves()</code> работает по-разному. Слайд 24: версия метода выбирается при запуске по типу объекта, а не по типу переменной. Переменная везде <code>ChessPiece</code>, а ходы у каждого свои.</p>
+    <p>Про запись массивов в коде. <code>new String[] {"g1f3", "g1h3"}</code> создаёт массив строк сразу со значениями, <code>new String[0]</code> пустой массив. Цикл «для каждого» из урока про классы работает и с массивом: <code>for (ChessPiece p : pieces)</code> берёт фигуры по очереди.</p>
+    <p>Цикл не знает, какие фигуры бывают. Добавишь ферзя, цикл менять не придётся. У Корелина в <code>Main</code> так же: <code>Car[] cars = {new ElectricCar(), new ElectricCar(), new GasCar()}</code> и один цикл для всех.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Добавили <code>class King extends ChessPiece { }</code> без своих ходов. Метод <code>countMoves</code> суммирует <code>p.getPossibleMoves().length</code> по массиву <code>{new Knight(), new Pawn(), new Pawn(), new King()}</code>. Сколько выйдет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>6</code>, проверено запуском. Конь 2, две пешки по 2, король 0: он не переопределил метод и получил версию родителя с пустым массивом.</p>
+          <p class="oshibka">Писать в цикле <code>if</code> на каждый вид фигуры. Это работа переопределения: каждая фигура сама знает свои ходы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Родитель x = new Наследник();</code> разрешено.</p>
+      <p>Какой метод сработает, решает тип объекта, а не переменной.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 12</div>
+    <h2>Тип переменной ограничивает вызовы, instanceof</h2>
+<pre><code>Car c = new ElectricCar();
+c.drive();
+c.charge();</code></pre>
+<pre><code>Main.java:17: error: cannot find symbol
+        c.charge();
+         ^
+  symbol:   method charge()
+  location: variable c of type Car
+1 error</code></pre>
+    <p class="novoe">Слайд 26, вторая половина: какие методы можно вызвать, определяет тип переменной, а не объекта. Объект электромобиль, но переменная <code>Car</code>, а у машины метода <code>charge</code> нет. Компилятор смотрит только на тип переменной.</p>
+    <p>Если нужно, проверяют настоящий тип объекта через <code>instanceof</code>. Запись <code>c instanceof ElectricCar e</code> сразу проверяет и заводит переменную <code>e</code> нужного типа, этот приём есть у Корелина в seminar2.</p>
+<pre><code>Car[] cars = {new ElectricCar(), new GasCar()};
+for (Car c : cars) {
+    c.drive();
+    if (c instanceof ElectricCar e) {
+        e.charge();
+    }
+}</code></pre>
+<pre><code>Еду
+Заряжаюсь
+Еду</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Без проверки сделали приведение: <code>Car c = new GasCar(); ElectricCar e = (ElectricCar) c; e.charge();</code>. Соберётся ли, и что будет при запуске?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Exception in thread "main" java.lang.ClassCastException: class GasCar cannot be cast to class ElectricCar (GasCar and ElectricCar are in unnamed module of loader 'app')
+	at Main.main(Main.java:16)</code></pre>
+          <p>Соберётся: компилятор допускает, что в <code>Car</code> лежит электромобиль. При запуске оказалось, что там бензиновая машина, и приведение падает с <code>ClassCastException</code>.</p>
+          <p class="oshibka">Приводить тип вслепую через <code>(Тип)</code>. Сначала <code>instanceof</code>, а лучше переопределённый метод, тогда проверка типа вообще не нужна.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Доступные методы решает тип переменной.</p>
+      <p><code>if (x instanceof Тип t)</code>: проверить и сразу получить переменную нужного типа.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 12</div>
+    <h2>Абстрактный класс</h2>
+    <p>По мотивам <code>Vehicle</code> из seminar1-oop: заправка у грузовика и электробуса разная, общего способа нет.</p>
+<pre><code>abstract class Vehicle {
+    protected double fuel;
+
+    public abstract void refuel(double amount);
+
+    public double getFuel() {
+        return fuel;
+    }
+}
+
+class Truck extends Vehicle {
+    @Override
+    public void refuel(double amount) {
+        fuel += amount;
+        System.out.println("Грузовик: дизель +" + amount);
+    }
+}
+
+class ElectricBus extends Vehicle {
+    @Override
+    public void refuel(double amount) {
+        fuel += amount * 0.9;
+        System.out.println("Автобус: заряд +" + amount + ", потери 10%");
+    }
+}</code></pre>
+<pre><code>Vehicle[] park = {new Truck(), new ElectricBus()};
+for (Vehicle v : park) {
+    v.refuel(50);
+    System.out.println(v.getFuel());
+}</code></pre>
+<pre><code>Грузовик: дизель +50.0
+50.0
+Автобус: заряд +50.0, потери 10%
+45.0</code></pre>
+    <p class="novoe">Абстрактный метод объявлен без тела, после скобок сразу <code>;</code>: «такой метод есть, но как он работает, решит наследник». Класс с абстрактным методом обязан быть <code>abstract</code>. Создать его объект нельзя: <code>new Vehicle()</code> даёт <code>Vehicle is abstract; cannot be instantiated</code>. Обычные поля и методы, как <code>getFuel</code>, у абстрактного класса тоже есть, наследники получают их готовыми.</p>
+    <p>У Корелина абстрактные <code>Car</code>, <code>Vehicle</code>, <code>AbstractFigure</code> в шахматах и <code>Bot</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Добавили <code>class Bus extends Vehicle { }</code> и забыли написать <code>refuel</code>. Что скажет компилятор?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:5: error: Bus is not abstract and does not override abstract method refuel(double) in Vehicle
+class Bus extends Vehicle {
+^
+1 error</code></pre>
+          <p>«Bus не абстрактный и не переопределил абстрактный <code>refuel(double)</code>». Обычный наследник обязан дать тело каждому абстрактному методу. Ради этой проверки метод и делают абстрактным: забыть его нельзя.</p>
+          <p class="oshibka">Чинить пустым телом <code>public void refuel(double amount) { }</code>. Соберётся, но автобус молча не заправляется. Пустое тело хуже ошибки компилятора.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>abstract</code> метод без тела, <code>abstract</code> класс, объект через <code>new</code> не создать.</p>
+      <p>Наследник обязан написать каждый абстрактный метод.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 12</div>
+    <h2>Интерфейс: обещание методов</h2>
+    <p>Интерфейсы <code>Startable</code> и <code>Fuelable</code> взяты из seminar1-oop, класс сокращён.</p>
+<pre><code>interface Startable {
+    void startEngine();
+    void stopEngine();
+}
+
+interface Fuelable {
+    void refuel(double amount);
+    double checkFuelLevel();
+}
+
+class Car implements Startable, Fuelable {
+    private double fuelLevel = 10;
+
+    @Override
+    public void startEngine() {
+        System.out.println("Двигатель запущен");
+    }
+
+    @Override
+    public void stopEngine() {
+        System.out.println("Двигатель заглушен");
+    }
+
+    @Override
+    public void refuel(double amount) {
+        fuelLevel += amount;
+    }
+
+    @Override
+    public double checkFuelLevel() {
+        return fuelLevel;
+    }
+}
+
+class Canister implements Fuelable {
+    private double liters = 0;
+
+    @Override
+    public void refuel(double amount) {
+        liters += amount;
+    }
+
+    @Override
+    public double checkFuelLevel() {
+        return liters;
+    }
+}</code></pre>
+<pre><code>Fuelable[] tanks = {new Car(), new Canister()};
+for (Fuelable t : tanks) {
+    t.refuel(20);
+    System.out.println(t.checkFuelLevel());
+}
+Startable s = new Car();
+s.startEngine();
+s.stopEngine();</code></pre>
+<pre><code>30.0
+20.0
+Двигатель запущен
+Двигатель заглушен</code></pre>
+    <p class="novoe">Интерфейс это список методов без тела, которые класс обещает написать. Обещание даётся словом <code>implements</code>, «реализует». Методы интерфейса всегда открытые, поэтому в классе они <code>public</code>. Полей у объекта интерфейс не даёт, конструктора у него нет.</p>
+    <p>Родитель у класса один, а интерфейсов сколько угодно: машина и заводится, и заправляется. Канистра машиной не является, но заправляется, и цикл по <code>Fuelable[]</code> работает с обеими. Интерфейс описывает умение, абстрактный класс описывает общий род с готовыми полями.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В классе написали <code>void startEngine() { … }</code> без <code>public</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:6: error: startEngine() in Car cannot implement startEngine() in Startable
+    void startEngine() {
+         ^
+  attempting to assign weaker access privileges; was public
+1 error</code></pre>
+          <p>«Попытка ослабить доступ, было public». В интерфейсе метод открыт, без слова доступ уже, чем <code>public</code>, а сужать доступ при переопределении нельзя.</p>
+          <p class="oshibka">Копировать строку из интерфейса как есть, <code>void startEngine();</code>. В интерфейсе <code>public</code> подразумевается, в классе его пишут явно.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>class X implements A, B</code>: интерфейсов много, родитель один.</p>
+      <p>Методы интерфейса в классе <code>public</code> и с <code>@Override</code>.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 12</div>
+    <h2>final запрещает наследовать, Object всем родитель</h2>
+<pre><code>final class Car {
+}
+
+class SportCar extends Car {
+}</code></pre>
+<pre><code>Main.java:4: error: cannot inherit from final Car
+class SportCar extends Car {
+                       ^
+1 error</code></pre>
+    <p class="novoe">Слайд 28. <code>final</code> у поля ты знаешь: присвоить один раз. У класса <code>final</code> значит «наследников не будет», так устроен, например, <code>String</code>. У метода <code>final</code> значит «переопределять нельзя».</p>
+    <p>Слайд 29: у всех классов есть общий суперкласс <code>Object</code>. Если <code>extends</code> не написан, класс наследует <code>Object</code>. Поэтому у любого объекта есть <code>toString</code>, <code>equals</code> и <code>hashCode</code>, и в уроке про инкапсуляцию ты их переопределял с <code>@Override</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У <code>Account</code> метод <code>public final double getCommission()</code> возвращает 0.01. <code>VipAccount extends Account</code> переопределяет его и возвращает 0.0. Что скажет компилятор и зачем такой запрет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:9: error: getCommission() in VipAccount cannot override getCommission() in Account
+    public double getCommission() {
+                  ^
+  overridden method is final
+1 error</code></pre>
+          <p>Метод помечен <code>final</code>, наследник его заменить не может. Так защищают правило, на которое опирается остальной код: комиссию не обнулит никакой наследник.</p>
+          <p class="oshibka">Путать три смысла <code>final</code>. Поле: присвоить один раз. Метод: не переопределить. Класс: не наследовать.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>final class</code> без наследников, <code>final</code> метод не переопределить.</p>
+      <p>Общий родитель всех классов <code>Object</code>.</p>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="shag" id="shag-12" data-shag>
+    <div class="shag-nomer">Шаг 12 из 12</div>
+    <h2>Когда наследование вредит</h2>
+    <p>Квадрат является прямоугольником, по геометрии всё верно:</p>
+<pre><code>class Rectangle {
+    protected int width;
+    protected int height;
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int area() {
+        return width * height;
+    }
+}
+
+class Square extends Rectangle {
+    @Override
+    public void setWidth(int side) {
+        width = side;
+        height = side;
+    }
+
+    @Override
+    public void setHeight(int side) {
+        width = side;
+        height = side;
+    }
+}
+
+public class Main {
+    static void stretch(Rectangle r) {
+        r.setWidth(5);
+        r.setHeight(2);
+        System.out.println("Ожидаю 10, площадь " + r.area());
+    }
+
+    public static void main(String[] args) {
+        stretch(new Rectangle());
+        stretch(new Square());
+    }
+}</code></pre>
+<pre><code>Ожидаю 10, площадь 10
+Ожидаю 10, площадь 4</code></pre>
+    <p class="novoe">Слайды 18–19: наследование моделирует отношение «является», но не каждое такое отношение надо делать через <code>extends</code>, и не стоит наследовать только ради чужих методов. Метод <code>stretch</code> честно работает с любым прямоугольником, а квадрат ведёт себя иначе и ломает его. Правило: наследник должен работать везде, где работает родитель.</p>
+    <p>Если правило не выполняется, берут композицию, отношение «имеет», из урока про классы, или общий интерфейс. Корелин на лекции 5.10 повторит это как «prefer composition over inheritance»: предпочитай композицию наследованию.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Перестрой код так, чтобы квадрат не наследовал прямоугольник, а оба умели считать площадь. Что напечатает цикл по <code>{new Rectangle(5, 2), new Square(3)}</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>interface Shape {
+    int area();
+}
+
+class Rectangle implements Shape {
+    private final int width;
+    private final int height;
+
+    public Rectangle(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    @Override
+    public int area() {
+        return width * height;
+    }
+}
+
+class Square implements Shape {
+    private final int side;
+
+    public Square(int side) {
+        this.side = side;
+    }
+
+    @Override
+    public int area() {
+        return side * side;
+    }
+}</code></pre>
+<pre><code>10
+9</code></pre>
+          <p>Общий интерфейс, у каждого свои неизменяемые поля. Сеттера ширины у квадрата больше нет, ломать нечего.</p>
+          <p class="oshibka">Наследовать, потому что «у родителя уже есть нужный метод». Сначала проверь вопрос: работает ли наследник везде вместо родителя.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Наследник должен заменять родителя без сюрпризов.</p>
+      <p>Не выходит: композиция или общий интерфейс.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР4</h2>
+    <ul>
+      <li><code>extends</code>, <code>protected</code>, <code>super(...)</code>: шаги 1–3.</li>
+      <li>Переопределение, <code>super.метод()</code>, отличие от перегрузки: шаги 4–6.</li>
+      <li>Полиморфизм и <code>instanceof</code>: шаги 7–8.</li>
+      <li>Абстрактный класс, интерфейс, <code>final</code>: шаги 9–11.</li>
+      <li>Выбор между наследованием и композицией: шаг 12.</li>
+    </ul>
+    <p>Вариант ПР4 выдаёт тест на элеарне, попытка одна: сразу сохрани текст. Вместе с уроками про классы и инкапсуляцию этот урок закрывает обе части слайдов ООП.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: наследование">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Класс <code>Employee</code> с закрытым именем и окладом, метод <code>pay()</code> возвращает оклад. <code>Manager extends Employee</code> получает оклад плюс 20%, через <code>super.pay()</code>. Массив из Анны и Бориса с окладом 50000, Борис менеджер. Выведи выплаты и общую сумму, должно выйти 110000.0.
+      <textarea name="z1" placeholder="class Manager extends Employee { …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Абстрактный класс <code>Shape</code> с абстрактным <code>double area()</code>. Наследники <code>Circle</code> и <code>Rect</code>. Посчитай сумму площадей круга радиуса 1 и прямоугольника 2 на 3 одним циклом. Проверь: 9.141592653589793.
+      <textarea name="z2" placeholder="abstract class Shape { …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Интерфейс <code>Payable</code> с методом <code>double amountToPay()</code>. Его реализуют <code>Invoice</code>, счёт с ценой и количеством, и <code>Employee</code> из задачи 1. Сложи, сколько платить по массиву <code>Payable[]</code> из двух счетов и одного сотрудника: 3 тетради по 45, 1 ручка за 30 и Анна с окладом 50000. Проверь: 50165.0.
+      <textarea name="z3" placeholder="interface Payable { …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> К шахматам из шага 7 добавь <code>Rook</code> с ходами <code>a1a2</code>, <code>a1a3</code>, <code>a1a4</code>. Сделай <code>ChessPiece</code> абстрактным, а <code>getPossibleMoves</code> абстрактным методом. Что сломалось в массиве из шага 7 и как починить?
+      <textarea name="z4" placeholder="abstract class ChessPiece { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Объясни своими словами разницу между абстрактным классом и интерфейсом и приведи по одному примеру из своей жизни, где подходит каждый.
+      <textarea name="z5" placeholder="Абстрактный класс нужен, когда…" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>extends, super, переопределение</td><td>Модуль A4: своя модель в PyTorch наследует <code>nn.Module</code>, первой строкой зовёт <code>super().__init__()</code> и переопределяет <code>forward</code>.</td></tr>
+      <tr><td>Полиморфизм</td><td>Модуль A2: в scikit-learn у любой модели есть <code>fit</code> и <code>predict</code>, поэтому один цикл перебирает разные модели и сравнивает их, как цикл по фигурам.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-lyambdy.html">Дальше: лямбды и Stream →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

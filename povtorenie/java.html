@@ -20,8 +20,8 @@
 </header>
 <main>
   <h1>Java: проверь себя</h1>
-  <p class="tiho">Три урока под ПР1–ПР3, 14 вопросов. Числа в вопросах новые, не из уроков. Ответь вслух или в голове, потом открывай ответ. Все ответы с выводом программы проверены запуском.</p>
-  <p>Не помнишь, вернись в урок: 1–5 <a href="../uroki/java-tipy-if.html">типы, формулы и if</a>, 6–10 <a href="../uroki/java-cikly-metody.html">циклы и методы</a>, 11–14 <a href="../uroki/java-massivy.html">массивы</a>.</p>
+  <p class="tiho">Одиннадцать уроков, 45 вопросов. Числа в вопросах новые, не из уроков. Ответь вслух или в голове, потом открывай ответ. Все ответы с выводом программы проверены запуском.</p>
+  <p>Не помнишь, вернись в урок: 1–5 <a href="../uroki/java-tipy-if.html">типы, формулы и if</a>, 6–10 <a href="../uroki/java-cikly-metody.html">циклы и методы</a>, 11–14 <a href="../uroki/java-massivy.html">массивы</a>, 15–17 <a href="../uroki/java-sreda.html">среда разработки</a>, 18–21 <a href="../uroki/java-stroki-palindrom.html">строки и палиндром</a>, 22–25 <a href="../uroki/java-klassy.html">классы и объекты</a>, 26–29 <a href="../uroki/java-inkapsulyaciya.html">инкапсуляция</a>, 30–33 <a href="../uroki/java-nasledovanie.html">наследование</a>, 34–37 <a href="../uroki/java-lyambdy.html">лямбды и Stream</a>, 38–41 <a href="../uroki/java-sealed-record.html">sealed и record</a>, 42–45 <a href="../uroki/java-isklyucheniya.html">исключения и null</a>.</p>
 
   <h2>Одной страницей</h2>
   <div class="tablica"><table>
@@ -36,6 +36,14 @@
     <tr><td>метод</td><td><code>static тип имя(параметры) { return …; }</code>, получает копию числа</td></tr>
     <tr><td>массив</td><td>индексы с 0 до <code>length - 1</code>, вывод <code>Arrays.toString(a)</code></td></tr>
     <tr><td>участки</td><td>флаг <code>inRun</code>, считать в начале участка</td></tr>
+    <tr><td>ошибки</td><td><code>Файл:строка: error</code> до запуска, <code>Exception … at …(Файл:строка)</code> при запуске</td></tr>
+    <tr><td>строки</td><td><code>length()</code>, <code>charAt(i)</code>, сравнение <code>equals</code>, после <code>nextInt</code> холостой <code>nextLine</code></td></tr>
+    <tr><td>объекты</td><td>конструктор с <code>this.поле = поле</code>, <code>b = a</code> копирует ссылку</td></tr>
+    <tr><td>инкапсуляция</td><td>поля <code>private</code>, проверка в сеттере и конструкторе, <code>final</code> без сеттера</td></tr>
+    <tr><td>наследование</td><td><code>extends</code> один родитель, <code>super(…)</code> первой строкой, <code>@Override</code>, метод выбирает тип объекта</td></tr>
+    <tr><td>лямбды</td><td><code>x -&gt; …</code> вместо интерфейса с одним методом, <code>stream().filter().map().toList()</code></td></tr>
+    <tr><td>record и sealed</td><td>record: поля, <code>x()</code>, equals сами. sealed + <code>switch</code> без <code>default</code></td></tr>
+    <tr><td>исключения</td><td><code>try/catch/finally</code>, checked ловить или <code>throws</code>, нет значения <code>Optional</code></td></tr>
   </table></div>
 
   <h2>Вопросы</h2>
@@ -110,7 +118,164 @@
     <div><p>Первое печатает служебный адрес вроде <code>[I@…</code>, второе содержимое <code>[6, 1, 8]</code>. Для <code>Arrays</code> нужен <code>import java.util.Arrays;</code>.</p></div>
   </details>
 
-  <p class="niz"><a href="../java/">← Java</a> · <a href="./">Всё повторение</a> · <a href="../uroki/java-massivy.html">Урок</a></p>
+  <h2>Среда, строки, классы, инкапсуляция</h2>
+
+  <details class="vopros">
+    <summary>15. <code>javac Task2.java</code> прошёл без ошибок. Какой командой запустить программу?</summary>
+    <div><p><code>java Task2</code>, имя класса без расширения. <code>java Task2.class</code> ответит <code>Could not find or load main class</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>16. Компилятор пишет <code>Main.java:7: error: cannot find symbol</code>, ниже <code>symbol: variable cnt</code>. Что и где искать?</summary>
+    <div><p>Строку 7 и имя <code>cnt</code>: оно не объявлено, объявлено в другом блоке или написано с опечаткой, например переменная называется <code>count</code>. Регистр тоже считается.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>17. Программа напечатала первую строку и остановилась: <code>Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException</code>, ниже <code>at Main.main(Main.java:9)</code>. Ошибка компиляции или исключение?</summary>
+    <div><p>Исключение: программа собралась и упала при запуске. Причина в строке 9, индекс вышел за границу массива. Компиляция бы не дала даже начать.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>18. Чему равны <code>"Урал".length()</code> и <code>"Урал".charAt(3)</code>? Что будет на <code>charAt(4)</code>?</summary>
+    <div><p>4 и <code>'л'</code>, номера с 0. <code>charAt(4)</code> падает: <code>StringIndexOutOfBoundsException: Index 4 out of bounds for length 4</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>19. <code>int n = sc.nextInt(); String s = sc.nextLine();</code>. Ввели <code>7</code>, Enter. Что в <code>s</code> и как починить?</summary>
+    <div><p>Пустая строка <code>""</code>: <code>nextLine</code> дочитал остаток строки после 7. После <code>nextInt</code> нужен холостой <code>sc.nextLine();</code>, потом настоящий.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>20. <code>String a = sc.next();</code>, ввели <code>нет</code>. Что дадут <code>a == "нет"</code> и <code>a.equals("нет")</code>?</summary>
+    <div><p><code>false</code> и <code>true</code>. <code>==</code> сравнивает ссылки, а строка с клавиатуры новый объект. Буквы сравнивает <code>equals</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>21. Палиндром двумя указателями. Сколько сравнений на «ротор» и на «ротик», что ответит программа?</summary>
+    <div><p>«ротор»: р и р, о и о, середина т, 2 сравнения, YES. «ротик»: р и к разные, 1 сравнение, NO.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>22. <code>class Cat { String name; int lives; }</code>. Что напечатает <code>Cat c = new Cat(); System.out.println(c.name + " " + c.lives);</code>?</summary>
+    <div><p><code>null 0</code>. Поля без значения получают значения по умолчанию: объекты <code>null</code>, числа 0.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>23. Конструктор <code>Cat(String name) { name = name; }</code>. Что окажется в поле после <code>new Cat("Мурка")</code>?</summary>
+    <div><p><code>null</code>. Параметр перекрыл поле, и <code>name = name</code> присвоил параметр самому себе. Нужно <code>this.name = name;</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>24. <code>Cat a = new Cat("Мурка"); Cat b = a; b.name = "Барсик";</code>. Чему равны <code>a.name</code> и <code>a == b</code>?</summary>
+    <div><p><code>Барсик</code> и <code>true</code>. <code>b = a</code> скопировал ссылку, объект один.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>25. Компьютер имеет список деталей по 300, 150 и 150. Что такое композиция и что вернёт <code>totalPrice()</code>, который суммирует цены частей?</summary>
+    <div><p>Композиция: поле объекта само является объектом или списком объектов, компьютер «имеет» детали. Ответ <code>600.0</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>26. Поле <code>private double balance</code>. Что скажет компилятор на <code>card.balance = 5;</code> в <code>main</code>?</summary>
+    <div><p><code>balance has private access in Account</code>. Закрытое поле видно только внутри класса, менять его можно только через методы класса.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>27. Сеттер <code>setHeight(double v) { if (v &gt; 0) height = v; }</code>. Вызвали <code>setHeight(1.2)</code>, потом <code>setHeight(0)</code>. Что вернёт <code>getHeight()</code>?</summary>
+    <div><p><code>1.2</code>. Ноль не прошёл проверку, поле не тронуто. Это тихий отказ, громкий делают через <code>throw new IllegalArgumentException(…)</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>28. Поле <code>private final String name</code>. Можно ли дописать к нему сеттер?</summary>
+    <div><p>Нет: <code>cannot assign a value to final variable name</code>. <code>final</code> поле присваивают один раз, в конструкторе или при объявлении.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>29. Две точки <code>new Point(1, 2)</code> без своего <code>equals</code>. Что даст <code>a.equals(b)</code>, и что нужно, чтобы стало true?</summary>
+    <div><p><code>false</code>: стандартный <code>equals</code> сравнивает ссылки. Нужен свой <code>@Override public boolean equals(Object o)</code>, который сравнивает поля, и вместе с ним <code>hashCode</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>30. <code>B extends A</code>, в <code>B</code> переопределён <code>hi()</code>: печатает «B» и вызывает <code>super.hi()</code>, у <code>A</code> он печатает «A». Что даст <code>A x = new B(); x.hi();</code>?</summary>
+    <div><p>«B», потом «A». Переменная типа <code>A</code>, но метод выбирается по объекту, а он <code>B</code>. <code>super.hi()</code> зовёт версию родителя.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>31. <code>C extends B</code>, <code>B extends A</code>, конструкторы печатают 3, 2 и 1. Что напечатает <code>new C()</code>?</summary>
+    <div><p><code>1 2 3</code> по строкам. Конструкторы работают от родителя к наследнику: каждый сначала неявно вызывает <code>super()</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>32. <code>abstract class Animal</code> с методом <code>abstract String sound();</code>. Что скажет компилятор на <code>new Animal()</code>, и что обязан сделать наследник?</summary>
+    <div><p><code>Animal is abstract; cannot be instantiated</code>. Обычный наследник обязан написать <code>sound()</code>, иначе «is not abstract and does not override abstract method sound()».</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>33. Соберётся ли <code>class Duck extends Bird implements Swimmer, Flyer</code>? А <code>class Duck extends Bird, Fish</code>?</summary>
+    <div><p>Первое да: родитель один, интерфейсов сколько угодно. Второе нет, <code>'{' expected</code>: два родителя в Java нельзя.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>34. <code>f = x -&gt; x * 3</code>, <code>g = x -&gt; x - 2</code>, обе <code>Function&lt;Integer, Integer&gt;</code>. Что вернут <code>f.andThen(g).apply(4)</code> и <code>g.andThen(f).apply(4)</code>?</summary>
+    <div><p><code>10</code> и <code>6</code>. В первом 4·3 = 12, минус 2. Во втором 4 − 2 = 2, умножить на 3. <code>andThen</code> выполняет слева направо.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>35. Что напечатает <code>List.of(7, 2, 9, 4, 6).stream().filter(x -&gt; x &gt; 4).map(x -&gt; x * 10).toList()</code>?</summary>
+    <div><p><code>[70, 90, 60]</code>. Остались 7, 9, 6 в том же порядке, потом каждое умножено на 10.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>36. Для <code>List.of(2, 3, 4)</code>: что дадут <code>reduce(1, (a, b) -&gt; a * b)</code> и <code>filter(x -&gt; x % 2 == 0).count()</code>?</summary>
+    <div><p><code>24</code> и <code>2</code>. Произведение начинают с 1, чётных два: 2 и 4.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>37. Какой готовый интерфейс подходит для <code>() -&gt; "привет"</code> и для <code>s -&gt; s.isEmpty()</code>? Можно ли внутри лямбды написать <code>count++</code> для локальной <code>count</code>?</summary>
+    <div><p><code>Supplier&lt;String&gt;</code> и <code>Predicate&lt;String&gt;</code>. Нельзя: локальные переменные лямбда только читает, ошибка «must be final or effectively final».</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>38. <code>record Point(int x, int y) {}</code>. <code>Point p = new Point(3, -1);</code>. Что напечатают <code>System.out.println(p)</code> и <code>System.out.println(p.x() + p.y())</code>? Есть ли у неё <code>getX()</code>?</summary>
+    <div><p><code>Point[x=3, y=-1]</code> и <code>2</code>. <code>getX()</code> нет, методы чтения называются как поля: <code>x()</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>39. <code>record Age(int value) { Age { if (value &lt; 0) throw new IllegalArgumentException("минус"); } }</code>. Как называется такой конструктор и что будет от <code>new Age(-3)</code>?</summary>
+    <div><p>Компактный конструктор, параметры не перечисляют, поля Java присваивает сама. <code>new Age(-3)</code> бросит <code>IllegalArgumentException: минус</code>, объект не создастся.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>40. <code>sealed interface Animal permits Cat, Dog</code>, в <code>switch</code> ветки для <code>Cat</code> и <code>Dog</code> без <code>default</code>. В <code>permits</code> дописали <code>Fox</code>. Что будет?</summary>
+    <div><p>Не соберётся: <code>the switch expression does not cover all possible input values</code>. Компилятор знает всех наследников и требует ветку для лисы. Ради этого <code>default</code> и не пишут.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>41. <code>case Sq(int a) -&gt; 4 * a</code> и <code>case Rect(int a, int b) -&gt; 2 * (a + b)</code>. Что вернёт метод для <code>new Sq(5)</code> и <code>new Rect(2, 7)</code>?</summary>
+    <div><p><code>20</code> и <code>18</code>. Шаблон записи проверяет тип и раскладывает запись на поля по порядку заголовка.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>42. В <code>try</code> печать «1», запись в <code>a[3]</code> массива длины 2, печать «2». <code>catch (ArrayIndexOutOfBoundsException e)</code> печатает «3», <code>finally</code> «4», после всего «5». Что выйдет?</summary>
+    <div><p><code>1 3 4 5</code> по строкам. «2» пропущено, исключение поймано, <code>finally</code> отработал, программа пошла дальше.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>43. Какие из них проверяемые: <code>IOException</code>, <code>IllegalArgumentException</code>, <code>NullPointerException</code>, <code>FileNotFoundException</code>?</summary>
+    <div><p><code>IOException</code> и его наследник <code>FileNotFoundException</code>. Два других наследники <code>RuntimeException</code>, компилятор их не проверяет.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>44. <code>Optional.ofNullable(nothing)</code>, где <code>nothing</code> равен <code>null</code>, дальше <code>.map(String::toUpperCase).orElse("пусто")</code>. А <code>Optional.of("Java").map(String::length).orElse(0)</code>?</summary>
+    <div><p>«пусто» и <code>4</code>. На пустой коробке <code>map</code> ничего не делает, и срабатывает запас.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>45. Ресурс в <code>try (R r = new R())</code> печатает «открыл» и «закрыл». Внутри <code>throw new RuntimeException("бах")</code>, <code>catch</code> печатает текст. Порядок вывода?</summary>
+    <div><p>«открыл», «закрыл», «бах». Ресурс закрывается до того, как сработает <code>catch</code>.</p></div>
+  </details>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="./">Всё повторение</a> · <a href="../uroki/index.html">Уроки</a></p>
 </main>
 <script src="../assets/app.js"></script>
 </body>

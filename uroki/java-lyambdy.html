@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Лямбды и Stream — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-lyambdy">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Лямбды и Stream</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Лямбды и Stream</h1>
+  <p class="tiho">Java · лекция 3, 28.09 (Корелин), «Функциональное программирование», его код seminar2 · на зачёт · около 65 минут</p>
+
+  <p>Лекция про то, как передать функцию в метод как обычное значение и как обработать список цепочкой «отбери, преобразуй, собери» вместо цикла. Нужен интерфейс из урока <a href="java-nasledovanie.html">наследование и полиморфизм</a>, шаг 10: если его ещё не прошёл, начни с него. Примеры взяты из кода лектора: калькулятор, предикаты на «banana», сервис товаров с ноутбуком за 1500.</p>
+  <p>Для ПР1–ПР4 эта тема не нужна, она на зачёт. Но после неё код со списками пишется втрое короче.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>Чистая функция и побочный эффект</h2>
+<pre><code>public class Main {
+    static int total = 0;
+
+    static int add(int a, int b) {
+        return a + b;
+    }
+
+    static int addToTotal(int x) {
+        total += x;
+        return total;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(add(2, 3));
+        System.out.println(add(2, 3));
+        System.out.println(addToTotal(5));
+        System.out.println(addToTotal(5));
+    }
+}</code></pre>
+<pre><code>5
+5
+5
+10</code></pre>
+    <p class="novoe">Чистая функция возвращает одно и то же для одинаковых аргументов и ничего не меняет вокруг себя. <code>add</code> из примеров Корелина чистая: <code>add(2, 3)</code> всегда 5. <code>addToTotal</code> меняет общее поле <code>total</code>, это побочный эффект: тот же вызов с 5 вернул сначала 5, потом 10.</p>
+    <p>Мысль лекции: функциональное программирование держится на чистых функциях и неизменяемых данных. Такой код проще проверять, его результат зависит только от входа. Java берёт у этого подхода лямбды, функции высшего порядка и Stream, они дальше.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие из методов чистые? <code>withVat(price)</code> возвращает <code>price * 1.2</code>. <code>log(text)</code> печатает текст. <code>nextId()</code> прибавляет 1 к полю <code>counter</code> и возвращает новое значение.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Чистая только <code>withVat</code>. <code>log</code> ничего не возвращает, но печать это тоже действие наружу. <code>nextId</code> меняет счётчик, и каждый вызов даёт новое число.</p>
+          <p class="oshibka">Считать функцию чистой, раз она «ничего не ломает». Любое изменение вне функции, даже печать или запись в поле, делает её нечистой.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Чистая функция: результат зависит только от аргументов, вокруг ничего не меняет.</p>
+      <p>Изменение поля, печать, файл: побочные эффекты.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>Функциональный интерфейс и лямбда</h2>
+    <p>Калькулятор из seminar2. Сначала по-старому, классом, потом лямбдой:</p>
+<pre><code>interface Calculator {
+    double calculate(int a, int b);
+}
+
+class Sum implements Calculator {
+    @Override
+    public double calculate(int a, int b) {
+        return a + b;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Calculator sumClass = new Sum();
+        System.out.println("Сумма классом: " + sumClass.calculate(5, 3));
+
+        Calculator sum = (a, b) -&gt; a + b;
+        Calculator product = (a, b) -&gt; a * b;
+        Calculator hypotenuse = (a, b) -&gt; Math.sqrt(a * a + b * b);
+        System.out.println("Сумма: " + sum.calculate(5, 3));
+        System.out.println("Произведение: " + product.calculate(5, 3));
+        System.out.println("Гипотенуза: " + hypotenuse.calculate(3, 4));
+    }
+}</code></pre>
+<pre><code>Сумма классом: 8.0
+Сумма: 8.0
+Произведение: 15.0
+Гипотенуза: 5.0</code></pre>
+    <p class="novoe">Функциональный интерфейс: интерфейс ровно с одним абстрактным методом. Лямбда <code>(a, b) -&gt; a + b</code> это короткая запись класса, который реализует такой интерфейс: слева от стрелки параметры метода, справа то, что он возвращает. Типы <code>a</code> и <code>b</code> писать не надо, Java берёт их из <code>calculate(int a, int b)</code>. Ответ <code>double</code>, поэтому 8 печатается как <code>8.0</code>.</p>
+    <p>Над таким интерфейсом ставят <code>@FunctionalInterface</code>, как у Корелина. Если дописать второй абстрактный метод, компилятор скажет <code>Unexpected @FunctionalInterface annotation</code> и <code>multiple non-overriding abstract methods found</code>: лямбда не знала бы, какой из двух методов она заменяет.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатают <code>avg.calculate(5, 2)</code> для <code>(a, b) -&gt; (a + b) / 2.0</code> и <code>div.calculate(5, 2)</code> для <code>(a, b) -&gt; a / b</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>3.5
+2.0</code></pre>
+          <p>В <code>div</code> оба числа <code>int</code>, деление целое, получается 2, и только потом оно превращается в <code>double</code> 2.0. Тип ответа интерфейса дробь не спасает.</p>
+          <p class="oshibka">Ждать 2.5 от <code>a / b</code>, раз метод возвращает <code>double</code>. Правило целого деления из урока про типы и if работает и внутри лямбды.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Функциональный интерфейс: один абстрактный метод, пометка <code>@FunctionalInterface</code>.</p>
+      <p>Лямбда <code>(параметры) -&gt; результат</code> вместо целого класса.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>Формы лямбды и внешние переменные</h2>
+<pre><code>interface Greeter {
+    String greet(String name);
+}
+
+interface Dice {
+    int roll();
+}</code></pre>
+<pre><code>Greeter hi = name -&gt; "Привет, " + name;
+Greeter polite = name -&gt; {
+    String upper = name.toUpperCase();
+    return "Здравствуйте, " + upper;
+};
+Dice four = () -&gt; 4;
+System.out.println(hi.greet("Аня"));
+System.out.println(polite.greet("Аня"));
+System.out.println(four.roll());
+
+String sign = "!";
+Greeter loud = name -&gt; "Эй, " + name + sign;
+System.out.println(loud.greet("Боря"));</code></pre>
+<pre><code>Привет, Аня
+Здравствуйте, АНЯ
+4
+Эй, Боря!</code></pre>
+    <p class="novoe">Один параметр можно писать без скобок: <code>name -&gt; …</code>. Без параметров пишут пустые скобки: <code>() -&gt; 4</code>. Если нужно несколько строк, тело берут в фигурные скобки и пишут <code>return</code>, как в обычном методе. Лямбда видит переменные метода вокруг себя, как <code>sign</code>, но только если их больше не меняют. Такую переменную называют фактически финальной: <code>final</code> не написан, но присвоена она один раз.</p>
+    <p>Если после лямбды написать <code>sign = "?";</code>, компилятор ответит <code>local variables referenced from a lambda expression must be final or effectively final</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Интерфейс <code>Counter</code> с методом <code>void add()</code>. Написали <code>int count = 0; Counter c = () -&gt; count++; c.add();</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Main.java:8: error: local variables referenced from a lambda expression must be final or effectively final
+        Counter c = () -&gt; count++;
+                          ^
+1 error</code></pre>
+          <p>Лямбда пытается менять переменную метода, а ей можно только читать. Это и есть защита от побочных эффектов из шага 1.</p>
+          <p class="oshibka">Обходить запрет массивом из одного элемента или полем класса, чтобы счётчик внутри лямбды «работал». Это возвращает побочный эффект. Посчитать лучше через Stream и <code>count()</code>, шаг 10.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>x -&gt; …</code>, <code>() -&gt; …</code>, <code>(a, b) -&gt; { …; return …; }</code></p>
+      <p>Переменные снаружи лямбда только читает, менять их потом нельзя.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>Function: из одного значения другое</h2>
+<pre><code>import java.util.function.Function;
+
+public class Main {
+    public static void main(String[] args) {
+        Function&lt;Integer, Integer&gt; increment = x -&gt; x + 1;
+        Function&lt;Integer, Integer&gt; square = x -&gt; x * x;
+        Function&lt;String, Integer&gt; length = s -&gt; s.length();
+
+        System.out.println(increment.apply(3));
+        System.out.println(square.apply(3));
+        System.out.println(length.apply("банан"));
+
+        Function&lt;Integer, Integer&gt; incrementThenSquare = increment.andThen(square);
+        System.out.println(incrementThenSquare.apply(3));
+    }
+}</code></pre>
+<pre><code>4
+9
+5
+16</code></pre>
+    <p class="novoe">Свой интерфейс на каждый случай писать не нужно: в пакете <code>java.util.function</code> готовые есть. <code>Function&lt;T, R&gt;</code> принимает значение типа <code>T</code> и возвращает <code>R</code>, метод у него <code>apply</code>. Типы в угловых скобках называют дженериками, параметрами типа, как у <code>ArrayList&lt;String&gt;</code>. Там пишут только классы, поэтому вместо <code>int</code> стоит <code>Integer</code>, класс-обёртка над числом. Java сама переводит одно в другое.</p>
+    <p><code>andThen</code> из примера Корелина склеивает две функции в новую: сначала прибавить 1, потом в квадрат. (3 + 1)² = 16. Это композиция функций со слайда.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернут <code>square.andThen(increment).apply(3)</code> и <code>increment.andThen(increment).andThen(square).apply(1)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>10</code> и <code>9</code>, проверено запуском. В первом сначала квадрат 9, потом плюс 1. Во втором 1, 2, 3, потом 3² = 9.</p>
+          <p class="oshibka">Читать <code>a.andThen(b)</code> справа налево. Порядок как в тексте: сначала <code>a</code>, потом <code>b</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Function&lt;T, R&gt;</code>: <code>apply(t)</code> даёт <code>R</code>. В скобках классы: <code>Integer</code>, не <code>int</code>.</p>
+      <p><code>f.andThen(g)</code>: сначала <code>f</code>, потом <code>g</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>Predicate: проверка да или нет</h2>
+<pre><code>import java.util.function.Predicate;
+
+public class Main {
+    public static void main(String[] args) {
+        Predicate&lt;String&gt; containsA = s -&gt; s.contains("a");
+        Predicate&lt;String&gt; containsB = s -&gt; s.contains("b");
+        Predicate&lt;String&gt; isLong = s -&gt; s.length() &gt; 5;
+
+        System.out.println(containsA.test("apple"));
+        System.out.println(containsA.and(containsB).test("banana"));
+        System.out.println(containsA.and(containsB).test("apple"));
+        System.out.println(containsB.or(isLong).test("cherry"));
+        System.out.println(isLong.negate().test("cherry"));
+    }
+}</code></pre>
+<pre><code>true
+true
+false
+true
+false</code></pre>
+    <p class="novoe"><code>Predicate&lt;T&gt;</code> принимает значение и возвращает <code>boolean</code>, метод у него <code>test</code>. <code>s.contains("a")</code> отвечает true, если в строке <code>s</code> есть кусок <code>"a"</code>. Проверки склеиваются: <code>and</code> это «обе верны», <code>or</code> это «хотя бы одна», <code>negate</code> это «наоборот». Пример Корелина: в «banana» есть и a, и b, поэтому true. В «apple» нет b. В «cherry» нет b, но шесть букв, <code>or</code> даёт true.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши предикат «чётное число» и проверь им 7 и 10. Как одной строкой получить из него «нечётное»?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Predicate&lt;Integer&gt; isEven = x -&gt; x % 2 == 0;
+System.out.println(isEven.test(7));
+System.out.println(isEven.test(10));
+Predicate&lt;Integer&gt; isOdd = isEven.negate();</code></pre>
+          <p>Напечатает <code>false</code> и <code>true</code>. <code>negate</code> не трогает старый предикат, а делает новый.</p>
+          <p class="oshibka">Писать в лямбде <code>if (x % 2 == 0) return true; else return false;</code>. Сравнение уже даёт <code>boolean</code>, его и возвращают.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Predicate&lt;T&gt;</code>: <code>test(t)</code> даёт true или false.</p>
+      <p><code>and</code>, <code>or</code>, <code>negate</code> собирают новую проверку.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>Consumer и Supplier</h2>
+<pre><code>import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+public class Main {
+    static int stockOrDefault(Integer stock, Supplier&lt;Integer&gt; fallback) {
+        if (stock != null) {
+            return stock;
+        }
+        return fallback.get();
+    }
+
+    public static void main(String[] args) {
+        Consumer&lt;String&gt; printUpperCase = s -&gt; System.out.println(s.toUpperCase());
+        List&lt;String&gt; words = List.of("apple", "banana", "cherry");
+        for (String w : words) {
+            printUpperCase.accept(w);
+        }
+        words.forEach(printUpperCase);
+
+        Supplier&lt;String&gt; greeting = () -&gt; "Добрый вечер";
+        System.out.println(greeting.get());
+
+        System.out.println(stockOrDefault(25, () -&gt; 0));
+        System.out.println(stockOrDefault(null, () -&gt; 0));
+    }
+}</code></pre>
+<pre><code>APPLE
+BANANA
+CHERRY
+APPLE
+BANANA
+CHERRY
+Добрый вечер
+25
+0</code></pre>
+    <p>Две новые записи до главного. <code>List.of("apple", "banana", "cherry")</code> сразу создаёт список из перечисленных значений. <code>List</code> это общий тип для списков, <code>ArrayList</code> один из них, поэтому со списком работает тот же цикл «для каждого». Параметр <code>stock</code> имеет тип <code>Integer</code>, а не <code>int</code>: объект может быть <code>null</code>, «остатка не знаем», а простое число <code>int</code> не может.</p>
+    <p class="novoe"><code>Consumer&lt;T&gt;</code> принимает значение и ничего не возвращает, метод <code>accept</code>. Это действие: напечатать, сохранить. У списка есть <code>forEach</code>, он отдаёт каждый элемент такому действию, и цикл писать не надо. <code>Supplier&lt;T&gt;</code> ничего не принимает и выдаёт значение, метод <code>get</code>. Им передают «как получить запасное значение»: у Корелина остаток товара по умолчанию задан как <code>() -&gt; 0</code>.</p>
+    <p>Четыре готовых интерфейса запомни парами. Function берёт и отдаёт. Predicate берёт и отвечает да или нет. Consumer только берёт. Supplier только отдаёт. Ещё есть <code>Runnable</code>: ничего не берёт и не отдаёт, просто запуск задачи.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой из четырёх интерфейсов подходит для: а) «запиши строку в журнал», б) «выдай текущее время», в) «цена с НДС», г) «товар дороже 1000?»
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) <code>Consumer&lt;String&gt;</code>, б) <code>Supplier&lt;LocalTime&gt;</code>, где <code>LocalTime</code> готовый класс Java для времени суток, в) <code>Function&lt;Double, Double&gt;</code>, г) <code>Predicate&lt;Product&gt;</code>.</p>
+          <p class="oshibka">Брать <code>Function&lt;Product, Boolean&gt;</code> для проверки. Работать будет, но <code>Predicate</code> даёт <code>and</code>, <code>or</code>, <code>negate</code> и сразу говорит читателю, что это условие.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Consumer</code>: <code>accept(t)</code>, ничего не возвращает. <code>Supplier</code>: <code>get()</code>, ничего не принимает.</p>
+      <p><code>list.forEach(действие)</code> вместо цикла.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Функция в параметре: пример лектора</h2>
+    <p>Главный пример лекции, <code>ProductService</code> из seminar2. Товар ищут по номеру. Не нашли, тогда цену считает функция, которую передал вызывающий.</p>
+<pre><code>@FunctionalInterface
+interface ItemNotFoundHandler {
+    double handle(List&lt;Product&gt; items);
+}
+
+class ProductService {
+    private final List&lt;Product&gt; products = new ArrayList&lt;&gt;();
+
+    public void addProduct(Product p) {
+        products.add(p);
+    }
+
+    public double getProductPriceOrDefault(int productId, ItemNotFoundHandler handler) {
+        for (Product p : products) {
+            if (p.getId() == productId) {
+                return p.getPrice();
+            }
+        }
+        return handler.handle(products);
+    }
+}</code></pre>
+    <p>Класс <code>Product</code> с полями <code>id</code>, <code>name</code>, <code>price</code> и геттерами, товары как у лектора: Laptop 1500, Smartphone 800, Tablet 600, Smartwatch 200, Headphones 100, номера с 1 по 5. Конструктор <code>Product(int id, String name, double price)</code>. Строки внутри <code>main</code>:</p>
+<pre><code>ProductService service = new ProductService();
+service.addProduct(new Product(1, "Laptop", 1500.00));
+service.addProduct(new Product(2, "Smartphone", 800.00));
+service.addProduct(new Product(3, "Tablet", 600.00));
+service.addProduct(new Product(4, "Smartwatch", 200.00));
+service.addProduct(new Product(5, "Headphones", 100.00));
+
+ItemNotFoundHandler average = items -&gt; {
+    System.out.println("Trying to calculate average price.");
+    double amount = 0;
+    for (Product p : items) {
+        amount += p.getPrice();
+    }
+    return amount / items.size();
+};
+
+System.out.println("Price: " + service.getProductPriceOrDefault(1, average));
+System.out.println("Price: " + service.getProductPriceOrDefault(6, average));
+System.out.println("Price: " + service.getProductPriceOrDefault(6, items -&gt; 0));</code></pre>
+<pre><code>Price: 1500.0
+Trying to calculate average price.
+Price: 640.0
+Price: 0.0</code></pre>
+    <p class="novoe">Функция высшего порядка принимает функцию параметром или возвращает функцию. <code>getProductPriceOrDefault</code> принимает: сервис не знает, что делать, если товара нет, и решает тот, кто вызывает. Товар 1 нашёлся, обработчик даже не вызван. Товара 6 нет: средняя цена 3200 / 5 = 640. Третий вызов передал другую функцию, и ответ другой, а код сервиса тот же.</p>
+    <p>Функция может и вернуть функцию. У Корелина <code>powerOf(2)</code> возвращает лямбду «в квадрат», а <code>powerOf(3)</code> «в куб»: <code>return number -&gt; (int) Math.pow(number, exponent);</code>, и <code>cube.apply(5)</code> даёт 125.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши обработчик «цена самого дешёвого товара». Что он вернёт на этих пяти товарах?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>ItemNotFoundHandler cheapest = items -&gt; {
+    double min = items.get(0).getPrice();
+    for (Product p : items) {
+        if (p.getPrice() &lt; min) {
+            min = p.getPrice();
+        }
+    }
+    return min;
+};</code></pre>
+          <p><code>100.0</code>, наушники. Приём «держу лучшего» из урока про типы и if, только внутри лямбды.</p>
+          <p class="oshibka">Начать минимум с 0. Ни одна цена не меньше нуля, и ответ будет 0.0. Начинают с первого элемента.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Функция высшего порядка принимает или возвращает функцию.</p>
+      <p>Метод решает «когда», переданная лямбда решает «что делать».</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>Ссылка на метод</h2>
+<pre><code>List&lt;String&gt; words = List.of("apple", "banana", "cherry");
+words.forEach(System.out::println);
+
+Function&lt;String, Integer&gt; length = String::length;
+Function&lt;String, String&gt; upper = String::toUpperCase;
+System.out.println(length.apply("банан"));
+System.out.println(upper.apply("банан"));
+
+Function&lt;String, Integer&gt; parse = Integer::parseInt;
+System.out.println(parse.apply("42") + 1);
+
+Supplier&lt;List&lt;String&gt;&gt; newList = ArrayList::new;
+List&lt;String&gt; basket = newList.get();
+basket.add("kiwi");
+System.out.println(basket);</code></pre>
+<pre><code>apple
+banana
+cherry
+5
+БАНАН
+43
+[kiwi]</code></pre>
+    <p class="novoe">Если лямбда только вызывает один готовый метод, её пишут короче: <code>Класс::метод</code>. <code>String::length</code> значит <code>s -&gt; s.length()</code>. <code>System.out::println</code> значит <code>x -&gt; System.out.println(x)</code>. <code>Integer::parseInt</code> значит <code>s -&gt; Integer.parseInt(s)</code>. <code>ArrayList::new</code> ссылается на конструктор. У Корелина так везде: <code>map(Product::getPrice)</code>, <code>orElseThrow(UserNotFoundException::new)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Перепиши ссылками на метод: <code>p -&gt; p.getName()</code> и <code>s -&gt; s.trim()</code>. Можно ли так записать <code>x -&gt; x * 2</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>Product::getName</code> и <code>String::trim</code>. <code>x -&gt; x * 2</code> нельзя: там не вызов метода, а умножение. Ссылка на метод годится, только когда лямбда целиком сводится к одному вызову.</p>
+          <p class="oshibka">Ставить скобки: <code>String::length()</code>. Это ошибка компиляции. Ссылка указывает на метод, а не вызывает его.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Класс::метод</code> вместо лямбды из одного вызова.</p>
+      <p>Без скобок. <code>Класс::new</code>: ссылка на конструктор.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Stream: filter, map, collect</h2>
+    <p>Те же пять товаров, только у товара теперь имя и цена, без номера. Строки внутри <code>main</code>:</p>
+<pre><code>List&lt;Product&gt; products = List.of(
+    new Product("Laptop", 1500.00),
+    new Product("Smartphone", 800.00),
+    new Product("Tablet", 600.00),
+    new Product("Smartwatch", 200.00),
+    new Product("Headphones", 100.00));
+
+List&lt;String&gt; expensive = products.stream()
+    .filter(p -&gt; p.getPrice() &gt; 500)
+    .map(Product::getName)
+    .toList();
+System.out.println(expensive);
+
+List&lt;Double&gt; withDiscount = products.stream()
+    .map(p -&gt; p.getPrice() * 0.9)
+    .collect(Collectors.toList());
+System.out.println(withDiscount);</code></pre>
+<pre><code>[Laptop, Smartphone, Tablet]
+[1350.0, 720.0, 540.0, 180.0, 90.0]</code></pre>
+    <p class="novoe">Stream, поток, это конвейер по элементам списка. <code>stream()</code> ставит список на конвейер. <code>filter</code> оставляет элементы, для которых предикат вернул true. <code>map</code> превращает каждый элемент функцией: товар в имя, цену в цену со скидкой. В конце элементы собирают обратно в список: <code>toList()</code> или <code>collect(Collectors.toList())</code>, для второго нужен <code>import java.util.stream.Collectors;</code>. Порядок элементов сохраняется.</p>
+    <p>Цикл с <code>if</code> и <code>add</code> делает то же, но цепочку читают как фразу: «из товаров отбери дороже 500, возьми имена, собери в список».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Из <code>List.of("кот", "собака", "ёж", "лошадь", "мышь")</code> собери длины слов, в которых не меньше 4 букв.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>List&lt;Integer&gt; r = words.stream()
+    .filter(w -&gt; w.length() &gt;= 4)
+    .map(String::length)
+    .toList();</code></pre>
+<pre><code>[6, 6, 4]</code></pre>
+          <p>Сначала отбор, потом длины. Наоборот, сначала <code>map</code>, слов уже не будет, только числа, и фильтр придётся писать по числу.</p>
+          <p class="oshibka">Забыть <code>toList()</code> и положить цепочку в <code>List</code>. Без него это ещё поток, а не список, и компилятор скажет про несовместимые типы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>list.stream().filter(предикат).map(функция).toList()</code></p>
+      <p>filter отбирает, map превращает, toList собирает.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Свести к одному числу: sum, count, reduce</h2>
+<pre><code>List&lt;Integer&gt; nums = List.of(1, 2, 3, 4, 5, 6);
+int sum = nums.stream()
+    .filter(x -&gt; x % 2 == 0)
+    .mapToInt(x -&gt; x * x)
+    .sum();
+System.out.println(sum);
+
+int total = nums.stream().reduce(0, (a, b) -&gt; a + b);
+System.out.println(total);
+int product = nums.stream().reduce(1, (a, b) -&gt; a * b);
+System.out.println(product);
+
+long odd = nums.stream().filter(x -&gt; x % 2 == 1).count();
+System.out.println(odd);
+
+double all = products.stream().mapToDouble(Product::getPrice).sum();
+System.out.println(all);</code></pre>
+<pre><code>56
+21
+720
+3
+3200.0</code></pre>
+    <p class="novoe">Конечная операция сводит поток к одному результату. <code>count()</code> считает элементы, ответ <code>long</code>. <code>mapToInt</code> и <code>mapToDouble</code> делают поток чисел, у него есть <code>sum()</code>. Чётные 2, 4, 6, их квадраты 4, 16, 36, сумма 56. <code>reduce(начало, функция)</code> сворачивает поток сам: берёт начальное значение и по очереди склеивает его с каждым элементом. Для суммы начинают с 0, для произведения с 1: 1·2·3·4·5·6 = 720.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для <code>List.of(3, 8, 1, 9, 4)</code> найди максимум через <code>reduce</code> и сумму чисел больше 3.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int max = nums.stream().reduce(nums.get(0), (a, b) -&gt; a &gt; b ? a : b);
+int s = nums.stream().filter(x -&gt; x &gt; 3).reduce(0, Integer::sum);</code></pre>
+          <p><code>9</code> и <code>21</code>, это 8 + 9 + 4. <code>Integer::sum</code> это ссылка на готовый метод сложения.</p>
+          <p class="oshibka">Начинать произведение с 0 или максимум с 0. С нуля произведение всегда 0, а максимум отрицательных чисел выйдет 0, которого в списке нет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>count()</code>, <code>mapToInt(…).sum()</code>: готовые итоги.</p>
+      <p><code>reduce(начало, (a, b) -&gt; …)</code>: свернуть самому.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>Неизменяемость и ленивый поток</h2>
+<pre><code>List&lt;Integer&gt; nums = List.of(1, 2, 3, 4);
+List&lt;Integer&gt; doubled = nums.stream().map(x -&gt; x * 2).toList();
+System.out.println(nums + " " + doubled);
+
+nums.stream().filter(x -&gt; {
+    System.out.println("смотрю " + x);
+    return x &gt; 2;
+});
+System.out.println("без конечной операции ничего не напечаталось");
+List&lt;Integer&gt; big = nums.stream().filter(x -&gt; {
+    System.out.println("смотрю " + x);
+    return x &gt; 2;
+}).toList();
+System.out.println(big);
+
+nums.add(5);</code></pre>
+<pre><code>[1, 2, 3, 4] [2, 4, 6, 8]
+без конечной операции ничего не напечаталось
+смотрю 1
+смотрю 2
+смотрю 3
+смотрю 4
+[3, 4]
+Exception in thread "main" java.lang.UnsupportedOperationException
+	at java.base/java.util.ImmutableCollections.uoe(ImmutableCollections.java:142)
+	at java.base/java.util.ImmutableCollections$AbstractImmutableCollection.add(ImmutableCollections.java:147)
+	at Main.main(Main.java:21)</code></pre>
+    <p class="novoe">Три правила. Поток не меняет исходный список: <code>nums</code> остался <code>[1, 2, 3, 4]</code>, результат лёг в новый. Поток ленивый: без конечной операции, такой как <code>toList</code>, <code>sum</code>, <code>count</code>, ни одна лямбда не вызвана. Список из <code>List.of</code> неизменяемый: <code>add</code> падает с <code>UnsupportedOperationException</code>, «операция не поддерживается».</p>
+    <p>Слайд Корелина про побочные эффекты: если сервис отдаёт наружу свой список товаров, его можно «превратить в тыкву», очистить или подменить снаружи. Защита: отдавать копию, которую менять нельзя, <code>List.copyOf(products)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Класс <code>Shop</code> хранит <code>ArrayList</code> товаров, а геттер возвращает <code>List.copyOf(items)</code>. Снаружи вызвали <code>shop.getItems().clear()</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Exception in thread "main" java.lang.UnsupportedOperationException
+	at java.base/java.util.ImmutableCollections.uoe(ImmutableCollections.java:142)
+	at java.base/java.util.ImmutableCollections$AbstractImmutableCollection.clear(ImmutableCollections.java:149)
+	at Main.main(Main.java:22)</code></pre>
+          <p>Копия неизменяемая, очистить её нельзя. Список внутри магазина цел. Это та же дыра, что <code>final</code>-список из урока про инкапсуляцию, шаг 9, только закрытая.</p>
+          <p class="oshibka">Ждать, что <code>map</code> или <code>filter</code> поменяют исходный список. Результат потока надо положить в переменную, иначе он пропал.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Поток не меняет источник и без конечной операции не работает.</p>
+      <p><code>List.of</code> и <code>List.copyOf</code> менять нельзя.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Что спросят на зачёте</h2>
+    <ul>
+      <li>Чистая функция и побочный эффект: шаг 1.</li>
+      <li>Функциональный интерфейс и лямбда: шаги 2–3.</li>
+      <li>Function, Predicate, Consumer, Supplier: шаги 4–6.</li>
+      <li>Функция высшего порядка и композиция: шаги 4 и 7.</li>
+      <li>Ссылка на метод: шаг 8. Stream API: шаги 9–11.</li>
+    </ul>
+    <p>Optional, коробку «значение есть или нет», Корелин тоже показывал в seminar2. Она разобрана в уроке <a href="java-isklyucheniya.html">исключения и null</a>, рядом с null.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: лямбды и Stream">
+    <h2>Мини-самостоятельная</h2>
+    <p>Четыре задачи. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Свой функциональный интерфейс <code>Discount</code> с методом <code>double apply(double price)</code>. Три лямбды: скидка 10%, скидка 500 рублей, но цена не ниже нуля, и «без скидки». Примени все три к цене 3000 и выведи.
+      <textarea name="z1" placeholder="@FunctionalInterface interface Discount { …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Список оценок <code>List.of(5, 3, 4, 2, 5, 4)</code>. Потоком посчитай: сколько пятёрок, сумму оценок выше тройки, список оценок без двоек. Сначала посчитай ответы в голове, потом сверь с запуском.
+      <textarea name="z2" placeholder="long fives = marks.stream()…" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Метод <code>static List&lt;String&gt; select(List&lt;String&gt; words, Predicate&lt;String&gt; rule)</code> возвращает слова, подходящие под правило. Вызови его дважды с разными лямбдами: слова на букву «к» и слова длиннее 5 букв.
+      <textarea name="z3" placeholder="static List&lt;String&gt; select(…) { …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Товары из шага 7. Одной цепочкой получи имена товаров дешевле 1000 большими буквами, используя только ссылки на методы там, где это возможно.
+      <textarea name="z4" placeholder="products.stream()…" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>filter, map, reduce</td><td>Модуль A2: в pandas фильтр строк, <code>apply</code> и <code>sum</code> работают той же цепочкой «отбери, преобразуй, сверни», только над столбцами таблицы.</td></tr>
+      <tr><td>Функция в параметре</td><td>Модуль A4: функцию потерь и функцию активации передают в обучение как значение, как обработчик в <code>ProductService</code>.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-sealed-record.html">Дальше: sealed и record →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>
