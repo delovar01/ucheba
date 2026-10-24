@@ -110,7 +110,7 @@ WHERE id IN (SELECT dataset_id
              WHERE model_id = 3);</code></pre>
     <p class="novoe">Если подзапрос возвращает один столбец и много строк, это список. Его ставят после <code>IN</code>, как список в скобках из урока про фильтры, только значения база находит сама. Пример с лекции такой же: фильмы с теми рейтингами, которые есть у фильмов со словом PET в названии.</p>
     <p>Подзапрос даёт 1, 3, 5. Ответ: iris, California Housing, MNIST.</p>
-    <p>Чем это лучше <code>JOIN</code>? <code>IN</code> не размножает строки. Logisticregression запускали на iris дважды, и <code>JOIN</code> выдал бы iris два раза, а <code>IN</code> выдаст один.</p>
+    <p>Чем это лучше <code>JOIN</code>? <code>IN</code> не размножает строки. У Resnet все три набора разные, и разницы не видно. Но возьми другую модель: Logisticregression запускали на iris дважды. Тот же запрос с <code>model_id</code> этой модели через <code>JOIN</code> выдал бы iris два раза, а через <code>IN</code> один.</p>
 
     <div class="sam">
       <b>Сделай сам.</b> Какие модели запускал Щайхутдинов Азат, исследователь 2? Через <code>IN</code>.
@@ -528,7 +528,7 @@ WHERE e.researcher_id = 2;</code></pre>
       <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
     </div>
     <div class="zadacha">
-      <b>3.</b> Наборы данных, по которым нет ни одной оценки <code>accuracy</code>. Через <code>NOT EXISTS</code>. Сколько их?
+      <b>3.</b> Наборы данных, по которым нет ни одной оценки <code>accuracy</code>. Через <code>NOT EXISTS</code>. Сколько их? Подсказка: оценка связана с набором не напрямую, а через запуск, поэтому внутри подзапроса соедини <code>metrics</code> с <code>experiments</code> через <code>JOIN</code> и сравни <code>dataset_id</code> запуска с <code>id</code> набора снаружи.
       <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
     </div>
     <div class="zadacha">

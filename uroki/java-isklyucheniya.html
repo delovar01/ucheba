@@ -561,7 +561,7 @@ Exception in thread "main" java.lang.IndexOutOfBoundsException: Index: -1 Size: 
       <b>Сделай сам.</b> Что не так с кодом: <code>int age = 0; try { age = Integer.parseInt("19 лет"); } catch (NumberFormatException e) { }</code>, дальше печать «Возраст » + age?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p>Напечатает <code>Возраст 0</code>, проверено. Пустой <code>catch</code> проглотил ошибку, и 0 выглядит как настоящий возраст. Это худший вариант из всех: ни падения, ни сообщения, только неверные данные дальше по программе.</p>
+          <p>Напечатает <code>Возраст 0</code>. Пустой <code>catch</code> проглотил ошибку, и 0 выглядит как настоящий возраст. Это худший вариант из всех: ни падения, ни сообщения, только неверные данные дальше по программе.</p>
           <p class="oshibka">Пустой <code>catch</code>, «чтобы не падало». В нём должно быть хотя бы сообщение и решение: запросить снова, взять запасное значение явно или передать ошибку наверх.</p>
         </div>
       </details>

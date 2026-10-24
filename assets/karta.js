@@ -16,6 +16,7 @@
   const SC = { id: 'sa-chto-takoe', nazvanie: 'Что такое системный анализ', ssylka: 'uroki/sa-chto-takoe.html' };
   const SM = { id: 'sa-problema-mvp', nazvanie: 'Проблема, ценность, границы, MVP', ssylka: 'uroki/sa-problema-mvp.html' };
   const SE = { id: 'sa-er-sequence', nazvanie: 'Диаграммы ER и Sequence', ssylka: 'uroki/sa-er-sequence.html' };
+  const SK = { id: 'sa-konkurenty-prototipy', nazvanie: 'Рынок, конкуренты и прототипы', ssylka: 'uroki/sa-konkurenty-prototipy.html' };
   const AK = { id: 'ach-nauchnaya-kommunikaciya', nazvanie: 'Научная коммуникация', ssylka: 'uroki/ach-nauchnaya-kommunikaciya.html' };
   const AI = { id: 'ach-apparat-issledovaniya', nazvanie: 'Аппарат исследования', ssylka: 'uroki/ach-apparat-issledovaniya.html' };
   const AG = { id: 'ach-gost-tz', nazvanie: 'ГОСТ и ТЗ', ssylka: 'uroki/ach-gost-tz.html' };
@@ -70,7 +71,7 @@
         { data: 'ср 7.10', tip: 'лаба', tema: 'Агрегаты: COUNT, SUM, AVG, MIN, MAX', material: 'конспект', urok: LJ },
         { data: 'вт 13.10', tip: 'лекция 4', tema: 'INSERT, UPDATE, DELETE, CASE, CTE', material: 'конспекты, слайды', urok: [BI, CD, BP] },
         { data: 'ср 14.10', tip: 'лаба', tema: 'Функции дат и CASE: EXTRACT, TO_CHAR (по чату записей соседних групп той же недели)', material: 'конспект', urok: CD },
-        { data: 'ср 21.10', tip: 'лаба', tema: 'Строковые функции: SUBSTRING, склейка || (по чату записей 20.10 соседних групп)', material: 'конспект', urok: BR },
+        { data: 'ср 21.10', tip: 'лаба', tema: 'Строковые функции: SUBSTRING, склейка || (по чату записей 20.10 соседних групп. Своя запись пары есть, 53 мин, в её чате только вопрос про ДЗ 3, тему по видео не сверяли)', material: 'конспект', urok: BR },
       ],
     },
     {
@@ -146,10 +147,10 @@
         { data: 'ср 16.09', tip: 'лекция МТС 1', tema: 'Жизненный цикл ПО, роли в команде', material: 'конспект, слайды, запись', urok: SP },
         { data: 'ср 23.09', tip: 'лекция МТС 2', tema: 'Модели разработки ПО: водопад, V-модель, спираль, итерации и инкременты, Scrum, Kanban', material: 'конспект, слайды, запись', urok: SP },
         { data: 'ср 30.09', tip: 'лаба 2', tema: 'Проблема, ценность, границы, MVP', material: 'конспект, слайды, запись', urok: SM },
-        { data: 'ср 30.09', tip: 'лекция МТС 3', tema: 'Анализ проблем и бизнес-требований', material: 'конспект, слайды', urok: ST },
+        { data: 'ср 30.09', tip: 'лекция МТС 3', tema: 'Анализ проблем и бизнес-требований, рынок и конкуренты', material: 'конспект, слайды', urok: [ST, SK] },
         { data: 'ср 7.10', tip: 'лекция МТС 4', tema: 'Требования: функциональные и нефункциональные', material: 'слайды, запись', urok: ST },
         { data: 'ср 14.10', tip: 'лаба 3', tema: 'Участники, требования, риски (по плану курса)', material: 'конспект, слайды', urok: SR },
-        { data: 'ср 14.10', tip: 'лекция МТС 5', tema: 'Прототипы и диаграммы: Use Case, BPMN', material: 'слайды, запись, шпаргалки BPMN', urok: ST },
+        { data: 'ср 14.10', tip: 'лекция МТС 5', tema: 'Прототипы и диаграммы: Use Case, BPMN', material: 'слайды, запись, шпаргалки BPMN', urok: [ST, SK] },
         { data: 'ср 21.10', tip: 'лекция МТС 6', tema: 'Диаграммы: ER и Sequence (по плану курса: раздел 6 «Диаграммы (ER, Sequence)» в TeachBase). Слайдов нет: раздел там ещё черновик, запись МТС Линк закрыта организатором (403); искал также элеарн 10012. Урок по плану курса, стандартное содержание тем', material: '', urok: SE },
       ],
     },

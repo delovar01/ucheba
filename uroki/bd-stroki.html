@@ -196,7 +196,7 @@ WHERE LOWER(name) LIKE 'r%';</code></pre>
     <p>Ответ: <code>false</code>, <code>true</code>, 7, 4. В DBeaver <code>false</code> и <code>true</code> бывают показаны пустым и отмеченным квадратиком.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> Какой будет <code>LENGTH(TRIM('   MNIST   '))</code>? А <code>LENGTH(TRIM('California  Housing'))</code>, где между словами два пробела?
+      <b>Сделай сам.</b> Какой будет <code>LENGTH(TRIM('   MNIST   '))</code>, где перед словом и после него по три пробела? А <code>LENGTH(TRIM('California  Housing'))</code>, где между словами два пробела?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
           <p>5: три пробела слева и три справа ушли. Во втором 19: по краям пробелов нет, а два пробела внутри <code>TRIM</code> не трогает.</p>
@@ -478,7 +478,7 @@ WHERE LOWER(TRIM(email)) LIKE '%@urfu.ru';</code></pre>
     <button class="knopka" type="button">Урок пройден ✓</button>
   </div>
 
-  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a></p>
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="../bd/">Дальше: страница БД →</a></p>
 </main>
 <script src="../assets/app.js"></script>
 </body>

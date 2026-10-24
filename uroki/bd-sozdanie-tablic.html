@@ -143,7 +143,7 @@ INSERT INTO models (name, framework) VALUES
     <p>Строки в таблицу кладёт команда <code>INSERT INTO таблица (столбцы) VALUES (значения), (значения);</code>. В первых скобках столбцы, которые заполняешь, дальше по скобкам на строку. Столбец <code>id</code> мы не назвали, поэтому номер выдал счётчик. Подробно <code>INSERT</code> будет в уроке <a href="bd-izmenenie-dannyh.html">про изменение данных</a>, здесь хватит этого.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> В пустую таблицу с <code>id SERIAL PRIMARY KEY</code> вставили строку, вписав номер руками: <code>INSERT INTO models (id, name) VALUES (1, 'Resnet');</code>. Потом вставляют следующую без номера: <code>INSERT INTO models (name) VALUES ('CatBoost');</code>. Что будет?
+      <b>Сделай сам.</b> Представь новую пустую таблицу <code>models</code>, а не ту, что уже заполнена кодом выше (там Resnet и CatBoost уже лежат, и первая же вставка упадёт). У неё <code>id SERIAL PRIMARY KEY</code>. В неё вставили строку, вписав номер руками: <code>INSERT INTO models (id, name) VALUES (1, 'Resnet');</code>. Потом вставляют следующую без номера: <code>INSERT INTO models (name) VALUES ('CatBoost');</code>. Что будет?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
           <p>Вторая вставка упадёт: <code>duplicate key value violates unique constraint "models_pkey"</code>, «такой ключ уже есть». Счётчик не знал про ручную единицу и выдал CatBoost тоже 1. Constraint по-английски «ограничение», правило на столбце. <code>models_pkey</code> имя этого правила, база склеила его из имени таблицы и pkey, первичного ключа.</p>
@@ -220,9 +220,9 @@ INSERT INTO models (name, framework) VALUES
 <pre><code class="sql">created_at TIMESTAMP   DEFAULT now(),
 status     VARCHAR(20) DEFAULT 'running'</code></pre>
     <p class="novoe"><code>DEFAULT значение</code> подставляется, когда столбец в <code>INSERT</code> не упомянули вовсе. <code>now()</code> значит «текущие дата и время»: новый запуск сам получит время записи и статус <code>running</code>, «идёт».</p>
-    <p>Запасное значение можно попросить и явно, словом <code>DEFAULT</code> на месте значения:</p>
-<pre><code class="sql">INSERT INTO experiments (researcher_id, dataset_id, count_apoh, status)
-VALUES (1, 1, 3, DEFAULT);   -- статус станет running</code></pre>
+    <p>Запасное значение можно попросить и явно, словом <code>DEFAULT</code> на месте значения. Пример для твоей <code>ml_tracker</code>, где у запуска обязательна ещё и модель. Таблицы <code>experiments</code> в пробной базе пока нет, она появится в шаге 10:</p>
+<pre><code class="sql">INSERT INTO experiments (researcher_id, dataset_id, model_id, count_apoh, status)
+VALUES (1, 1, 1, 3, DEFAULT);   -- статус станет running</code></pre>
 
     <div class="sam">
       <b>Сделай сам.</b> Две вставки в запуски. В первой столбца <code>status</code> нет совсем. Во второй он есть, и в нём явно написано <code>NULL</code>. Какой статус будет у каждого запуска?
@@ -408,7 +408,7 @@ ALTER TABLE datasets RENAME COLUMN count TO rows_count;</code></pre>
       <textarea name="z2" placeholder="UNIQUE (…)" aria-label="Ответ на задачу 2"></textarea>
     </div>
     <div class="zadacha">
-      <b>3.</b> В пробной базе из шага 10 у <code>experiments.status</code> нет ни проверки, ни <code>NOT NULL</code>. Напиши две команды <code>ALTER TABLE</code>: проверку, что статус один из <code>running</code>, <code>done</code>, <code>failed</code>, и обязательный статус. Пройдут ли они на данных скрипта шага 10? А если перед ними вставить запуск со статусом <code>'dnoe'</code>?
+      <b>3.</b> В пробной базе из шага 10 у <code>experiments.status</code> нет ни проверки, ни <code>NOT NULL</code>. Напиши две команды <code>ALTER TABLE</code>: проверку, что статус один из <code>running</code>, <code>done</code>, <code>failed</code>, и обязательный статус. Пройдут ли они на данных скрипта шага 10? А если перед ними вставить запуск со статусом <code>'dnoe'</code>? Если пример шага 11 ты уже выполнил, правило <code>experiments_status_check</code> в базе есть, и одноимённое упадёт с <code>already exists</code>: назови своё по-другому, например <code>status_variants</code>.
       <textarea name="z3" placeholder="ALTER TABLE experiments …" aria-label="Ответ на задачу 3"></textarea>
     </div>
     <div class="zadacha">

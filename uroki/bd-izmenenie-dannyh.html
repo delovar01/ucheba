@@ -22,15 +22,15 @@
   <h1>Добавить, поправить, удалить: INSERT, UPDATE, DELETE</h1>
   <p class="tiho">Базы данных · лекция 4 от 13.10, домашка 4 · около 50 минут</p>
 
-  <p>До сих пор ты только читал базу через <code>SELECT</code>. Здесь три команды, которые её меняют: <code>INSERT</code> добавляет строки, <code>UPDATE</code> правит, <code>DELETE</code> удаляет. Всё на твоей базе <code>ml_tracker</code>, а после каждой правки проверяем результат через <code>SELECT … WHERE</code>. Ровно это и просят в домашке 4.</p>
-  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Рамку «Главное из шага» перепиши в тетрадь. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+  <p>В уроке про создание таблиц <code>INSERT</code> и <code>UPDATE</code> мелькнули на пробной базе. Здесь три команды, которые меняют данные, разобраны по порядку: <code>INSERT</code> добавляет строки, <code>UPDATE</code> правит, <code>DELETE</code> удаляет. Всё на твоей базе <code>ml_tracker</code>, а после каждой правки проверяем результат через <code>SELECT … WHERE</code>. Ровно это и просят в домашке 4.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Рамку «Главное из шага» прочитай вслух своими словами. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
 
   <div class="glavnoe">
     <p>Важно: эти команды меняют базу по-настоящему. На этой же базе ты делаешь самостоятельную 2, и чужие строки испортят её ответы. Поэтому в уроке каждая правка идёт внутри пробы, которая потом всё отменяет. Как она устроена, в шаге 1.</p>
   </div>
 
   <h2>Твоя база</h2>
-  <p>Те же пять таблиц, что в уроке <a href="bd-filtry-join.html">«Сортировка, фильтры и JOIN»</a>. Здесь коротко, только то, что понадобится.</p>
+  <p>Если в DBeaver видишь ещё <code>students</code>, <code>orders</code> и <code>runs</code>, это учебные таблицы из уроков про LEFT JOIN и даты, к твоей базе они не относятся. Твоих таблиц пять, те же, что в уроке <a href="bd-filtry-join.html">«Сортировка, фильтры и JOIN»</a>. Здесь коротко, только то, что понадобится.</p>
 
   <div class="tablica">
     <div class="imya">researchers · исследователи</div>
@@ -244,9 +244,10 @@ VALUES (1, 5, 2, 7);
 
 SELECT id, researcher_id, dataset_id, model_id, count_apoh, status
 FROM experiments
-WHERE id = 10;
+ORDER BY id DESC
+LIMIT 1;
 ROLLBACK;</code></pre>
-    <p>Получится строка 10 со статусом <code>running</code>: у <code>status</code> стоит <code>DEFAULT 'running'</code>, а <code>created_at</code> возьмёт текущее время.</p>
+    <p>Получится новая строка со статусом <code>running</code>: у <code>status</code> стоит <code>DEFAULT 'running'</code>, а <code>created_at</code> возьмёт текущее время. В первый раз у неё будет номер 10. Проверка берёт не номер 10, а последнюю строку (<code>ORDER BY id DESC LIMIT 1</code>), потому что номер при каждом прогоне растёт: как сказано в шаге 2, <code>ROLLBACK</code> счётчик назад не крутит, и даже вставка с ошибкой забирает номер. Во второй раз будет 11, потом 12, и это нормально.</p>
     <p class="novoe">Столбец <code>researcher_id</code> объявлен как <b>внешний ключ</b> (<code>REFERENCES researchers(id)</code>): в нём может стоять только номер, который есть в <code>researchers</code>. Попробуй исследователя 99:</p>
 <pre><code class="sql">INSERT INTO experiments (researcher_id, dataset_id, model_id, count_apoh)
 VALUES (99, 5, 2, 7);</code></pre>
@@ -548,7 +549,7 @@ ON CONFLICT (email) DO NOTHING;</code></pre>
     <button class="knopka" type="button">Урок пройден ✓</button>
   </div>
 
-  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-filtry-join.html">Сортировка, фильтры и JOIN</a></p>
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-podzaprosy-cte.html">Дальше: подзапросы и CTE →</a></p>
 </main>
 <script src="../assets/app.js"></script>
 </body>

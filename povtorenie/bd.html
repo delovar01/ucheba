@@ -294,6 +294,75 @@ SUBSTRING(email FROM POSITION('@' IN email))     -- @urfu.ru</code></pre>
     </div>
   </details>
 
+  <h2>После урока «Сортировка, фильтры и JOIN»</h2>
+
+  <details class="vopros">
+    <summary>31. Запиши короче: count_apoh &gt;= 3 AND count_apoh &lt;= 7. Входят ли 3 и 7?</summary>
+    <div>
+      <p><code>count_apoh BETWEEN 3 AND 7</code>. Оба края входят: <code>BETWEEN</code> значит «от и до включительно».</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>32. Что найдёт name LIKE 'M%', а что name LIKE '_N%'?</summary>
+    <div>
+      <p><code>%</code> значит «любое число любых символов», <code>_</code> ровно один символ. Первое найдёт всё, что начинается на M, например MNIST. Второе всё, где вторая буква N, и MNIST тоже подходит. <code>LIKE</code> различает большие и маленькие буквы, без разницы ищет <code>ILIKE</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>33. Почему WHERE count_apoh = NULL ничего не находит и как написать правильно? А что делает status IN ('done', 'failed')?</summary>
+    <div>
+      <p>Сравнение с <code>NULL</code> через <code>=</code> всегда даёт «неизвестно», а не «да», поэтому ни одна строка не проходит. Правильно <code>count_apoh IS NULL</code>. <code>IN ('done', 'failed')</code> это короткая запись <code>status = 'done' OR status = 'failed'</code>.</p>
+    </div>
+  </details>
+
+  <h2>После урока «DISTINCT, лучший и окна»</h2>
+
+  <details class="vopros">
+    <summary>34. Чем SELECT DISTINCT researcher_id FROM experiments отличается от SELECT researcher_id FROM experiments?</summary>
+    <div>
+      <p>Без <code>DISTINCT</code> номер исследователя повторится столько раз, сколько у него запусков. С <code>DISTINCT</code> каждый номер один раз: повторы строк выкидываются. <code>COUNT(DISTINCT researcher_id)</code> считает, сколько разных исследователей.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>35. Чем MAX(mean_metric) с GROUP BY отличается от MAX(mean_metric) OVER (PARTITION BY experiments_id)?</summary>
+    <div>
+      <p><code>GROUP BY</code> схлопывает каждую группу в одну строку: по запуску остаётся одна строка с максимумом. <code>OVER</code> строки не схлопывает: каждая оценка остаётся на месте, а рядом пишется максимум её запуска. Поэтому с <code>OVER</code> можно в одной строке показать и оценку, и насколько она хуже лучшей.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>36. Как вывести один лучший запуск по accuracy, если двух одинаковых значений нет?</summary>
+    <div>
+      <p><code>ORDER BY mean_metric DESC LIMIT 1</code> после <code>WHERE name_metric = 'accuracy'</code>. <code>DESC</code> ставит большее первым, <code>LIMIT 1</code> оставляет одну строку.</p>
+    </div>
+  </details>
+
+  <h2>После урока «INSERT, UPDATE, DELETE»</h2>
+
+  <details class="vopros">
+    <summary>37. Что сделает UPDATE experiments SET status = 'done'; без WHERE?</summary>
+    <div>
+      <p>Поставит <code>done</code> всем запускам в таблице. <code>UPDATE</code> и <code>DELETE</code> без <code>WHERE</code> трогают все строки. Поэтому сначала пишут <code>SELECT … WHERE</code> с тем же условием, смотрят, какие строки попадут, и только потом меняют.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>38. Вставляешь запуск с researcher_id = 99, а такого исследователя нет. Что ответит база и почему?</summary>
+    <div>
+      <p>Ошибку <code>violates foreign key constraint</code>: <code>researcher_id</code> внешний ключ на <code>researchers(id)</code>, и в нём может стоять только существующий номер. Это ссылочная целостность из вопроса 5.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>39. Зачем оборачивать пробы в BEGIN; … ROLLBACK;? Что ROLLBACK не возвращает?</summary>
+    <div>
+      <p><code>ROLLBACK</code> отменяет всё, что сделано после <code>BEGIN</code>, и база остаётся как была. Не возвращается счётчик номеров <code>SERIAL</code>: номер, взятый вставкой, пропадёт, и следующая вставка получит следующий.</p>
+    </div>
+  </details>
+
   <p class="niz"><a href="../bd/">← БД</a> · <a href="./">Всё повторение</a></p>
 </main>
 <script src="../assets/app.js"></script>

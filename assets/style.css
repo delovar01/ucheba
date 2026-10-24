@@ -245,7 +245,7 @@ details.otvet[open] > summary .skryt { display: inline; }
 
 /* --- код и таблицы --- */
 code { font-family: var(--shrift-kod); font-size: .88em; }
-:not(pre) > code { background: var(--kod-fon); padding: 1px 5px; border-radius: var(--r-mal); overflow-wrap: anywhere; }
+:not(pre) > code { background: var(--kod-fon); padding: 1px 5px; border-radius: var(--r-mal); overflow-wrap: anywhere; white-space: pre-wrap; }
 pre {
   background: var(--kod-fon); border: 1px solid var(--linia); border-radius: var(--r);
   padding: var(--o3) var(--o4); margin: var(--o3) 0;
@@ -326,6 +326,7 @@ details.vopros > div { padding: var(--o1) var(--o4) var(--o3); }
 .karta-predmet td.tema { min-width: 190px; }
 .karta-predmet td.pusto { background: var(--oshibka-fon); color: var(--oshibka); }
 .karta-predmet td.ne-bylo { color: var(--tekst-2); font-style: italic; }
+.karta-predmet .dyra { color: var(--oshibka); font-weight: 600; }
 .karta-knopki { display: flex; gap: var(--o2); flex-wrap: wrap; margin: var(--o3) 0; }
 .knopka.vtoraya { background: transparent; color: var(--akcent); }
 
@@ -336,7 +337,7 @@ details.vopros > div { padding: var(--o1) var(--o4) var(--o3); }
 .knopka-tema { min-height: 44px; }
 h2 > a { display: inline-flex; align-items: center; min-height: 44px; }
 /* дорожка разделов, которую подставляет панель над шапкой */
-.u-put a { display: inline-flex; align-items: center; min-height: 44px; }
+.u-put a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; padding: 0 var(--o1); }
 .u-put { padding-top: 0 !important; }
 .spisok-urokov li { position: relative; }
 .spisok-urokov li > a::after { content: ""; position: absolute; inset: 0; }
@@ -345,6 +346,10 @@ h2 > a { display: inline-flex; align-items: center; min-height: 44px; }
 .spisok-urokov li:hover > a { text-decoration-thickness: 2px; }
 .hod { padding-bottom: var(--o3); }
 .dorozhka a { position: relative; }
+.shag-perehod { display: flex; justify-content: space-between; gap: var(--o2); margin-top: var(--o4); }
+.shag-perehod a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; padding: 0 var(--o2); font-size: var(--t-mel); }
+/* в уроке на телефоне верхнее меню панели лишнее: «← Учёба» и дорожка уже есть */
+@media (max-width: 640px) { body[data-urok] .u-put { display: none; } }
 .dorozhka a::after { content: ""; position: absolute; inset: -19px 0; }
 .gorit a.urok { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--t-mel); }
 details.podrobnee > summary {
@@ -373,7 +378,7 @@ main.glavnaya { max-width: 1160px; }
 }
 
 /* предметы карточками: уроки видны прямо с главной */
-.predmety { display: grid; gap: var(--o3); margin: var(--o3) 0; }
+.predmety { display: grid; gap: var(--o3); margin: var(--o3) 0; align-items: start; }
 @media (min-width: 640px) { .predmety { grid-template-columns: 1fr 1fr; } }
 .predmet-k {
   background: var(--fon-2); border: 1px solid var(--linia); border-radius: var(--r-bol);

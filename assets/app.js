@@ -48,6 +48,18 @@
     const hodB = hod.querySelector('b'), hodSpan = hod.querySelector('span');
     const delenia = [...hod.querySelectorAll('.dorozhka a')];
 
+    // Точки дорожки на телефоне узкие, пальцем не попасть: внизу каждого шага кнопки «назад» и «дальше»
+    shagi.forEach((s, i) => {
+      if (s.querySelector(':scope > .shag-perehod')) return;
+      const nav = document.createElement('nav');
+      nav.className = 'shag-perehod';
+      nav.setAttribute('aria-label', 'Переход между шагами');
+      const dalshe = shagi[i + 1] ? '#' + shagi[i + 1].id : (document.querySelector('#samostoyatelnaya') ? '#samostoyatelnaya' : '');
+      nav.innerHTML = (i > 0 ? '<a href="#' + shagi[i - 1].id + '">← Шаг ' + i + '</a>' : '<span></span>') +
+        (dalshe ? '<a href="' + dalshe + '">' + (shagi[i + 1] ? 'Шаг ' + (i + 2) + ' →' : 'Мини-самостоятельная →') + '</a>' : '');
+      s.appendChild(nav);
+    });
+
     let tekushiy = -1;
     const obnovit = () => {
       const porog = innerHeight * 0.4;
@@ -99,7 +111,7 @@
     z.className = 'sostoyanie';
     if (sost.proyden) { z.classList.add('proyden'); z.textContent = 'пройден ✓'; }
     else if (sost.max) { z.classList.add('idet'); z.textContent = 'дошёл до шага ' + sost.max + ' из ' + vsego; }
-    else z.textContent = 'не начат';
+    else return; // не начатый урок без пометки, чтобы списки не рябили
     el.appendChild(z);
   };
   document.querySelectorAll('[data-urok-status]').forEach(znachok);
@@ -125,17 +137,21 @@
   // .gorit[data-predmet] на странице предмета: все сроки этого предмета.
   const seychas = Date.now();
   const den = 86400000;
+  // derzhat: true — срок прошёл, но работа не сдана и вопрос не решён: не убирать с главной
   const aktivnye = () => (window.SROKI || [])
-    .filter(s => !s.sdano && (!s.do || new Date(s.do).getTime() > seychas - den))
+    .filter(s => !s.sdano && (s.derzhat || !s.do || new Date(s.do).getTime() > seychas - den))
     .sort((a, b) => (a.do ? new Date(a.do) : Infinity) - (b.do ? new Date(b.do) : Infinity));
   const sostUroka = put => chitat('urok:' + (document.querySelector('[data-urok-status] a[href$="' + put.split('/').pop() + '"]')?.closest('[data-urok-status]')?.dataset.urokStatus || ''), {});
+  // urok — один урок или массив, если к сдаче их несколько
+  const urokiSdachi = s => [].concat(s.urok || []);
 
   // «Сажусь учиться»: урок к ближайшей сдаче, который ещё не пройден
   const glavnyy = document.querySelector('.vhod.glavnyy[data-avto]');
   if (glavnyy && window.SROKI) {
-    const s = aktivnye().find(x => x.urok && !sostUroka(x.urok).proyden && document.querySelector('[data-urok-status] a[href$="' + x.urok.split('/').pop() + '"]'));
+    let put = null;
+    const s = aktivnye().find(x => (put = urokiSdachi(x).find(u => !sostUroka(u).proyden && document.querySelector('[data-urok-status] a[href$="' + u.split('/').pop() + '"]'))));
     if (s) {
-      const li = document.querySelector('[data-urok-status] a[href$="' + s.urok.split('/').pop() + '"]').closest('[data-urok-status]');
+      const li = document.querySelector('[data-urok-status] a[href$="' + put.split('/').pop() + '"]').closest('[data-urok-status]');
       const imya = li.querySelector('b').textContent;
       const kogda = new Date(new Date(s.do).getTime() - 60000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'Asia/Yekaterinburg' });
       glavnyy.href = li.querySelector('a').getAttribute('href');
@@ -166,12 +182,14 @@
       const kogda = d ? formatDaty(d) + '<small>' + ostalos(d) + '</small>'
         : s.kogda ? s.kogda + '<small>дата не объявлена</small>'
         : 'без срока<small>чем раньше, тем лучше</small>';
-      const urok = s.urok ? sostUroka(s.urok) : null;
+      const uroki = urokiSdachi(s);
+      const ssylkiUrokov = uroki.map((u, i) => '<a class="urok" href="' + koren + u + '">' +
+        (sostUroka(u).proyden ? 'Урок пройден ✓, повторить →' : uroki.length > 1 ? 'Урок ' + (i + 1) + ' к этому →' : 'Урок к этому →') + '</a>').join('');
       return '<li class="' + (skoro ? 'skoro' : '') + '">' +
         '<div class="kogda">' + kogda + '</div>' +
         '<div>' + (sPredmetom ? '<span class="predmet">' + s.predmet + '</span>' : '') +
         '<span class="chto">' + (s.ssylka ? '<a href="' + s.ssylka + '" target="_blank" rel="noopener">' + s.chto + '</a>' : s.chto) + '</span>' +
-        (s.urok ? '<a class="urok" href="' + koren + s.urok + '">' + (urok.proyden ? 'Урок пройден ✓, повторить →' : 'Урок к этому →') + '</a>' : '') +
+        ssylkiUrokov +
         (s.probnyy ? '<a class="urok probnyy" href="' + koren + s.probnyy + '">Пробный вариант →</a>' : '') +
         (s.primechanie ? '<details class="podrobnee"><summary>Подробнее</summary><p>' + s.primechanie + '</p></details>' : '') +
         '</div></li>';
@@ -239,7 +257,10 @@
           (pusto(r.material) ? '<td class="pusto">нет</td>' : '<td>' + r.material + '</td>') + urok + '</tr>';
       }).join('');
       return '<details class="karta-predmet"' + (i === 0 && !karta.dataset.zakryto ? ' open' : '') + '><summary><b>' + p.predmet + '</b>' +
-        '<span class="tiho">' + bylo.length + ' пар · без темы ' + bezTemy + ' · без материала ' + bezMat + ' · с уроком ' + sUrokom + '</span></summary>' +
+        '<span class="tiho">' + (bezTemy || bezMat || sUrokom < bylo.length
+          ? [bezTemy ? '<b class="dyra">без темы ' + bezTemy + '</b>' : '', bezMat ? '<b class="dyra">без материала ' + bezMat + '</b>' : '',
+             'уроков ' + sUrokom + ' из ' + bylo.length].filter(Boolean).join(' · ')
+          : 'дыр нет, уроков ' + sUrokom + ' из ' + bylo.length) + '</span></summary>' +
         '<div class="tablica"><table><tr><th>дата</th><th>тип</th><th>тема</th><th>материал</th><th>урок</th></tr>' + stroki + '</table></div></details>';
     }).join('');
     document.querySelectorAll('[data-karta]').forEach(b => b.addEventListener('click', () => {

@@ -28,6 +28,7 @@ const STRANICY = [
   './uroki/sa-chto-takoe.html',
   './uroki/sa-problema-mvp.html',
   './uroki/sa-er-sequence.html',
+  './uroki/sa-konkurenty-prototipy.html',
   './uroki/ach-nauchnaya-kommunikaciya.html',
   './uroki/ach-apparat-issledovaniya.html',
   './uroki/ach-gost-tz.html',

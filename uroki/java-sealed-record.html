@@ -168,7 +168,7 @@ Exception in thread "main" java.lang.IllegalArgumentException: конец дол
     }
 }</code></pre>
 <pre><code>Email[value=bob@example.com]</code></pre>
-          <p>Присваивается уже очищенное значение. И <code>new Email("bob@example.com").equals(new Email(" BOB@example.com"))</code> теперь true, проверено.</p>
+          <p>Присваивается уже очищенное значение. И <code>new Email("bob@example.com").equals(new Email(" BOB@example.com"))</code> теперь true.</p>
           <p class="oshibka">Писать в компактном конструкторе <code>this.value = value;</code>. Компилятор ответит <code>cannot assign a value to final variable value</code>: присваивание полям в нём делает только Java, в конце.</p>
         </div>
       </details>
@@ -275,14 +275,14 @@ class Bandit implements Hero {
 ^
 1 error</code></pre>
     <p class="novoe">Наследник запечатанного типа обязан сказать, что дальше. <code>final</code>: на нём иерархия кончается. <code>sealed</code>: у него свой закрытый список. <code>non-sealed</code>: дальше наследовать может кто угодно. Запись record сама <code>final</code>, ей писать ничего не надо.</p>
-    <p>Так устроена иерархия игры из seminar3: персонаж бывает героем или врагом, герои Alex и Steve, враги зомби и боссы, боссы Dragon и Warden. Упрощённая версия с открытой веткой врагов:</p>
-<pre><code>sealed abstract class Character permits Hero, Enemy {
+    <p>Так устроена иерархия игры из seminar3: персонаж бывает героем или врагом, герои Alex и Steve, враги зомби и боссы, боссы Dragon и Warden. Упрощённая версия с открытой веткой врагов. Класс назван <code>GameCharacter</code>, а не <code>Character</code>: имя <code>Character</code> уже занято встроенным классом Java для символов, и свой класс с тем же именем сломал бы в проекте вызовы вроде <code>Character.isDigit</code>.</p>
+<pre><code>sealed abstract class GameCharacter permits Hero, Enemy {
 }
 
-final class Hero extends Character {
+final class Hero extends GameCharacter {
 }
 
-non-sealed class Enemy extends Character {
+non-sealed class Enemy extends GameCharacter {
 }
 
 class Zombie extends Enemy {
@@ -296,7 +296,7 @@ class Dragon extends Enemy {
       <b>Сделай сам.</b> В коде выше захотели, чтобы врагов было ровно два вида, зомби и дракон. Что поменять?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-<pre><code>sealed class Enemy extends Character permits Zombie, Dragon {
+<pre><code>sealed class Enemy extends GameCharacter permits Zombie, Dragon {
 }
 
 final class Zombie extends Enemy {
@@ -480,6 +480,11 @@ static double area(Shape shape) {
     <div class="shag-nomer">Шаг 10 из 10</div>
     <h2>Практика лекции: Result</h2>
     <p>Результат операции бывает успехом со значением или ошибкой с текстом. Решение из seminar3, билеты получают только с 18 лет. У Корелина в билете случайный номер и время, здесь вместо них имя владельца, чтобы вывод не менялся от запуска к запуску.</p>
+    <p>В этом шаге три новые вещи сразу, поэтому сначала каждая отдельно, на одной строке.</p>
+    <p><b>1. Буква в угловых скобках.</b> <code>Result&lt;T&gt;</code> читается «результат с чем-то внутри», T заменяется настоящим типом при использовании: <code>Result&lt;Integer&gt;</code> хранит число, <code>Result&lt;String&gt;</code> строку. Ты уже видел такое у списков: <code>List&lt;String&gt;</code> в уроке про лямбды. Такой тип называют обобщённым, по-английски generic.</p>
+    <p><b>2. default-метод.</b> Метод интерфейса со словом <code>default</code> приходит уже с телом, его не надо писать в каждой записи. Здесь это <code>ifSuccess</code>: «если успех, сделай действие со значением».</p>
+    <p><b>3. Разбор записи прямо в проверке.</b> В шаге 9 ты писал <code>case Rectangle(double w, double h)</code>. Тот же приём работает и в <code>if</code>: <code>this instanceof Success&lt;T&gt;(T value)</code> значит «если этот результат успех, достань из него значение в переменную value». А в <code>switch</code> пишут так же, как в шаге 9, только с типом в скобках: <code>case Success&lt;Double&gt;(Double v)</code>.</p>
+    <p>Теперь код целиком, он склеен из этих трёх кусков:</p>
 <pre><code>import java.util.function.Consumer;
 
 sealed interface Result&lt;T&gt; permits Success, Failure {

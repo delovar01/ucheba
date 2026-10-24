@@ -172,7 +172,7 @@ FROM metrics;</code></pre>
   MAX(mean_metric) OVER () - mean_metric AS otstavanie
 FROM metrics;</code></pre>
           <p>0.991 − 0.787 = 0.204. У самой лучшей строки 0.000.</p>
-          <p class="oshibka">Написать <code>MAX(mean_metric) - mean_metric</code> без <code>OVER</code>. База ответит <code>column "metrics.mean_metric" must appear in the GROUP BY clause or be used in an aggregate function</code>: обычный <code>MAX</code> хочет схлопнуть таблицу в одну строку, а рядом стоит столбец каждой строки. С <code>OVER</code> конфликта нет.</p>
+          <p class="oshibka">Написать <code>MAX(mean_metric) - mean_metric</code> без <code>OVER</code>. База ответит <code>column "metrics.experiments_id" must appear in the GROUP BY clause or be used in an aggregate function</code>. Ругается она на первый столбец списка, который не внутри <code>MAX</code>, здесь это <code>experiments_id</code>, но беда та же со всеми тремя. Обычный <code>MAX</code> хочет схлопнуть таблицу в одну строку, а рядом стоит столбец каждой строки. С <code>OVER</code> конфликта нет.</p>
         </div>
       </details>
     </div>
@@ -256,7 +256,7 @@ FROM experiments;</code></pre>
       <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
     </div>
     <div class="zadacha">
-      <b>4.</b> Для каждого запуска: число эпох и среднее число эпох у того же исследователя. Подсказка: вместо <code>MAX</code> функция <code>AVG</code>.
+      <b>4.</b> Для каждого запуска: число эпох и среднее число эпох у того же исследователя. Подсказка: вместо <code>MAX</code> функция <code>AVG</code>. Учти, что <code>AVG</code>, как и <code>SUM</code>, пустые клетки пропускает: у исследователя с запусками 3, 1 и пустым выйдет <code>(3 + 1) / 2 = 2</code>, а не <code>4 / 3</code>. Длинный хвост нулей после точки убирает <code>ROUND(…, 2)</code>.
       <textarea name="z4" placeholder="SELECT …" aria-label="Ответ на задачу 4"></textarea>
     </div>
 
@@ -269,7 +269,7 @@ FROM experiments;</code></pre>
     <button class="knopka" type="button">Урок пройден ✓</button>
   </div>
 
-  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a></p>
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-izmenenie-dannyh.html">Дальше: INSERT, UPDATE, DELETE →</a></p>
 </main>
 <script src="../assets/app.js"></script>
 </body>

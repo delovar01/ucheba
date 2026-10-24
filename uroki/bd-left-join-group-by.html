@@ -61,8 +61,9 @@
   <details class="vopros">
     <summary>Хочешь проверять каждый шаг в DBeaver? Вот скрипт</summary>
     <div>
-      <p>Скрипт создаёт эти две таблицы и заполняет их. <code>CREATE TABLE</code> и <code>INSERT</code> ты писал в самостоятельной 1. Напомню слова. <code>INT</code>: целое число. <code>TEXT</code>: текст. <code>PRIMARY KEY</code>: первичный ключ, номер строки, который не повторяется. <code>REFERENCES</code>: внешний ключ, ссылка на другую таблицу.</p>
-<pre><code class="sql">CREATE TABLE students (
+      <p>Скрипт создаёт эти две таблицы и заполняет их. <code>CREATE TABLE</code> и <code>INSERT</code> ты писал в самостоятельной 1. Напомню слова. <code>INT</code>: целое число. <code>TEXT</code>: текст. <code>PRIMARY KEY</code>: первичный ключ, номер строки, который не повторяется. <code>REFERENCES</code>: внешний ключ, ссылка на другую таблицу. Первая строка удаляет эти таблицы, если они остались с прошлого раза, иначе повторный запуск упадёт с <code>relation "students" already exists</code>.</p>
+<pre><code class="sql">DROP TABLE IF EXISTS orders, students;
+CREATE TABLE students (
   id   INT PRIMARY KEY,
   name TEXT
 );

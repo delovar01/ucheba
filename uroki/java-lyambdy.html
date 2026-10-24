@@ -207,7 +207,7 @@ public class Main {
       <b>Сделай сам.</b> Что вернут <code>square.andThen(increment).apply(3)</code> и <code>increment.andThen(increment).andThen(square).apply(1)</code>?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p><code>10</code> и <code>9</code>, проверено запуском. В первом сначала квадрат 9, потом плюс 1. Во втором 1, 2, 3, потом 3² = 9.</p>
+          <p><code>10</code> и <code>9</code>. В первом сначала квадрат 9, потом плюс 1. Во втором 1, 2, 3, потом 3² = 9.</p>
           <p class="oshibka">Читать <code>a.andThen(b)</code> справа налево. Порядок как в тексте: сначала <code>a</code>, потом <code>b</code>.</p>
         </div>
       </details>
@@ -624,7 +624,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
       <textarea name="z3" placeholder="static List&lt;String&gt; select(…) { …" aria-label="Ответ на задачу 3"></textarea>
     </div>
     <div class="zadacha">
-      <b>4.</b> Товары из шага 7. Одной цепочкой получи имена товаров дешевле 1000 большими буквами, используя только ссылки на методы там, где это возможно.
+      <b>4.</b> Список <code>products</code> из шага 9, товары с именем и ценой. Одной цепочкой получи имена товаров дешевле 1000 большими буквами, используя только ссылки на методы там, где это возможно.
       <textarea name="z4" placeholder="products.stream()…" aria-label="Ответ на задачу 4"></textarea>
     </div>
 

@@ -49,8 +49,9 @@
   <details class="vopros">
     <summary>Хочешь проверять каждый шаг в DBeaver? Вот скрипт</summary>
     <div>
-      <p><code>DATE</code> значит «дата без времени». <code>NUMERIC(4,2)</code> значит число, в котором всего 4 цифры, из них 2 после точки.</p>
-<pre><code class="sql">CREATE TABLE runs (
+      <p><code>DATE</code> значит «дата без времени». <code>NUMERIC(4,2)</code> значит число, в котором всего 4 цифры, из них 2 после точки. Первая строка удаляет таблицу, если она осталась с прошлого раза, иначе повторный запуск упадёт.</p>
+<pre><code class="sql">DROP TABLE IF EXISTS runs;
+CREATE TABLE runs (
   id         INT PRIMARY KEY,
   researcher TEXT,
   started_at DATE,
@@ -287,7 +288,7 @@ SELECT EXTRACT(DOW    FROM DATE '2026-10-18');  -- 0</code></pre>
     <p class="novoe"><code>ISODOW</code> считает по-нашему: понедельник 1, воскресенье 7. <code>DOW</code> считает по-американски: воскресенье 0, понедельник 1, суббота 6. Отличаются только у воскресенья.</p>
 
     <div class="sam">
-      <b>Сделай сам.</b> Сколько запусков в нашей таблице сделано в выходные? Напиши запрос с <code>ISODOW</code> и проверь ответ по календарю: 3 октября 2026 года суббота. Новое слово для условия: <code>x IN (6, 7)</code> значит «x равен 6 или 7», это короче, чем <code>x = 6 OR x = 7</code>.
+      <b>Сделай сам.</b> Сколько запусков в нашей таблице сделано в выходные? Напиши запрос с <code>ISODOW</code> и проверь ответ по календарю: 3 октября 2026 года суббота. Пригодится <code>IN</code> из урока про фильтры: <code>x IN (6, 7)</code> значит «x равен 6 или 7», это короче, чем <code>x = 6 OR x = 7</code>.
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
 <pre><code class="sql">SELECT COUNT(*)

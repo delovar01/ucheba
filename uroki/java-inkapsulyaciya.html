@@ -191,7 +191,7 @@ System.out.println(dog.getName());</code></pre>
       <b>Сделай сам.</b> По слайдам сеттер может преобразовать значение. Поле <code>private int angle</code> хранит угол в градусах, а сеттер получает радианы: <code>angle = (int) (180 * rad / Math.PI);</code>. Что окажется в <code>angle</code> после <code>setAngle(Math.PI / 2)</code> и после <code>setAngle(1)</code>?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p>90 и 57. Пи пополам это 90 градусов ровно. Один радиан это 57,29… градуса, а <code>(int)</code> отбрасывает дробь, проверено запуском.</p>
+          <p>90 и 57. Пи пополам это 90 градусов ровно. Один радиан это 57,29… градуса, а <code>(int)</code> отбрасывает дробь.</p>
           <p class="oshibka">Забыть <code>this.</code> в сеттере с тем же именем параметра: <code>name = name;</code>. Как в конструкторе из прошлого урока, ничего не поменяется и компилятор промолчит.</p>
         </div>
       </details>
@@ -368,6 +368,7 @@ public boolean withdraw(double amount) {
     balance -= amount;
     return true;
 }</code></pre>
+    <p>Почему отказы разные, громкий и тихий, как в шагах 5 и 6. Положить ноль или минус может только ошибка в программе, такого быть не должно, поэтому <code>deposit</code> бросает исключение. А снять больше, чем есть, это обычная жизненная ситуация, «не хватает денег»: <code>withdraw</code> тихо отвечает <code>false</code>, и вызывающий код сам решает, что показать человеку.</p>
     <p>Оба метода стоят в классе <code>Account</code> из шага 7. Строки внутри <code>main</code>:</p>
 <pre><code>Account card = new Account("A-1", 1000);
 card.deposit(250);
@@ -435,7 +436,7 @@ true
       <b>Сделай сам.</b> В классе <code>Group</code> поле <code>private final ArrayList&lt;String&gt; names = new ArrayList&lt;&gt;();</code> и геттер <code>getNames()</code>. Пройдёт ли <code>g.getNames().add("Борис");</code>?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p>Пройдёт. Добавили «Борис», потом «Вера», и список печатается <code>[Борис, Вера]</code>. Слайды: для ссылок <code>final</code> делает неизменяемой только ссылку, а не объект, на который она указывает. Поменять <code>names</code> на другой список нельзя, а менять сам список можно.</p>
+          <p>Пройдёт. Если список был пустой, «Борис» ляжет в него, и <code>System.out.println(g.getNames())</code> напечатает <code>[Борис]</code>. Слайды: для ссылок <code>final</code> делает неизменяемой только ссылку, а не объект, на который она указывает. Поменять <code>names</code> на другой список нельзя, а менять сам список можно.</p>
           <p class="oshibka">Считать объект неизменяемым, раз все поля <code>final</code>, когда среди них список. Геттер отдал наружу сам список, и его меняет кто угодно.</p>
         </div>
       </details>
@@ -485,7 +486,7 @@ System.out.println(Dog.getPaws() * Dog.getCount());</code></pre>
       <b>Сделай сам.</b> На слайде статический метод расстояния между точками записан так: <code>Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - b.x, 2))</code>. Что он вернёт для точек (0, 0) и (3, 4) и где ошибка?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p>Вернёт <code>3.1622776601683795</code>, корень из 9 + 1, вместо 5.0. Во второй скобке опечатка: <code>b.y - b.x</code> вместо <code>b.y - a.y</code>. С исправлением выходит 5.0, проверено. Метод статический и получает обе точки параметрами, своего объекта у него нет.</p>
+          <p>Вернёт <code>3.1622776601683795</code>, корень из 9 + 1, вместо 5.0. Во второй скобке опечатка: <code>b.y - b.x</code> вместо <code>b.y - a.y</code>. С исправлением выходит 5.0. Метод статический и получает обе точки параметрами, своего объекта у него нет.</p>
           <p class="oshibka">Обратиться из статического метода к полю объекта: <code>public static String getName() { return name; }</code>. Компилятор ответит <code>non-static variable name cannot be referenced from a static context</code>, «у статического метода нет объекта, чьё имя брать».</p>
         </div>
       </details>
@@ -590,13 +591,15 @@ false
 false</code></pre>
     <p class="novoe">Стандартный <code>equals</code> у объекта сравнивает ссылки, как <code>==</code>. Свой <code>equals</code> сравнивает поля. Схема всегда одна: тот же объект, значит true. Не точка или <code>null</code>, значит false, это проверяет <code>instanceof</code>. Дальше привести <code>o</code> к <code>Point</code> и сравнить поля.</p>
     <p>Новые слова по порядку. <code>Object</code> это общий тип для любого объекта Java, в такой параметр можно передать и точку, и строку, и собаку. <code>o instanceof Point</code> отвечает true, если в <code>o</code> лежит точка, и false для <code>null</code>. <code>(Point) o</code> говорит компилятору «считай <code>o</code> точкой», только после этого у неё можно взять <code>p.x</code>. Поле <code>p.x</code> закрыто, но код внутри класса <code>Point</code> видит закрытые поля любой точки, не только своей.</p>
-    <p>Параметр именно <code>Object</code>, а не <code>Point</code>, иначе это не замена, и <code>@Override</code> не соберётся. Вместе с <code>equals</code> всегда заменяют <code>hashCode</code> по тем же полям. Этот метод сворачивает поля в одно число, а <code>Objects.hash(x, y)</code> считает его за тебя. Нужен он, когда объекты кладут в наборы <code>HashMap</code> и <code>HashSet</code>, они ищут объект сначала по этому числу. Обычному <code>ArrayList</code> хватает <code>equals</code>. IDEA пишет оба метода сама: Alt+Insert, equals() and hashCode().</p>
+    <p>Параметр именно <code>Object</code>, а не <code>Point</code>, иначе это не замена, и <code>@Override</code> не соберётся.</p>
+    <p>Вместе с <code>equals</code> всегда заменяют <code>hashCode</code> по тем же полям. Этот метод сворачивает поля в одно число, а <code>Objects.hash(x, y)</code> считает его за тебя. Обычному <code>ArrayList</code> хватает <code>equals</code>.</p>
+    <p><code>hashCode</code> нужен быстрым коллекциям. <code>HashSet</code> это набор без повторов, <code>HashMap</code> таблица «ключ → значение», как словарь. Подробно они будут в уроке про исключения, а сейчас достаточно знать одно: они ищут объект сначала по этому числу, и без своего <code>hashCode</code> две равные точки для них окажутся разными. IDEA пишет оба метода сама: Alt+Insert, equals() and hashCode().</p>
 
     <div class="sam">
       <b>Сделай сам.</b> В классе <code>RawPoint</code> своего <code>equals</code> нет. Что даст <code>new RawPoint(1).equals(new RawPoint(1))</code>?
       <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
         <div class="otvet-telo">
-          <p><code>false</code>, проверено. Без своего <code>equals</code> работает стандартный, а он сравнивает ссылки, а объекта два.</p>
+          <p><code>false</code>. Без своего <code>equals</code> работает стандартный, а он сравнивает ссылки, а объекта два.</p>
           <p class="oshibka">Сравнивать строковые поля внутри <code>equals</code> через <code>==</code>: <code>name == p.name</code>. Строки сравнивают через <code>equals</code>, урок про строки, шаг 6. Надёжно для любых полей: <code>Objects.equals(name, p.name)</code>, он ещё и не падает на <code>null</code>.</p>
         </div>
       </details>
