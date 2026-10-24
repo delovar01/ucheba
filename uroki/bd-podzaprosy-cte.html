@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Подзапросы и WITH — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-podzaprosy-cte">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · Подзапросы и WITH</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Подзапросы, WITH и множества</h1>
+  <p class="tiho">Базы данных · лекции 2–3 от 29.09 (подзапросы) и лекция 4 от 13.10 (WITH, UNION, EXCEPT) · около 55 минут</p>
+
+  <p>Подзапрос это запрос внутри другого запроса. Его ответ становится числом, списком или целой таблицей для внешнего запроса. На лекции 4 сказали так: подзапросы превращают SQL в «лапшу», а <code>WITH</code> позволяет писать сверху вниз, шаг за шагом, как код на Python. Здесь и то и другое, а в конце операции над результатами как над множествами.</p>
+  <p>Нужно уже уметь <code>JOIN</code>, <code>GROUP BY</code> и <code>CASE</code>: если плывёт, сначала уроки <a href="bd-filtry-join.html">«Сортировка, фильтры и JOIN»</a>, <a href="bd-left-join-group-by.html">«LEFT JOIN и GROUP BY»</a> и <a href="bd-case-daty.html">«CASE и даты»</a>. Всё на твоей базе <code>ml_tracker</code>. Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ.</p>
+
+  <h2>Что понадобится из базы</h2>
+  <div class="tablica">
+    <div class="imya">experiments, нужные столбцы</div>
+    <table>
+      <tr><th>id</th><th>researcher_id</th><th>dataset_id</th><th>model_id</th><th>count_apoh</th><th>status</th></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>done</td></tr>
+      <tr><td>2</td><td>1</td><td>1</td><td>3</td><td class="null">NULL</td><td>done</td></tr>
+      <tr><td>3</td><td>2</td><td>2</td><td>2</td><td>1</td><td>done</td></tr>
+      <tr><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td><td>done</td></tr>
+      <tr><td>5</td><td>3</td><td>5</td><td>4</td><td>5</td><td>done</td></tr>
+      <tr><td>6</td><td>1</td><td>4</td><td>4</td><td>3</td><td>done</td></tr>
+      <tr><td>7</td><td>2</td><td>6</td><td>2</td><td>1</td><td>failed</td></tr>
+      <tr><td>8</td><td>2</td><td>5</td><td>3</td><td>10</td><td>running</td></tr>
+      <tr><td>9</td><td>3</td><td>1</td><td>1</td><td>1</td><td>done</td></tr>
+    </table>
+  </div>
+  <div class="tablica">
+    <div class="imya">metrics · оценки</div>
+    <table>
+      <tr><th>experiments_id</th><th>name_metric</th><th>mean_metric</th></tr>
+      <tr><td>1</td><td>accuracy</td><td>0.787</td></tr>
+      <tr><td>1</td><td>f1</td><td>0.721</td></tr>
+      <tr><td>2</td><td>accuracy</td><td>0.835</td></tr>
+      <tr><td>2</td><td>f1</td><td>0.789</td></tr>
+      <tr><td>3</td><td>accuracy</td><td>0.960</td></tr>
+      <tr><td>3</td><td>f1</td><td>0.941</td></tr>
+      <tr><td>4</td><td>r2</td><td>0.812</td></tr>
+      <tr><td>5</td><td>accuracy</td><td>0.982</td></tr>
+      <tr><td>6</td><td>accuracy</td><td>0.874</td></tr>
+      <tr><td>6</td><td>f1</td><td>0.866</td></tr>
+      <tr><td>8</td><td>accuracy</td><td>0.991</td></tr>
+      <tr><td>9</td><td>accuracy</td><td>0.947</td></tr>
+    </table>
+  </div>
+  <p>Исследователи: 1 Павленко Степан и 2 Щайхутдинов Азат из группы РИ-250932, 3 Иванова Мария из РИ-250931, 4 Смирнов Олег. У Смирнова нет запусков, а группа <code>NULL</code>. Наборы: 1 iris (150 строк), 2 pirs (210), 3 California Housing (20640), 4 IMDB Reviews (50000), 5 MNIST (70000), 6 Titanic (891). Модели: 1 Logisticregression, 2 RandomForest, 3 Resnet, 4 rubert-tiny2, 5 CatBoost (её не запускали).</p>
+
+  <div class="glavnoe">
+    <p>Средние PostgreSQL показывает с длинным хвостом нулей, например <code>0.97550000000000000000</code>. В уроке числа округлены, это не ошибка.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>Подзапрос-число в WHERE</h2>
+    <p>Хотим наборы данных, которые больше среднего. Среднее сначала надо посчитать, а в <code>WHERE</code> писать <code>AVG</code> нельзя. Решение: посчитать его отдельным запросом прямо внутри условия.</p>
+<pre><code class="sql">SELECT name, count
+FROM datasets
+WHERE count &gt; (SELECT AVG(count) FROM datasets);</code></pre>
+    <p class="novoe"><b>Подзапрос</b> пишут в круглых скобках, база выполняет его первым. Если он возвращает одно число, его можно ставить туда, где ждут число. Такой подзапрос называют <b>скалярным</b>.</p>
+    <p>Внутренний запрос даёт 23648.5. Дальше база ищет <code>count &gt; 23648.5</code>: IMDB Reviews 50000 и MNIST 70000. Проверяй подзапрос так же: выдели его без скобок и запусти один.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Оценки <code>accuracy</code>, которые выше средней <code>accuracy</code>. Номер запуска и значение.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT experiments_id, mean_metric
+FROM metrics
+WHERE name_metric = 'accuracy'
+  AND mean_metric &gt; (SELECT AVG(mean_metric)
+                     FROM metrics
+                     WHERE name_metric = 'accuracy');</code></pre>
+          <p>Средняя accuracy 0.911. Выше неё четыре: запуски 3 (0.960), 5 (0.982), 8 (0.991), 9 (0.947).</p>
+          <p class="oshibka">Вернуть из подзапроса не одно число, а столбец: <code>WHERE mean_metric &gt; (SELECT mean_metric FROM metrics WHERE …)</code>. Число нельзя сравнить со списком, PostgreSQL ответит <code>more than one row returned by a subquery used as an expression</code>, «подзапрос вернул больше одной строки». Где нужно одно число, внутри должен быть <code>AVG</code>, <code>MAX</code> или другой агрегат.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WHERE x &gt; (SELECT AVG(x) FROM t)</code>, подзапрос в скобках выполняется первым.</p>
+      <p>Там, где ждут число, подзапрос обязан вернуть одно значение.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>IN (SELECT …): подзапрос-список</h2>
+    <p>На каких наборах данных запускали Resnet, модель 3? Номера наборов лежат в запусках, названия в <code>datasets</code>.</p>
+<pre><code class="sql">SELECT name
+FROM datasets
+WHERE id IN (SELECT dataset_id
+             FROM experiments
+             WHERE model_id = 3);</code></pre>
+    <p class="novoe">Если подзапрос возвращает один столбец и много строк, это список. Его ставят после <code>IN</code>, как список в скобках из урока про фильтры, только значения база находит сама. Пример с лекции такой же: фильмы с теми рейтингами, которые есть у фильмов со словом PET в названии.</p>
+    <p>Подзапрос даёт 1, 3, 5. Ответ: iris, California Housing, MNIST.</p>
+    <p>Чем это лучше <code>JOIN</code>? <code>IN</code> не размножает строки. Logisticregression запускали на iris дважды, и <code>JOIN</code> выдал бы iris два раза, а <code>IN</code> выдаст один.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие модели запускал Щайхутдинов Азат, исследователь 2? Через <code>IN</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name
+FROM models
+WHERE id IN (SELECT model_id
+             FROM experiments
+             WHERE researcher_id = 2);</code></pre>
+          <p>RandomForest и Resnet. Подзапрос вернёт 2, 2, 3, повтор двойки ни на что не влияет.</p>
+          <p class="oshibka">Выбрать в подзапросе не тот столбец: <code>SELECT id FROM experiments WHERE researcher_id = 2</code>. Это номера запусков 3, 7, 8, а не моделей. Ошибки не будет, но ответ будет про модели с номерами 3, 7 и 8, а из них есть только Resnet. Подзапрос должен вернуть то, с чем сравниваешь, здесь <code>model_id</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WHERE id IN (SELECT ссылка FROM t WHERE …)</code></p>
+      <p>Подзапрос в <code>IN</code> возвращает ровно один столбец, и тот, с которым сравниваешь.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>NOT IN и ловушка с NULL</h2>
+    <p>Кто из исследователей не сделал ни одного запуска?</p>
+<pre><code class="sql">SELECT full_name
+FROM researchers
+WHERE id NOT IN (SELECT researcher_id FROM experiments);</code></pre>
+    <p>Ответ: Смирнов Олег. <code>NOT IN</code> значит «нет в списке».</p>
+    <p class="novoe">Если в списке после <code>NOT IN</code> есть хоть один <code>NULL</code>, ответ всегда пустой. <code>x NOT IN (2, NULL)</code> для базы значит «x не 2 и x не NULL». Второе сравнение с неизвестным даёт «неизвестно», а <code>WHERE</code> пропускает только «да».</p>
+    <p>Вот где это стреляет на твоих данных. Хотим тех, кто не из групп Ивановой и Смирнова:</p>
+<pre><code class="sql">SELECT full_name
+FROM researchers
+WHERE grp NOT IN (SELECT grp FROM researchers WHERE id IN (3, 4));</code></pre>
+    <p>Ждём Павленко и Щайхутдинова из РИ-250932, а приходит пусто: у Смирнова группа <code>NULL</code>, и она попала в список. Лечится условием внутри подзапроса: <code>WHERE id IN (3, 4) AND grp IS NOT NULL</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие модели ни разу не запускали? Может ли здесь сработать ловушка с <code>NULL</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name
+FROM models
+WHERE id NOT IN (SELECT model_id FROM experiments);</code></pre>
+          <p>CatBoost. Ловушки не будет: у <code>model_id</code> стоит <code>NOT NULL</code>, пустого номера в запусках нет.</p>
+          <p class="oshibka">Писать <code>NOT IN</code> по столбцу, где бывает пусто, и верить пустому ответу. Пустой ответ здесь не значит «таких нет». Если в столбце бывает <code>NULL</code>, бери <code>NOT EXISTS</code> из следующего шага, он этой ловушки не знает.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WHERE id NOT IN (SELECT …)</code>: кого нет в списке.</p>
+      <p>Один <code>NULL</code> в списке, и <code>NOT IN</code> вернёт пусто.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>EXISTS: есть хоть одна строка</h2>
+    <p>У кого из исследователей есть упавший запуск?</p>
+<pre><code class="sql">SELECT r.full_name
+FROM researchers r
+WHERE EXISTS (SELECT 1
+              FROM experiments e
+              WHERE e.researcher_id = r.id
+                AND e.status = 'failed');</code></pre>
+    <p class="novoe"><code>EXISTS (подзапрос)</code> верно, если подзапрос вернул хотя бы одну строку. <code>NOT EXISTS</code> верно, если ни одной. Что именно выбрать внутри, не важно, поэтому пишут <code>SELECT 1</code>.</p>
+    <p>Внутри стоит <code>r.id</code> из внешнего запроса. Такой подзапрос называют <b>коррелированным</b>: база считает его заново для каждого исследователя. Для Павленко ищет его упавшие запуски, не находит. Для Щайхутдинова находит запуск 7. Ответ: Щайхутдинов Азат. Подзапросы в шагах 1–3 ссылок наружу не имели, их можно было запустить отдельно.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запуски, у которых нет ни одной оценки. Номер и статус.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT e.id, e.status
+FROM experiments e
+WHERE NOT EXISTS (SELECT 1
+                  FROM metrics m
+                  WHERE m.experiments_id = e.id);</code></pre>
+          <p>Одна строка: запуск 7, <code>failed</code>. Упавший запуск ничего не намерил.</p>
+          <p class="oshibka">Забыть связь с внешним запросом: <code>NOT EXISTS (SELECT 1 FROM metrics m)</code>. Тогда подзапрос спрашивает «есть ли в базе хоть одна оценка вообще». Есть, значит <code>NOT EXISTS</code> ложно для всех, и ответ пустой. Внутри всегда нужно условие вида <code>m.experiments_id = e.id</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WHERE NOT EXISTS (SELECT 1 FROM t2 WHERE t2.ссылка = t.id)</code></p>
+      <p>Без условия на внешнюю таблицу <code>EXISTS</code> проверяет всю таблицу разом.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>Подзапрос в FROM: таблица на лету</h2>
+    <p>Сколько оценок в среднем приходится на запуск? Сначала надо посчитать оценки у каждого запуска, потом среднее этих чисел. <code>AVG(COUNT(*))</code> не сработает: PostgreSQL ответит <code>aggregate function calls cannot be nested</code>, агрегат в агрегат вкладывать нельзя.</p>
+<pre><code class="sql">SELECT AVG(n)
+FROM (SELECT experiments_id, COUNT(*) AS n
+      FROM metrics
+      GROUP BY experiments_id) AS po_zapuskam;</code></pre>
+    <p class="novoe">Подзапрос можно поставить после <code>FROM</code>, тогда его ответ работает как обычная таблица. Её называют <b>производной таблицей</b>. Дай ей имя через <code>AS</code>: по нему обращаешься к её столбцам, а в PostgreSQL до 16-й версии без имени будет ошибка <code>subquery in FROM must have an alias</code>. MySQL без имени тоже не пустит.</p>
+    <p>Внутренний запрос даёт восемь строк: у запусков 1, 2, 3 и 6 по две оценки, у 4, 5, 8 и 9 по одной. Всего 12 оценок на 8 запусков, среднее 1.5.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Лучшая <code>accuracy</code> на каждом наборе данных, с названием набора. Сначала производная таблица «номер набора и лучшая accuracy», потом к ней <code>JOIN datasets</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT d.name, b.best
+FROM (SELECT e.dataset_id, MAX(m.mean_metric) AS best
+      FROM metrics m
+      JOIN experiments e ON e.id = m.experiments_id
+      WHERE m.name_metric = 'accuracy'
+      GROUP BY e.dataset_id) AS b
+JOIN datasets d ON d.id = b.dataset_id
+ORDER BY b.best DESC;</code></pre>
+          <p>Четыре строки: MNIST 0.991, pirs 0.960, iris 0.947, IMDB Reviews 0.874. У California Housing только r2, у Titanic оценок нет, их в ответе нет.</p>
+          <p class="oshibka">Забыть <code>AS best</code> у <code>MAX</code> внутри. Тогда столбец назовётся <code>max</code>, и <code>b.best</code> снаружи даст <code>column b.best does not exist</code>. Снаружи видны только те имена, которые ты дал внутри.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>FROM (SELECT … GROUP BY …) AS имя</code>: ответ подзапроса как таблица.</p>
+      <p>Агрегат от агрегата считают только так, <code>AVG(COUNT(*))</code> нельзя.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>WITH: подзапрос с именем наверху</h2>
+    <p>Тот же запрос из «сделай сам» шага 5, но читается сверху вниз.</p>
+<pre><code class="sql">WITH best AS (
+    SELECT e.dataset_id, MAX(m.mean_metric) AS best
+    FROM metrics m
+    JOIN experiments e ON e.id = m.experiments_id
+    WHERE m.name_metric = 'accuracy'
+    GROUP BY e.dataset_id
+)
+SELECT d.name, b.best
+FROM best b
+JOIN datasets d ON d.id = b.dataset_id
+ORDER BY b.best DESC;</code></pre>
+    <p class="novoe"><code>WITH имя AS (запрос)</code> объявляет временную таблицу до основного запроса. Это называется <b>CTE</b>, от common table expression, «общее табличное выражение». Живёт она только в этом запросе. Ответ тот же: MNIST 0.991, pirs 0.960, iris 0.947, IMDB Reviews 0.874.</p>
+    <p>Пример лекции такой же формы: в <code>WITH</code> сумма платежей каждого клиента, а снизу <code>JOIN</code> к клиентам, сортировка и топ-5.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Перепиши через <code>WITH</code> запрос шага 5 про среднее число оценок на запуск.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">WITH po_zapuskam AS (
+    SELECT experiments_id, COUNT(*) AS n
+    FROM metrics
+    GROUP BY experiments_id
+)
+SELECT AVG(n) FROM po_zapuskam;</code></pre>
+          <p>1.5, как и было.</p>
+          <p class="oshibka">Поставить точку с запятой после скобки <code>WITH</code>: <code>… ); SELECT AVG(n) FROM po_zapuskam;</code>. Точка с запятой заканчивает запрос, и <code>WITH</code> остаётся без основной части, а второй запрос не знает <code>po_zapuskam</code>: <code>relation "po_zapuskam" does not exist</code>. Точка с запятой одна, в самом конце.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WITH имя AS (SELECT …) SELECT … FROM имя;</code></p>
+      <p>CTE живёт только внутри одного запроса, <code>;</code> только в конце.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Несколько CTE подряд</h2>
+    <p>Кто из исследователей в среднем берёт accuracy выше, чем средняя по всем? Три шага: собрать accuracy с номером исследователя, посчитать среднее у каждого, сравнить с общим.</p>
+<pre><code class="sql">WITH acc AS (
+    SELECT e.researcher_id, m.mean_metric
+    FROM metrics m
+    JOIN experiments e ON e.id = m.experiments_id
+    WHERE m.name_metric = 'accuracy'
+),
+po_lyudyam AS (
+    SELECT researcher_id, AVG(mean_metric) AS srednyaya
+    FROM acc
+    GROUP BY researcher_id
+)
+SELECT r.full_name, p.srednyaya
+FROM po_lyudyam p
+JOIN researchers r ON r.id = p.researcher_id
+WHERE p.srednyaya &gt; (SELECT AVG(mean_metric) FROM acc)
+ORDER BY p.srednyaya DESC;</code></pre>
+    <p class="novoe">В одном <code>WITH</code> можно объявить несколько CTE через запятую, слово <code>WITH</code> пишется один раз. Следующий может брать данные из предыдущего, а основной запрос из любого и сколько угодно раз. Здесь <code>acc</code> используется дважды.</p>
+    <p>Средние: Павленко 0.832, Щайхутдинов 0.976, Иванова 0.965, общая 0.911. Ответ: Щайхутдинов Азат 0.976, Иванова Мария 0.965.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Наборы данных, на которых запусков больше, чем в среднем на набор. Первый CTE: число запусков у каждого набора.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">WITH po_naboram AS (
+    SELECT dataset_id, COUNT(*) AS n
+    FROM experiments
+    GROUP BY dataset_id
+)
+SELECT d.name, p.n
+FROM po_naboram p
+JOIN datasets d ON d.id = p.dataset_id
+WHERE p.n &gt; (SELECT AVG(n) FROM po_naboram)
+ORDER BY p.n DESC;</code></pre>
+          <p>9 запусков на 6 наборов, в среднем 1.5. Больше: iris 3 и MNIST 2.</p>
+          <p class="oshibka">Писать <code>WITH</code> перед каждым CTE: <code>WITH a AS (…), WITH b AS (…)</code>. Это синтаксическая ошибка. Слово одно, дальше только запятые.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WITH a AS (…), b AS (SELECT … FROM a) SELECT …</code></p>
+      <p>На CTE можно ссылаться много раз, и из следующих CTE тоже.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>COALESCE в CTE: ноль вместо пустоты</h2>
+    <p>На лекции 4 задача была про клиентов проката: посчитать, сколько потратил каждый, разделить на «Новичков», «Любителей» и «Фанатов» и показать фанатов первыми. Сделаем то же на твоей базе за два шага. В этом шаге посчитаем, сколько эпох всего прогнал каждый исследователь, включая Смирнова с нулём.</p>
+<pre><code class="sql">WITH epohi AS (
+    SELECT r.full_name, COALESCE(SUM(e.count_apoh), 0) AS vsego
+    FROM researchers r
+    LEFT JOIN experiments e ON e.researcher_id = r.id
+    GROUP BY r.id, r.full_name
+)
+SELECT full_name, vsego
+FROM epohi
+ORDER BY vsego DESC;</code></pre>
+    <p class="novoe"><code>COALESCE(x, 0)</code> возвращает первое непустое из списка: если <code>x</code> пустой, будет 0. У Смирнова запусков нет, <code>SUM</code> по пустой кучке даёт <code>NULL</code>, а с <code>COALESCE</code> ноль.</p>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>vsego</th></tr>
+      <tr><td>Щайхутдинов Азат</td><td>12</td></tr>
+      <tr><td>Иванова Мария</td><td>7</td></tr>
+      <tr><td>Павленко Степан</td><td>4</td></tr>
+      <tr><td>Смирнов Олег</td><td>0</td></tr>
+    </table></div>
+    <p>Эпохи: Щайхутдинов 1 + 1 + 10, Иванова 1 + 5 + 1, Павленко 1 + 3. У его запуска 2 эпохи не записаны, <code>SUM</code> пустую клетку пропускает.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько эпох всего у каждой модели, включая CatBoost, которую не запускали? Через <code>WITH</code>, <code>LEFT JOIN</code> и <code>COALESCE</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">WITH epohi_modeli AS (
+    SELECT m.name, COALESCE(SUM(e.count_apoh), 0) AS vsego
+    FROM models m
+    LEFT JOIN experiments e ON e.model_id = m.id
+    GROUP BY m.id, m.name
+)
+SELECT name, vsego
+FROM epohi_modeli
+ORDER BY vsego DESC, name;</code></pre>
+          <p>Resnet 11, rubert-tiny2 8, Logisticregression 2, RandomForest 2, CatBoost 0.</p>
+          <p class="oshibka">Написать <code>JOIN</code> вместо <code>LEFT JOIN</code>. У CatBoost запусков нет, обычный <code>JOIN</code> выкинет её совсем, и до <code>COALESCE</code> дело не дойдёт. Ноль можно показать, только если строка модели осталась.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>COALESCE(x, 0)</code>: пусто превращается в 0.</p>
+      <p><code>SUM</code> без строк даёт <code>NULL</code>, а не 0.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Итоговая задача лекции: CASE для метки и для очереди</h2>
+    <p>Берём <code>epohi</code> из прошлого шага и делим людей на группы: больше 10 эпох «много», от 5 до 10 «середина», меньше «новичок». Сначала «много», потом «середина», потом «новички».</p>
+<pre><code class="sql">WITH epohi AS (
+    SELECT r.full_name, COALESCE(SUM(e.count_apoh), 0) AS vsego
+    FROM researchers r
+    LEFT JOIN experiments e ON e.researcher_id = r.id
+    GROUP BY r.id, r.full_name
+)
+SELECT full_name, vsego,
+       CASE
+           WHEN vsego &gt; 10 THEN 'много'
+           WHEN vsego &gt;= 5 THEN 'середина'
+           ELSE 'новичок'
+       END AS gruppa
+FROM epohi
+ORDER BY CASE
+             WHEN vsego &gt; 10 THEN 1
+             WHEN vsego &gt;= 5 THEN 2
+             ELSE 3
+         END,
+         full_name;</code></pre>
+    <p>Первый <code>CASE</code> в <code>SELECT</code> ты знаешь из урока про CASE, он даёт метку.</p>
+    <p class="novoe"><code>CASE</code> можно поставить и в <code>ORDER BY</code>. Тогда база сортирует не по столбцу, а по числу, которое вернул <code>CASE</code>: «много» получает 1, «середина» 2, «новичок» 3, и строки встают по этим номерам. После запятой второй ключ сортировки, <code>full_name</code>: внутри одного номера по алфавиту. Сортировать прямо по метке нельзя: по алфавиту «много» встанет раньше «новичка», но «середина» уедет в конец.</p>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>vsego</th><th>gruppa</th></tr>
+      <tr><td>Щайхутдинов Азат</td><td>12</td><td>много</td></tr>
+      <tr><td>Иванова Мария</td><td>7</td><td>середина</td></tr>
+      <tr><td>Павленко Степан</td><td>4</td><td>новичок</td></tr>
+      <tr><td>Смирнов Олег</td><td>0</td><td>новичок</td></tr>
+    </table></div>
+    <p>Павленко и Смирнов оба «новички», номер 3, и между собой встали по алфавиту.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Каждой модели число запусков и подпись: 0 «не запускали», 1 или 2 «пару раз», больше «часто». Сначала самые частые.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">WITH zapuski AS (
+    SELECT m.name, COUNT(e.id) AS n
+    FROM models m
+    LEFT JOIN experiments e ON e.model_id = m.id
+    GROUP BY m.id, m.name
+)
+SELECT name, n,
+       CASE
+           WHEN n = 0  THEN 'не запускали'
+           WHEN n &lt;= 2 THEN 'пару раз'
+           ELSE 'часто'
+       END AS kak
+FROM zapuski
+ORDER BY n DESC, name;</code></pre>
+          <p>Resnet 3 часто, Logisticregression 2, RandomForest 2, rubert-tiny2 2 пару раз, CatBoost 0 не запускали.</p>
+          <p class="oshibka">Написать <code>COUNT(*)</code> вместо <code>COUNT(e.id)</code>. После <code>LEFT JOIN</code> у CatBoost одна строка с пустым запуском, и <code>COUNT(*)</code> насчитает 1, «пару раз». <code>COUNT(e.id)</code> пустые не считает и даст 0.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Схема лекции: CTE считает итог, снаружи <code>CASE</code> даёт метку и <code>CASE</code> в <code>ORDER BY</code> ставит очередь.</p>
+      <p><code>ORDER BY CASE … THEN 1 … THEN 2 … END</code> сортирует в своём порядке, а не по алфавиту.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>UNION: сложить два ответа</h2>
+    <p>Какими моделями работали Павленко или Щайхутдинов? Два запроса, ответы сложим.</p>
+<pre><code class="sql">SELECT m.name FROM models m
+JOIN experiments e ON e.model_id = m.id
+WHERE e.researcher_id = 1
+UNION
+SELECT m.name FROM models m
+JOIN experiments e ON e.model_id = m.id
+WHERE e.researcher_id = 2
+ORDER BY name;</code></pre>
+    <p class="novoe"><code>запрос1 UNION запрос2</code> ставит строки второго ответа под строки первого и убирает повторы. <code>UNION ALL</code> повторы оставляет и работает быстрее. Условие: у обоих запросов одинаковое число столбцов и похожие типы.</p>
+    <p>Павленко: Logisticregression, Resnet, rubert-tiny2. Щайхутдинов: RandomForest, RandomForest, Resnet. <code>UNION</code> даёт четыре: Logisticregression, RandomForest, Resnet, rubert-tiny2. <code>UNION ALL</code> дал бы все шесть строк. <code>ORDER BY</code> пишется один раз, в самом конце, и сортирует общий ответ.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> На каких наборах данных работали Павленко или Иванова, исследователь 3? Сколько строк даст <code>UNION</code> и сколько <code>UNION ALL</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT d.name FROM datasets d
+JOIN experiments e ON e.dataset_id = d.id
+WHERE e.researcher_id = 1
+UNION
+SELECT d.name FROM datasets d
+JOIN experiments e ON e.dataset_id = d.id
+WHERE e.researcher_id = 3;</code></pre>
+          <p>У Павленко iris, iris, IMDB Reviews. У Ивановой California Housing, MNIST, iris. <code>UNION</code>: четыре разных, iris, IMDB Reviews, California Housing, MNIST. <code>UNION ALL</code>: шесть.</p>
+          <p class="oshibka">Выбрать в двух половинах разное число столбцов, например <code>d.name</code> сверху и <code>d.name, e.id</code> снизу. База ответит <code>each UNION query must have the same number of columns</code>. Склеиваются только ответы одной формы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>UNION</code> без повторов, <code>UNION ALL</code> с повторами.</p>
+      <p>Столбцов поровну, <code>ORDER BY</code> один в конце.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>INTERSECT и EXCEPT: общее и разница</h2>
+    <p>Те же два запроса из шага 10, но спрашиваем иначе. Какими моделями работали оба? Какими Павленко, но не Щайхутдинов?</p>
+<pre><code class="sql">SELECT m.name FROM models m
+JOIN experiments e ON e.model_id = m.id
+WHERE e.researcher_id = 1
+INTERSECT
+SELECT m.name FROM models m
+JOIN experiments e ON e.model_id = m.id
+WHERE e.researcher_id = 2;</code></pre>
+    <p class="novoe"><code>INTERSECT</code> оставляет строки, которые есть в обоих ответах, это пересечение. <code>EXCEPT</code> оставляет строки первого ответа, которых нет во втором, это разность. Порядок у <code>EXCEPT</code> важен, у <code>INTERSECT</code> нет.</p>
+    <p><code>INTERSECT</code>: Resnet. Если заменить на <code>EXCEPT</code>: Logisticregression и rubert-tiny2. Если поменять половины местами, <code>EXCEPT</code> даст RandomForest.</p>
+    <p>На лекции предупреждали: в MySQL до версии 8.0.31 <code>INTERSECT</code> и <code>EXCEPT</code> не было, их заменяли на <code>JOIN</code>, <code>EXISTS</code> и <code>LEFT JOIN … IS NULL</code>. В PostgreSQL они есть давно.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Наборы данных Павленко и Ивановой из «сделай сам» шага 10. На каких работали оба? На каких Иванова, но не Павленко?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Оба: iris, <code>INTERSECT</code>. Иванова без Павленко: California Housing и MNIST, это <code>EXCEPT</code>, где первой половиной идёт Иванова, запрос с <code>researcher_id = 3</code>.</p>
+          <p class="oshibka">Поставить Павленко первым в <code>EXCEPT</code>. Получится обратный вопрос, «Павленко, но не Иванова»: IMDB Reviews. Первая половина это «откуда вычитаем».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>INTERSECT</code> есть в обоих, <code>EXCEPT</code> есть в первом и нет во втором.</p>
+      <p>В <code>EXCEPT</code> первая половина это «откуда вычитаем».</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: подзапросы и WITH">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач на твоей базе. Ответов здесь нет: впиши запросы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Модели, у которых параметров больше, чем в среднем у моделей. Подзапросом в <code>WHERE</code>. Число параметров в миллионах лежит в столбце <code>countpar</code>: Logisticregression 0.01, RandomForest 0.01, Resnet 11.70, rubert-tiny2 29.40, CatBoost 0.50.
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Исследователи, которые хоть раз запускали что-то на MNIST. Через <code>IN</code>, номер MNIST найди сам.
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Наборы данных, по которым нет ни одной оценки <code>accuracy</code>. Через <code>NOT EXISTS</code>. Сколько их?
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Через <code>WITH</code>: среднее число эпох у каждого исследователя, и только те, у кого оно выше среднего по всем запускам.
+      <textarea name="z4" placeholder="WITH …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Модели, которые запускала Иванова, но не запускал Щайхутдинов. Через <code>EXCEPT</code>.
+      <textarea name="z5" placeholder="SELECT … EXCEPT SELECT …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>WITH по шагам</td><td>Модуль A2: выборку для обучения собирают цепочкой шагов, отобрать, посчитать признаки, склеить. В pandas это цепочка переменных, а в SQL цепочка CTE, читается так же сверху вниз.</td></tr>
+      <tr><td>NOT EXISTS и EXCEPT</td><td>Модуль A3: тестовая выборка не должна пересекаться с обучающей. «Строки, которых нет в обучении» пишутся через <code>NOT EXISTS</code> или <code>EXCEPT</code>.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-stroki.html">Дальше: строковые функции →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

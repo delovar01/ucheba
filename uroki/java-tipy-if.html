@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Типы, формулы и if — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-tipy-if">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Типы, формулы и if</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Типы, формулы и if</h1>
+  <p class="tiho">Java · лекция 14.09, лабы 22.09 и 29.09 · под ПР1, срок 1.11 в 00:00 · около 60 минут</p>
+
+  <p>Это первый урок по Java, он считает, что Java ты не видел. Двенадцать шагов, в каждом одна новая вещь. К концу ты умеешь всё, что спрашивает ПР1: чинить объявления переменных, считать функцию от x, выбирать ветку через <code>if</code> и проверять, что ввёл пользователь.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Код из урока можно вставить в IntelliJ IDEA и запустить, вывод будет ровно таким, как здесь. В рамке «Главное из шага» суть шага в двух строках. Если шаг непонятен, дальше не иди, сначала задай вопрос по нему.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 12</div>
+    <h2>Каркас программы и вывод на экран</h2>
+    <p>Любая программа на Java живёт внутри такого каркаса. Пока его не разбираем по словам, просто переписываем каждый раз одинаково.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Привет, Java");
+        System.out.println(2 + 3);
+        System.out.println("2 + 3");
+    }
+}</code></pre>
+    <p>Программа напечатает:</p>
+<pre><code>Привет, Java
+5
+2 + 3</code></pre>
+    <p class="novoe"><code>System.out.println(…)</code> печатает то, что в скобках, и переводит строку. Текст в двойных кавычках печатается как есть, а выражение без кавычек сначала считается.</p>
+    <p>Команды выполняются сверху вниз, каждая заканчивается точкой с запятой. Свои команды ты пишешь между фигурными скобками <code>main</code>. Имя после <code>class</code> совпадает с именем файла: класс <code>Main</code> лежит в файле <code>Main.java</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Не запуская, скажи, что напечатают две строки:
+<pre><code>System.out.println(10 - 4);
+System.out.println("10 - 4");</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>6
+10 - 4</code></pre>
+          <p>Первая строка считает выражение, вторая печатает текст из кавычек как есть.</p>
+          <p class="oshibka">Забыть точку с запятой в конце команды. Программа не запустится, IDEA подчеркнёт строку красным и напишет <code>';' expected</code>, то есть «тут ждали точку с запятой».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Команды пишутся внутри <code>main</code>, каждая с <code>;</code> в конце.</p>
+      <p><code>println("текст")</code> печатает текст, <code>println(2 + 3)</code> печатает 5.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 12</div>
+    <h2>Переменная: тип, имя, значение</h2>
+    <p>Переменная это ячейка памяти с именем. В Java у ячейки ещё и тип: что в неё можно положить.</p>
+<pre><code>int age = 19;
+double height = 1.82;
+String name = "Степан";
+boolean student = true;
+System.out.println(name);
+System.out.println(age + 1);
+System.out.println(height);
+System.out.println(student);</code></pre>
+    <p>Эти строки пишутся внутри <code>main</code>, как в шаге 1. Программа напечатает:</p>
+<pre><code>Степан
+20
+1.82
+true</code></pre>
+    <p class="novoe">Объявление переменной: <code>тип имя = значение;</code>. Тип пишется один раз, и после этого в переменную можно класть только значения этого типа.</p>
+    <div class="tablica"><table>
+      <tr><th>тип</th><th>что хранит</th><th>пример</th></tr>
+      <tr><td><code>int</code></td><td>целое число</td><td><code>19</code></td></tr>
+      <tr><td><code>double</code></td><td>дробное число, через точку</td><td><code>1.82</code></td></tr>
+      <tr><td><code>String</code></td><td>текст в двойных кавычках</td><td><code>"Степан"</code></td></tr>
+      <tr><td><code>boolean</code></td><td>да или нет</td><td><code>true</code>, <code>false</code></td></tr>
+    </table></div>
+    <p>Дальше переменную зовут просто по имени, без типа: <code>age + 1</code> берёт из ячейки 19 и прибавляет 1. Сама ячейка при этом не меняется.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Заведи переменную для цены 120.5 и переменную для количества 3. Выведи цену, умноженную на количество. Что напечатается? Умножение в Java пишется звёздочкой <code>*</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>double price = 120.5;
+int count = 3;
+System.out.println(price * count);</code></pre>
+          <p>Напечатается <code>361.5</code>. Цена дробная, поэтому <code>double</code>. Количество целое, поэтому <code>int</code>.</p>
+          <p class="oshibka">Написать <code>int price = 120.5;</code>. В целую ячейку дробь не влезет, и программа не запустится: <code>possible lossy conversion from double to int</code>, «можно потерять часть числа».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>тип имя = значение;</code> Тип один раз и навсегда.</p>
+      <p><code>int</code> целое, <code>double</code> дробное, <code>String</code> текст, <code>boolean</code> да или нет.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 12</div>
+    <h2>Починить объявление: четыре проверки</h2>
+    <p>Это задание 1 ПР1: в файле варианта строки с ошибками, их надо исправить. Кроме четырёх типов из шага 2 в задании встречаются ещё такие:</p>
+    <div class="tablica"><table>
+      <tr><th>тип</th><th>что хранит</th><th>как пишется значение</th></tr>
+      <tr><td><code>byte</code></td><td>целое от −128 до 127</td><td><code>100</code></td></tr>
+      <tr><td><code>short</code></td><td>целое до 32 тысяч</td><td><code>30000</code></td></tr>
+      <tr><td><code>long</code></td><td>очень большое целое</td><td><code>5000000000L</code>, с буквой L</td></tr>
+      <tr><td><code>float</code></td><td>дробное, но короче double</td><td><code>3.5f</code>, с буквой f</td></tr>
+      <tr><td><code>char</code></td><td>ровно один символ</td><td><code>'a'</code>, в одинарных кавычках</td></tr>
+    </table></div>
+    <p>Вот четыре сломанных строки и что про каждую скажет компилятор. Компилятор это программа, которая проверяет код перед запуском. Нашёл ошибку, значит программа не запустится вовсе.</p>
+    <div class="tablica"><table>
+      <tr><th>строка</th><th>компилятор</th><th>почему</th></tr>
+      <tr><td><code>integer count = 5;</code></td><td><code>cannot find symbol</code></td><td>типа <code>integer</code> нет, есть <code>int</code></td></tr>
+      <tr><td><code>float price = 3.5;</code></td><td><code>possible lossy conversion from double to float</code></td><td>число с точкой считается <code>double</code>, для float нужно <code>3.5f</code></td></tr>
+      <tr><td><code>long big = 5000000000;</code></td><td><code>integer number too large</code></td><td>целое без L считается <code>int</code>, а 5 миллиардов в int не влезает</td></tr>
+      <tr><td><code>char letter = "a";</code></td><td><code>String cannot be converted to char</code></td><td>двойные кавычки дают строку, символу нужны одинарные</td></tr>
+    </table></div>
+    <p>Исправленные строки работают:</p>
+<pre><code>int count = 5;
+float price = 3.5f;
+long big = 5000000000L;
+char letter = 'a';
+System.out.println(count + " " + price + " " + big + " " + letter);</code></pre>
+<pre><code>5 3.5 5000000000 a</code></pre>
+    <p><code>+</code> между текстом и числом склеивает их в одну строку, а <code>" "</code> добавляет пробел между ними.</p>
+    <p class="novoe">Каждую строку объявления проверяй по списку. Первое: такой тип существует. Второе: имя законное, то есть не начинается с цифры, не служебное слово вроде <code>int</code> или <code>class</code> и не занято выше. Третье: значение подходит к типу и влезает в него. Четвёртое: в конце стоит точка с запятой.</p>
+    <p>В задании сказано, что правки «инвариантные», то есть верный ответ не один. Можно поменять тип под значение, а можно значение под тип. Главное, чтобы строка собиралась и смысл не потерялся.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Почини каждую строку и скажи, что не так:
+<pre><code>byte small = 1000;
+boolean ok = 1;
+int 2nd = 7;
+String word = 'Море';</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>byte small = 100;
+boolean ok = true;
+int second = 7;
+String word = "Море";</code></pre>
+          <p>1000 не влезает в byte, до 127, поэтому либо меньше число, либо тип <code>int</code>. В boolean кладут только <code>true</code> или <code>false</code>, единица не годится. Имя не может начинаться с цифры. Строка пишется в двойных кавычках.</p>
+          <p>Компилятор на исходные строки отвечает так: <code>possible lossy conversion from int to byte</code>, <code>int cannot be converted to boolean</code>, а на две последние выдаёт пачку непонятных ошибок вроде <code>not a statement</code> и <code>unclosed character literal</code>.</p>
+          <p class="oshibka">Посчитать ошибкой <code>long code = 'b';</code>. Эта строка собирается: символ в Java это ещё и число, код буквы b равен 98, и в <code>code</code> окажется 98. Проверено, программа печатает <code>98</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Проверка строки: тип есть, имя законное, значение влезает, есть <code>;</code>.</p>
+      <p><code>long</code> с <code>L</code>, <code>float</code> с <code>f</code>, <code>char</code> в <code>'одинарных'</code>, <code>String</code> в <code>"двойных"</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 12</div>
+    <h2>Деление целых отбрасывает дробь</h2>
+    <p>Делим 7 на 2 тремя способами.</p>
+<pre><code>int a = 7;
+int b = 2;
+System.out.println(a / b);
+System.out.println(a % b);
+System.out.println((double) a / b);
+System.out.println(7 / 2.0);</code></pre>
+<pre><code>3
+1
+3.5
+3.5</code></pre>
+    <p class="novoe">Если оба числа целые, <code>/</code> даёт целую часть, дробь отбрасывается. Чтобы получить дробь, хотя бы одно число должно быть дробным: <code>(double) a</code> превращает 7 в дробное 7.0, а <code>2.0</code> дробное само по себе.</p>
+    <p><code>%</code> даёт остаток от деления: 7 = 2 · 3 + 1, остаток 1. Им проверяют чётность: <code>n % 2 == 0</code> значит n чётное.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Оценки 4, 5 и 5. Что напечатают три строки?
+<pre><code>int sum = 4 + 5 + 5;
+System.out.println(sum / 3);
+System.out.println((double) sum / 3);
+System.out.println((double) (sum / 3));</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>4
+4.666666666666667
+4.0</code></pre>
+          <p>Сумма 14. <code>14 / 3</code> целое, это 4. Во второй строке 14 сначала стало дробным, деление честное. В третьей скобки заставили сначала поделить целые, получилось 4, и только потом 4 стало дробным 4.0.</p>
+          <p class="oshibka">Ставить <code>(double)</code> снаружи скобок, как в третьей строке. Деление к этому моменту уже случилось целым, дробь потеряна. Превращать в дробное нужно само число до деления.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Целое <code>/</code> целое = целое, дробь отброшена.</p>
+      <p>Нужна дробь: <code>(double) a / b</code>. <code>%</code> это остаток.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 12</div>
+    <h2>Формула от x: Math.pow</h2>
+    <p>Это задание 2 ПР1: посчитать функцию от x. Возьмём соседнюю функцию <code>y = 2x³ − 4x + 1</code>.</p>
+<pre><code>double x = 2;
+double y = 2 * Math.pow(x, 3) - 4 * x + 1;
+System.out.println("y = " + y);
+x = 0.5;
+y = 2 * Math.pow(x, 3) - 4 * x + 1;
+System.out.println("y = " + y);</code></pre>
+<pre><code>y = 9.0
+y = -0.75</code></pre>
+    <p class="novoe"><code>Math.pow(x, 3)</code> это x в степени 3. Отдельного знака степени в Java нет. Результат всегда дробный, поэтому x и y заводим как <code>double</code>.</p>
+    <p>Сверка руками: при x = 2 выходит 2 · 8 − 8 + 1 = 9, при x = 0.5 выходит 2 · 0.125 − 2 + 1 = −0.75. Так же сверяй свою функцию на двух-трёх x. Второй раз <code>x = 0.5;</code> пишется без типа: переменная уже объявлена, мы только кладём в неё новое значение.</p>
+    <p>Умножение всегда пишется явно: <code>4 * x</code>, а не <code>4x</code>. Квадрат можно писать как <code>x * x</code> или <code>Math.pow(x, 2)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Посчитай <code>y = x² + 3x − 10</code> при x = 2 и при x = −1.5. Напиши код и скажи, что он напечатает.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>double x = 2;
+double y = Math.pow(x, 2) + 3 * x - 10;
+System.out.println("y = " + y);
+x = -1.5;
+y = Math.pow(x, 2) + 3 * x - 10;
+System.out.println("y = " + y);</code></pre>
+<pre><code>y = 0.0
+y = -12.25</code></pre>
+          <p>Руками: 4 + 6 − 10 = 0 и 2.25 − 4.5 − 10 = −12.25.</p>
+          <p class="oshibka">Написать степень как <code>x^2</code>. В Java <code>^</code> это совсем другая операция, и с дробными числами программа не соберётся: <code>bad operand types for binary operator '^'</code>. Степень только через <code>Math.pow</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Степень: <code>Math.pow(x, n)</code>, результат <code>double</code>.</p>
+      <p>Умножение явно: <code>3 * x</code>. Сверяй формулу руками на двух x.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 12</div>
+    <h2>Ввод с клавиатуры: Scanner</h2>
+    <p>В шаге 5 x был записан в коде. В задании x вводит пользователь. Для этого нужен Scanner, это готовый инструмент Java для чтения ввода. Здесь целая программа, с каркасом.</p>
+<pre><code>import java.util.Locale;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in).useLocale(Locale.US);
+        System.out.println("Введите x:");
+        double x = sc.nextDouble();
+        double y = 2 * Math.pow(x, 3) - 4 * x + 1;
+        System.out.println("y = " + y);
+    }
+}</code></pre>
+    <p>Пользователь ввёл <code>0.5</code>. Программа напечатает:</p>
+<pre><code>Введите x:
+y = -0.75</code></pre>
+    <p>В окне IDEA между этими строками будет видно и само 0.5, которое ты набрал.</p>
+    <p class="novoe"><code>sc.nextDouble()</code> ждёт, пока пользователь введёт число и нажмёт Enter, и возвращает это число. Для целого есть <code>sc.nextInt()</code>, для слова <code>sc.next()</code>.</p>
+    <p>Строка <code>Scanner sc = new Scanner(System.in)</code> создаёт сканер, читающий клавиатуру, а <code>System.in</code> и значит «клавиатура». Строки <code>import</code> сверху подключают Scanner и Locale. Без них программа их не найдёт. <code>useLocale(Locale.US)</code> разрешает вводить дробь через точку.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что будет, если убрать <code>.useLocale(Locale.US)</code> и на компьютере с русской Windows ввести <code>2.5</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Программа упадёт: <code>Exception in thread "main" java.util.InputMismatchException</code>, «ввели не то, что ждали». Русская Windows ждёт дробь через запятую, <code>2,5</code>, и точку числом не считает. С <code>Locale.US</code> всегда работает точка.</p>
+          <p class="oshibka">Забыть <code>import java.util.Scanner;</code>. Программа не соберётся: <code>cannot find symbol</code>, а строкой ниже <code>symbol: class Scanner</code>, «не знаю, что такое Scanner». <code>Math</code> подключать не нужно, а Scanner нужно.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>Scanner sc = new Scanner(System.in).useLocale(Locale.US);</code> и два <code>import</code> сверху.</p>
+      <p><code>sc.nextDouble()</code> дробное, <code>sc.nextInt()</code> целое.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 12</div>
+    <h2>if и else: считать, только если можно</h2>
+    <p>Функция <code>y = √(x − 3)</code>. Корень из отрицательного числа не берётся, поэтому при x &lt; 3 функция не определена. Множество x, где функцию можно посчитать, называется областью определения.</p>
+<pre><code>double x = 1;
+if (x &lt; 3) {
+    System.out.println("Функция не определена");
+} else {
+    double y = Math.sqrt(x - 3);
+    System.out.println("y = " + y);
+}</code></pre>
+    <p>При x = 1 напечатается <code>Функция не определена</code>. При x = 7 напечатается <code>y = 2.0</code>. <code>Math.sqrt</code> это квадратный корень.</p>
+    <p class="novoe"><code>if (условие) { А } else { Б }</code> выполняет А, если условие верно, и Б, если нет. Выполняется ровно одна из двух веток.</p>
+    <p>Сравнения: <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>==</code> равно, <code>!=</code> не равно. Равенство пишется двумя знаками.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Функция <code>y = 1 / (x − 4)</code>. При каком x её нельзя считать? Напиши проверку и скажи, что выйдет при x = 6.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>double x = 6;
+if (x == 4) {
+    System.out.println("Функция не определена");
+} else {
+    double y = 1 / (x - 4);
+    System.out.println("y = " + y);
+}</code></pre>
+          <p>При x = 4 знаменатель равен нулю. При x = 6 напечатается <code>y = 0.5</code>.</p>
+          <p class="oshibka">Написать <code>if (x = 4)</code> с одним знаком. Один знак значит «положить 4 в x», а не сравнить. Программа не соберётся: <code>incompatible types: double cannot be converted to boolean</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>if (условие) { … } else { … }</code>, выполнится одна ветка.</p>
+      <p>Сравнение <code>==</code>, двумя знаками. Проверка области определения идёт до расчёта.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 12</div>
+    <h2>Два условия сразу: || и &amp;&amp;</h2>
+    <p>Функция <code>y = √(x + 2) / (x − 3)</code>. Здесь два запрета: под корнем не меньше нуля, то есть x ≥ −2, и знаменатель не ноль, то есть x ≠ 3. Функция не определена, если нарушен хотя бы один.</p>
+<pre><code>double x = 7;
+if (x &lt; -2 || x == 3) {
+    System.out.println("Функция не определена");
+} else {
+    double y = Math.sqrt(x + 2) / (x - 3);
+    System.out.println("y = " + y);
+}</code></pre>
+    <p>Напечатается <code>y = 0.75</code>: корень из 9 это 3, делим на 4.</p>
+    <p class="novoe"><code>||</code> значит «или»: условие верно, если верна хотя бы одна часть. <code>&amp;&amp;</code> значит «и»: обе части сразу. <code>!</code> переворачивает условие: <code>!(x &gt; 0)</code> верно, когда x не больше нуля.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Функция <code>y = √(5 − x) / x</code>. Запиши условие «не определена» и посчитай y при x = 1.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>double x = 1;
+if (x &gt; 5 || x == 0) {
+    System.out.println("Функция не определена");
+} else {
+    double y = Math.sqrt(5 - x) / x;
+    System.out.println("y = " + y);
+}</code></pre>
+          <p>Под корнем 5 − x ≥ 0, значит x ≤ 5, нарушение это x &gt; 5. Знаменатель x, нарушение x == 0. При x = 1 напечатается <code>y = 2.0</code>.</p>
+          <p class="oshibka">Соединить запреты через <code>&amp;&amp;</code>. Число не может быть одновременно больше 5 и равно 0, условие никогда не сработает. При x = 0 программа посчитает и напечатает <code>y = Infinity</code>, бесконечность, вместо сообщения.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Запреты области определения соединяются <code>||</code>: нарушен хотя бы один.</p>
+      <p><code>&amp;&amp;</code> это «и», <code>||</code> «или», <code>!</code> «не».</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 12</div>
+    <h2>Больше двух вариантов: else if</h2>
+    <p>Это задание 3 ПР1. Пример: по баллам поставить оценку.</p>
+<pre><code>int score = 78;
+if (score &gt;= 85) {
+    System.out.println("отлично");
+} else if (score &gt;= 70) {
+    System.out.println("хорошо");
+} else if (score &gt;= 50) {
+    System.out.println("удовлетворительно");
+} else {
+    System.out.println("не сдал");
+}</code></pre>
+    <p>Напечатается <code>хорошо</code>.</p>
+    <p class="novoe">Цепочка <code>if … else if … else</code> проверяет условия сверху вниз и выполняет первую подходящую ветку. Остальные пропускает. <code>else</code> в конце ловит всё, что не подошло никуда.</p>
+    <p>Поэтому важен порядок. 78 подходит и под <code>&gt;= 70</code>, и под <code>&gt;= 50</code>, но сработает только первая подходящая ветка. Поставь <code>&gt;= 50</code> первым, и 78 получит «удовлетворительно».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для целого n выведи «положительное», «отрицательное» или «ноль». Что напечатается при n = 0?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int n = 0;
+if (n &gt; 0) {
+    System.out.println("положительное");
+} else if (n &lt; 0) {
+    System.out.println("отрицательное");
+} else {
+    System.out.println("ноль");
+}</code></pre>
+          <p>Напечатается <code>ноль</code>.</p>
+          <p class="oshibka">Написать <code>if (n &gt; 0) … else …</code> только с двумя ветками. Ноль не больше нуля, попадёт в else и будет назван отрицательным. Ноль это отдельный случай, ему нужна своя ветка.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>if … else if … else</code>: срабатывает первая верная ветка.</p>
+      <p>Порядок условий важен. Ноль не положительный и не отрицательный.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 12</div>
+    <h2>«Держу лучшего»: наименьшее из трёх</h2>
+    <p>В задании 3 бывает «найти наименьшее» или «наибольшее». Приём: запоминаем первое число как лучшее и по очереди сравниваем с ним остальные.</p>
+<pre><code>int a = 7;
+int b = 3;
+int c = 5;
+int min = a;
+if (b &lt; min) {
+    min = b;
+}
+if (c &lt; min) {
+    min = c;
+}
+System.out.println("Меньшее: " + min);</code></pre>
+    <p>Напечатается <code>Меньшее: 3</code>. Ход: min = 7. b = 3 меньше 7, теперь min = 3. c = 5 не меньше 3, min остаётся 3.</p>
+    <p class="novoe">«Держу лучшего»: завёл переменную, положил в неё первое значение, затем каждое следующее сравниваешь с ней и при победе заменяешь. Каждое сравнение отдельным <code>if</code>, не через <code>else if</code>.</p>
+    <p>Отдельные <code>if</code> нужны, потому что проверить надо каждое число. Цепочка <code>else if</code> остановится на первом совпадении. Так же, отдельными <code>if</code>, считают «сколько из трёх чисел такие-то».</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Три цены: 450, 1200, 980. Выведи самую большую.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int a = 450;
+int b = 1200;
+int c = 980;
+int max = a;
+if (b &gt; max) {
+    max = b;
+}
+if (c &gt; max) {
+    max = c;
+}
+System.out.println("Дороже всего: " + max);</code></pre>
+          <p>Напечатается <code>Дороже всего: 1200</code>.</p>
+          <p class="oshibka">Написать второе сравнение через <code>else if</code>. На этих ценах ответ случайно верный. Но при ценах 450, 980, 1200 первое условие сработает, max станет 980, и третье число уже не проверится. Программа напечатает <code>Дороже всего: 980</code>, проверено.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>min = a</code>, потом <code>if (b &lt; min) min = b</code> и так для каждого.</p>
+      <p>Каждое число своим <code>if</code>, не <code>else if</code>.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 12</div>
+    <h2>return: остановиться на плохих данных</h2>
+    <p>Задание 4 ПР1 просит при ошибке во вводе сообщить о ней и остановиться. Пример: пользователь вводит скидку в процентах, она должна быть от 0 до 100.</p>
+<pre><code>Scanner sc = new Scanner(System.in).useLocale(Locale.US);
+System.out.println("Скидка, %:");
+double discount = sc.nextDouble();
+if (discount &lt; 0 || discount &gt; 100) {
+    System.out.println("Ошибка: скидка от 0 до 100");
+    return;
+}
+System.out.println("Скидка принята: " + discount);</code></pre>
+    <p>Строки внутри <code>main</code>, а каркас и два <code>import</code> как в шаге 6. Ввели <code>120</code>:</p>
+<pre><code>Скидка, %:
+Ошибка: скидка от 0 до 100</code></pre>
+    <p>Ввели <code>15</code>:</p>
+<pre><code>Скидка, %:
+Скидка принята: 15.0</code></pre>
+    <p class="novoe"><code>return;</code> внутри <code>main</code> сразу заканчивает программу. Строки ниже него уже не выполняются.</p>
+    <p>Так не нужно прятать весь расчёт в <code>else</code>: проверил, при ошибке вышел, дальше спокойно считаешь.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Возраст вводится целым числом. Допиши проверку: если возраст меньше 0 или больше 120, напечатать ошибку и остановиться.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int age = sc.nextInt();
+if (age &lt; 0 || age &gt; 120) {
+    System.out.println("Ошибка: возраст от 0 до 120");
+    return;
+}</code></pre>
+          <p class="oshibka">Напечатать ошибку и забыть <code>return;</code>. Сообщение появится, а программа пойдёт дальше и посчитает ерунду с неверным числом.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Проверка: <code>if (плохо) { сообщение; return; }</code></p>
+      <p><code>return;</code> в <code>main</code> заканчивает программу.</p>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="shag" id="shag-12" data-shag>
+    <div class="shag-nomer">Шаг 12 из 12</div>
+    <h2>Ввели не число: hasNextDouble</h2>
+    <p>Шаг 11 ловит число вне границ. А если пользователь вместо числа напечатал <code>abc</code>, <code>nextDouble()</code> падает сам, и твоё сообщение не появится. Поэтому сначала спрашиваем, число ли там.</p>
+<pre><code>import java.util.Locale;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in).useLocale(Locale.US);
+        // 1. что делает программа
+        System.out.println("Программа считает цену со скидкой.");
+        // 2. просим данные и 3. проверяем
+        System.out.println("Цена, руб:");
+        if (!sc.hasNextDouble()) {
+            System.out.println("Ошибка: цена должна быть числом");
+            return;
+        }
+        double price = sc.nextDouble();
+        if (price &lt;= 0) {
+            System.out.println("Ошибка: цена больше нуля");
+            return;
+        }
+        System.out.println("Скидка, %:");
+        if (!sc.hasNextDouble()) {
+            System.out.println("Ошибка: скидка должна быть числом");
+            return;
+        }
+        double discount = sc.nextDouble();
+        if (discount &lt; 0 || discount &gt; 100) {
+            System.out.println("Ошибка: скидка от 0 до 100");
+            return;
+        }
+        // 4. считаем
+        double total = price * (100 - discount) / 100;
+        // 5. выводим
+        System.out.println("К оплате: " + total + " руб");
+    }
+}</code></pre>
+    <p>Ввели 1500 и 20:</p>
+<pre><code>Программа считает цену со скидкой.
+Цена, руб:
+Скидка, %:
+К оплате: 1200.0 руб</code></pre>
+    <p>Ввели <code>abc</code>:</p>
+<pre><code>Программа считает цену со скидкой.
+Цена, руб:
+Ошибка: цена должна быть числом</code></pre>
+    <p class="novoe"><code>sc.hasNextDouble()</code> заглядывает во ввод и отвечает <code>true</code>, если там дробное число, и <code>false</code>, если нет. Само число при этом не забирает. Проверяем до <code>nextDouble()</code>. Для целых есть <code>hasNextInt()</code>.</p>
+    <p>Строки с <code>//</code> это комментарии, Java их пропускает. Здесь они отмечают пять частей, которые просит задание 4: что делает программа, ввод, проверка, расчёт, вывод.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает программа, если проверку поставить после чтения, и пользователь ввёл <code>abc</code>?
+<pre><code>System.out.println("Цена, руб:");
+double price = sc.nextDouble();
+if (!sc.hasNextDouble()) {
+    System.out.println("Ошибка: цена должна быть числом");
+    return;
+}</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Цена, руб:
+Exception in thread "main" java.util.InputMismatchException</code></pre>
+          <p>И ещё несколько строк с <code>at …</code> о том, где упало. До проверки дело не дошло: <code>nextDouble()</code> уже попробовал прочитать abc как число и упал.</p>
+          <p class="oshibka">Проверять после чтения. Проверка ввода всегда стоит перед <code>nextDouble()</code> или <code>nextInt()</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>if (!sc.hasNextDouble()) { сообщение; return; }</code> перед <code>nextDouble()</code>.</p>
+      <p>Затем проверка границ, затем расчёт и вывод.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР1</h2>
+    <ul>
+      <li>Задание 1, починить объявления: шаги 2–3, список из четырёх проверок.</li>
+      <li>Задание 2, функция от x: шаги 4–6 для расчёта и ввода, шаги 7–8 если в функции корень, логарифм или деление.</li>
+      <li>Задание 3, условия: шаги 9–10. Ноль отдельной веткой, «держу лучшего» отдельными <code>if</code>.</li>
+      <li>Задание 4, своя формула: шаги 11–12, пять частей программы.</li>
+    </ul>
+    <p>Формулу для задания 4 бери свою, не из урока: из жизни, где понятно, какие числа разумны. Каждую ветку проверь запуском: хороший ввод, ввод вне границ, буквы вместо числа. Дальше по ПР2 урок <a href="java-cikly-metody.html">«Циклы и методы»</a>.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: типы, формулы и if">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Почини каждую строку, не меняя смысла, и скажи, что было не так.
+<pre><code>Int year = 2026;
+short big = 50000;
+double 1price = 99.9;
+String letter = 'Я';
+long phone = 89991234567;</code></pre>
+      <textarea name="z1" placeholder="int year = …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Программа читает x и считает <code>y = √(x + 1) / (x − 2)</code>. Если функция не определена, сообщение. Посчитай руками y при x = 3 и сверь с программой.
+      <textarea name="z2" placeholder="import java.util.Locale; …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Даны три целых числа. Выведи наименьшее и наибольшее, приёмом «держу лучшего». Проверь на 4, −2, 9 и на 5, 5, 5.
+      <textarea name="z3" placeholder="int min = a; …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Вводится температура, целое число. Выведи «мороз» при t ниже 0, «прохладно» от 0 до 15 включительно, «тепло» выше 15. Какие t ты возьмёшь, чтобы проверить все три ветки и обе границы?
+      <textarea name="z4" placeholder="if (t &lt; 0) …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Индекс массы тела: вес в килограммах делить на рост в метрах в квадрате. Напиши программу из пяти частей с проверкой: число ли ввели, вес от 20 до 300, рост от 0.5 до 2.5. Что выйдет для 70 кг и 1.75 м?
+      <textarea name="z5" placeholder="// 1. что делает программа …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Типы и деление</td><td>Модуль A1: в numpy у массива тоже один тип на все числа, и деление целых там так же легко теряет дробь, если тип выбран не тот.</td></tr>
+      <tr><td>Проверка ввода</td><td>Модуль X1: функция, которая сначала проверяет аргументы и только потом считает, падает меньше и понятнее. Так же пишут проверку данных перед обучением модели.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-cikly-metody.html">Дальше: циклы и методы →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

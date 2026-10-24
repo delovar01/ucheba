@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Строковые функции — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-stroki">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · Строковые функции</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Строковые функции: склеить, отрезать, почистить</h1>
+  <p class="tiho">Базы данных · лаба 21.10 и слайд 9 лекции 4 · около 60 минут</p>
+
+  <p>На лабе 21.10 разбирали строковые функции PostgreSQL: склейку <code>||</code> и <code>SUBSTRING</code>. На лекции 4 был пример: собрать красивое имя клиента и спрятать его почту, оставив две буквы и домен. Здесь всё это на твоей базе <code>ml_tracker</code>, плюс функции, без которых текст не почистить: длина, регистр, пробелы, замена.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. В рамке «Главное из шага» суть шага в двух строках. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <h2>Что понадобится из базы</h2>
+  <div class="tablica">
+    <div class="imya">researchers · исследователи</div>
+    <table>
+      <tr><th>id</th><th>full_name</th><th>email</th><th>grp</th></tr>
+      <tr><td>1</td><td>Павленко Степан</td><td>stepan@urfu.ru</td><td>РИ-250932</td></tr>
+      <tr><td>2</td><td>Щайхутдинов Азат</td><td>azat@urfu.ru</td><td>РИ-250932</td></tr>
+      <tr><td>3</td><td>Иванова Мария</td><td>maria@urfu.ru</td><td>РИ-250931</td></tr>
+      <tr><td>4</td><td>Смирнов Олег</td><td>oleg@urfu.ru</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+  <div class="tablica">
+    <div class="imya">datasets · наборы данных</div>
+    <table>
+      <tr><th>id</th><th>name</th><th>type_task</th><th>link</th></tr>
+      <tr><td>1</td><td>iris</td><td>classification</td><td>https:\\gobro</td></tr>
+      <tr><td>2</td><td>pirs</td><td>analize</td><td>https:\\brat</td></tr>
+      <tr><td>3</td><td>California Housing</td><td>regression</td><td>https:\\fatwer</td></tr>
+      <tr><td>4</td><td>IMDB Reviews</td><td>nlp</td><td>https:\\bawet</td></tr>
+      <tr><td>5</td><td>MNIST</td><td>cv</td><td>https:\\hjkl</td></tr>
+      <tr><td>6</td><td>Titanic</td><td>classification</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+  <p>Модели: Logisticregression и RandomForest на <code>sklearn</code>, Resnet и rubert-tiny2 на <code>pytorch</code>, CatBoost на <code>catboost</code>.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 12</div>
+    <h2>Склейка ||</h2>
+    <p>Хотим одну строку вида «Павленко Степан (РИ-250932)».</p>
+<pre><code class="sql">SELECT full_name || ' (' || grp || ')' AS podpis
+FROM researchers;</code></pre>
+    <p class="novoe"><code>a || b</code> склеивает два куска текста в один. Кусков может быть сколько угодно, свой текст пишут в одинарных кавычках. Пробел тоже кусок: без <code>' ('</code> имя и скобка слипнутся.</p>
+    <div class="tablica"><table>
+      <tr><th>podpis</th></tr>
+      <tr><td>Павленко Степан (РИ-250932)</td></tr>
+      <tr><td>Щайхутдинов Азат (РИ-250932)</td></tr>
+      <tr><td>Иванова Мария (РИ-250931)</td></tr>
+      <tr><td class="null">NULL</td></tr>
+    </table></div>
+    <p>У Смирнова пусто целиком, даже имени нет. Если в склейке через <code>||</code> хоть один кусок <code>NULL</code>, весь результат <code>NULL</code>: «имя плюс неизвестно» база считает неизвестным.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для каждой модели строка «название / фреймворк», например «Resnet / pytorch».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name || ' / ' || framework AS podpis
+FROM models;</code></pre>
+          <p>Пять строк: Logisticregression / sklearn, RandomForest / sklearn, Resnet / pytorch, rubert-tiny2 / pytorch, CatBoost / catboost. Пустых фреймворков нет, поэтому <code>NULL</code> здесь не вылезет.</p>
+          <p class="oshibka">Взять разделитель в двойные кавычки: <code>name || " / " || framework</code>. В PostgreSQL двойные кавычки значат имя столбца, и база ответит <code>column " / " does not exist</code>. Текст только в одинарных.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>a || ' ' || b</code> склеивает, текст в одинарных кавычках.</p>
+      <p>Один <code>NULL</code> в склейке <code>||</code>, и вся строка <code>NULL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 12</div>
+    <h2>CONCAT и COALESCE: склейка без пропажи</h2>
+    <p>То же через функцию, как на слайде лекции.</p>
+<pre><code class="sql">SELECT CONCAT(full_name, ' (', grp, ')') AS podpis
+FROM researchers;</code></pre>
+    <p class="novoe"><code>CONCAT(a, b, …)</code> склеивает все свои аргументы, а <code>NULL</code> просто пропускает. У Смирнова выйдет «Смирнов Олег ()». <code>CONCAT</code> есть и в PostgreSQL, и в MySQL, а <code>||</code> в MySQL по умолчанию значит «или», так что для переносимого кода бери <code>CONCAT</code>.</p>
+    <p>Пустые скобки некрасиво. Подставим слово вместо пустоты:</p>
+<pre><code class="sql">SELECT full_name || ' (' || COALESCE(grp, 'без группы') || ')' AS podpis
+FROM researchers;</code></pre>
+    <p><code>COALESCE</code> ты уже видел в уроке <a href="bd-podzaprosy-cte.html">про подзапросы</a>, шаг 8, там он менял пустоту на 0. С текстом так же: <code>COALESCE(x, 'замена')</code> возвращает <code>x</code>, а если он <code>NULL</code>, то замену. Теперь у Смирнова «Смирнов Олег (без группы)», и <code>||</code> уже не ломается.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для каждого набора данных строка «название: ссылка», а где ссылки нет, «название: ссылки нет».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT CONCAT(name, ': ', COALESCE(link, 'ссылки нет')) AS podpis
+FROM datasets;</code></pre>
+          <p>Шесть строк, например «iris: https:\\gobro», а последняя «Titanic: ссылки нет».</p>
+          <p class="oshibka">Надеяться, что <code>CONCAT</code> сам напишет «ссылки нет». Он только выбрасывает <code>NULL</code>, и выйдет «Titanic: » с пустотой после двоеточия. Слово вместо пустоты даёт только <code>COALESCE</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CONCAT(a, b, c)</code> пропускает <code>NULL</code>, <code>||</code> нет.</p>
+      <p><code>COALESCE(x, 'замена')</code>: пусто превращается в замену.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 12</div>
+    <h2>LENGTH: длина текста</h2>
+<pre><code class="sql">SELECT name, LENGTH(name) AS dlina
+FROM datasets
+ORDER BY dlina DESC;</code></pre>
+    <p class="novoe"><code>LENGTH(s)</code> возвращает число символов в тексте. Пробелы тоже символы. Русские буквы считаются по одной, как и латинские.</p>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>dlina</th></tr>
+      <tr><td>California Housing</td><td>18</td></tr>
+      <tr><td>IMDB Reviews</td><td>12</td></tr>
+      <tr><td>Titanic</td><td>7</td></tr>
+      <tr><td>MNIST</td><td>5</td></tr>
+      <tr><td>iris</td><td>4</td></tr>
+      <tr><td>pirs</td><td>4</td></tr>
+    </table></div>
+    <p>California Housing: 10 букв, пробел и ещё 7. У iris и pirs по 4, кто из них выйдет первым, база не обещает.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Модели, у которых название длиннее 8 символов, с длиной.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name, LENGTH(name) AS dlina
+FROM models
+WHERE LENGTH(name) &gt; 8;</code></pre>
+          <p>Logisticregression 18, RandomForest 12, rubert-tiny2 12. Resnet 6 и CatBoost 8 не подходят: 8 не больше 8.</p>
+          <p class="oshibka">Написать в <code>WHERE</code> имя из <code>SELECT</code>: <code>WHERE dlina &gt; 8</code>. Ответ <code>column "dlina" does not exist</code>: <code>WHERE</code> выполняется раньше <code>SELECT</code> и про это имя ещё не знает. В <code>ORDER BY</code> можно, он идёт после.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>LENGTH(s)</code> число символов, пробелы считаются.</p>
+      <p>Имя из <code>SELECT</code> в <code>WHERE</code> не видно, пиши функцию целиком.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 12</div>
+    <h2>UPPER и LOWER: большие и маленькие буквы</h2>
+    <p>Ищем набор mnist, написав название маленькими.</p>
+<pre><code class="sql">SELECT name FROM datasets WHERE name = 'mnist';          -- пусто
+SELECT name FROM datasets WHERE LOWER(name) = 'mnist';   -- MNIST</code></pre>
+    <p class="novoe"><code>LOWER(s)</code> делает все буквы маленькими, <code>UPPER(s)</code> большими. Чтобы сравнить без учёта регистра, приводят к одному виду обе стороны. В таблице MNIST остаётся как был, меняется только то, что видит сравнение.</p>
+    <p>На лекции был пример, что в PostgreSQL <code>'анна'</code> не находит <code>'Анна'</code>. Это то же лечение: <code>LOWER(имя) = 'анна'</code>. В <code>LIKE</code> есть готовый вариант без регистра, <code>ILIKE</code>, он в уроке <a href="bd-filtry-join.html">про фильтры</a>, шаг 7.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Модели, у которых название начинается на r, большую или маленькую. Без <code>ILIKE</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name
+FROM models
+WHERE LOWER(name) LIKE 'r%';</code></pre>
+          <p>RandomForest, Resnet, rubert-tiny2. Ровно то, что дал бы <code>name ILIKE 'r%'</code>.</p>
+          <p class="oshibka">Привести к маленьким столбец, а шаблон оставить с большой: <code>LOWER(name) LIKE 'R%'</code>. После <code>LOWER</code> большой R в названиях не осталось, и ответ пустой. Обе стороны в одном регистре.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>LOWER(s)</code> маленькие, <code>UPPER(s)</code> большие.</p>
+      <p>Без регистра: <code>LOWER(столбец) = 'всё маленькими'</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 12</div>
+    <h2>TRIM: лишние пробелы по краям</h2>
+    <p>Данные часто приходят с пробелами: кто-то скопировал название из таблицы вместе с пробелом. Для базы это уже другой текст.</p>
+<pre><code class="sql">SELECT '  iris ' = 'iris'       AS kak_est,
+       TRIM('  iris ') = 'iris' AS posle_trim,
+       LENGTH('  iris ')        AS bylo,
+       LENGTH(TRIM('  iris '))  AS stalo;</code></pre>
+    <p class="novoe"><code>TRIM(s)</code> убирает пробелы в начале и в конце текста, внутри не трогает. <code>LTRIM</code> только слева, <code>RTRIM</code> только справа.</p>
+    <p>Ответ: <code>false</code>, <code>true</code>, 7, 4. В DBeaver <code>false</code> и <code>true</code> бывают показаны пустым и отмеченным квадратиком.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой будет <code>LENGTH(TRIM('   MNIST   '))</code>? А <code>LENGTH(TRIM('California  Housing'))</code>, где между словами два пробела?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>5: три пробела слева и три справа ушли. Во втором 19: по краям пробелов нет, а два пробела внутри <code>TRIM</code> не трогает.</p>
+          <p class="oshibka">Ждать, что <code>TRIM</code> сожмёт двойной пробел внутри. Не сожмёт. Двойной пробел внутри меняют функцией <code>REPLACE</code> из шага 11.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>TRIM(s)</code> убирает пробелы по краям, внутри нет.</p>
+      <p><code>' iris'</code> и <code>'iris'</code> для базы разные строки.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 12</div>
+    <h2>SUBSTRING: кусок текста</h2>
+    <p>Группа РИ-250932 состоит из букв направления и номера. Достанем их по отдельности.</p>
+<pre><code class="sql">SELECT grp,
+       SUBSTRING(grp FROM 1 FOR 2) AS bukvy,
+       SUBSTRING(grp FROM 4)       AS nomer
+FROM researchers
+WHERE grp IS NOT NULL;</code></pre>
+    <p class="novoe"><code>SUBSTRING(s FROM n FOR k)</code> вырезает k символов, начиная с n-го. Символы считают с единицы. Без <code>FOR k</code> берёт всё до конца.</p>
+    <p>Р первый символ, И второй, дефис третий, номер с четвёртого. Выйдет РИ и 250932, у Ивановой РИ и 250931.</p>
+    <p>В MySQL вместо <code>FROM … FOR</code> обычно пишут через запятую: <code>SUBSTRING(grp, 4)</code>, PostgreSQL понимает и так.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Первые две цифры номера группы это год поступления, у тебя 25. Достань их из <code>grp</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name, SUBSTRING(grp FROM 4 FOR 2) AS god
+FROM researchers;</code></pre>
+          <p>У троих 25, у Смирнова <code>NULL</code>: кусок от пустоты тоже пустота.</p>
+          <p class="oshibka">Начать счёт с нуля, как в Python: <code>FROM 3 FOR 2</code>. Получится «-2», дефис и первая цифра. В SQL первый символ имеет номер 1.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>SUBSTRING(s FROM n FOR k)</code>: k символов с n-го, счёт с 1.</p>
+      <p>Без <code>FOR</code> берёт до конца текста.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 12</div>
+    <h2>LEFT и RIGHT: начало и конец</h2>
+    <p>Когда кусок нужен с самого начала или с самого конца, считать номер символа незачем.</p>
+<pre><code class="sql">SELECT name, LEFT(name, 3) AS nachalo, RIGHT(name, 3) AS konec
+FROM datasets
+WHERE id = 3;</code></pre>
+    <p class="novoe"><code>LEFT(s, k)</code> возвращает первые k символов, <code>RIGHT(s, k)</code> последние k. Это короткая запись для <code>SUBSTRING</code>, когда кусок у края.</p>
+    <p>У California Housing выйдет Cal и ing. <code>LEFT(name, 3)</code> то же самое, что <code>SUBSTRING(name FROM 1 FOR 3)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для каждого исследователя первая буква фамилии и последние две буквы почты.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name, LEFT(full_name, 1) AS bukva, RIGHT(email, 2) AS konec
+FROM researchers;</code></pre>
+          <p>П, Щ, И, С. Конец почты у всех ru.</p>
+          <p class="oshibka">Ждать, что <code>RIGHT</code> выдаст буквы задом наперёд, «ur». Он только берёт кусок с конца, а порядок букв внутри не меняет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>LEFT(s, k)</code> первые k символов, <code>RIGHT(s, k)</code> последние k.</p>
+      <p>Порядок букв в куске остаётся как в тексте.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 12</div>
+    <h2>POSITION: где стоит символ</h2>
+    <p>Логин в почте разной длины: stepan длиннее, чем oleg. Чтобы отрезать его, надо знать, где стоит @.</p>
+<pre><code class="sql">SELECT email, POSITION('@' IN email) AS gde
+FROM researchers;</code></pre>
+    <p class="novoe"><code>POSITION(кусок IN s)</code> возвращает номер символа, с которого кусок первый раз встречается в тексте. Если куска нет, возвращает 0.</p>
+    <div class="tablica"><table>
+      <tr><th>email</th><th>gde</th></tr>
+      <tr><td>stepan@urfu.ru</td><td>7</td></tr>
+      <tr><td>azat@urfu.ru</td><td>5</td></tr>
+      <tr><td>maria@urfu.ru</td><td>6</td></tr>
+      <tr><td>oleg@urfu.ru</td><td>5</td></tr>
+    </table></div>
+    <p>В stepan шесть букв, поэтому @ седьмая. На слайде для MySQL то же самое записано через <code>LOCATE('@', email)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> На каком месте пробел в <code>full_name</code> у каждого исследователя?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name, POSITION(' ' IN full_name) AS probel
+FROM researchers;</code></pre>
+          <p>Павленко 9, Щайхутдинов 12, Иванова 8, Смирнов 8. Номер пробела на один больше длины фамилии.</p>
+          <p class="oshibka">Перепутать порядок: <code>POSITION(full_name IN ' ')</code>. Тогда база ищет всё имя внутри одного пробела, не находит и даёт 0 у всех. Сначала что ищем, после <code>IN</code> где ищем.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>POSITION('@' IN email)</code>: номер символа, счёт с 1.</p>
+      <p>Не нашлось: 0.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 12</div>
+    <h2>SUBSTRING и POSITION вместе: логин, домен, маска</h2>
+    <p>Теперь режем почту по @. Логин всё, что до неё, домен с неё до конца.</p>
+<pre><code class="sql">SELECT email,
+       SUBSTRING(email FOR POSITION('@' IN email) - 1) AS login,
+       SUBSTRING(email FROM POSITION('@' IN email))    AS domen
+FROM researchers;</code></pre>
+    <p class="novoe">Число в <code>SUBSTRING</code> можно не писать руками, а посчитать функцией. <code>SUBSTRING(s FOR k)</code> без <code>FROM</code> берёт k символов с начала. У stepan@urfu.ru @ седьмая, значит логин это 7 − 1 = 6 первых символов, stepan. Домен с седьмого: @urfu.ru.</p>
+    <p>Пример со слайда лекции, маска почты:</p>
+<pre><code class="sql">SELECT CONCAT(LEFT(email, 2), '***',
+              SUBSTRING(email FROM POSITION('@' IN email))) AS maska
+FROM researchers;</code></pre>
+    <p>Выйдет st***@urfu.ru, az***@urfu.ru, ma***@urfu.ru, ol***@urfu.ru. <code>LEFT</code> из шага 7 берёт две первые буквы, <code>CONCAT</code> склеивает их со звёздочками и доменом.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Раздели <code>full_name</code> на фамилию и имя двумя столбцами. Через <code>SUBSTRING</code> и <code>POSITION</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT SUBSTRING(full_name FOR POSITION(' ' IN full_name) - 1)  AS familiya,
+       SUBSTRING(full_name FROM POSITION(' ' IN full_name) + 1) AS imya
+FROM researchers;</code></pre>
+          <p>Павленко Степан, Щайхутдинов Азат, Иванова Мария, Смирнов Олег. У имени <code>+ 1</code>, чтобы не захватить сам пробел.</p>
+          <p class="oshibka">Забыть <code>- 1</code> у фамилии. Тогда в неё попадёт пробел, «Павленко » с пробелом на конце. Глазами его не видно, но <code>familiya = 'Павленко'</code> такую строку уже не найдёт.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>До символа: <code>SUBSTRING(s FOR POSITION(c IN s) - 1)</code>.</p>
+      <p>С символа: <code>SUBSTRING(s FROM POSITION(c IN s))</code>.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 12</div>
+    <h2>SPLIT_PART: разрезать по символу короче</h2>
+    <p>Логин и домен из прошлого шага в PostgreSQL достают одной функцией, без подсчёта позиций.</p>
+<pre><code class="sql">SELECT email,
+       SPLIT_PART(email, '@', 1) AS login,
+       SPLIT_PART(email, '@', 2) AS domen
+FROM researchers;</code></pre>
+    <p class="novoe"><code>SPLIT_PART(s, разделитель, n)</code> режет текст по разделителю на куски и возвращает кусок номер n. Куски считают с единицы. Сам разделитель ни в один кусок не попадает.</p>
+    <p>У stepan@urfu.ru первый кусок stepan, второй urfu.ru, уже без @. В прошлом шаге домен выходил с @, здесь без него. В MySQL такой функции нет, там режут через <code>SUBSTRING</code> и <code>POSITION</code>, как в шаге 9.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Достань имя из <code>full_name</code> через <code>SPLIT_PART</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name, SPLIT_PART(full_name, ' ', 2) AS imya
+FROM researchers;</code></pre>
+          <p>Степан, Азат, Мария, Олег. Фамилия была бы <code>SPLIT_PART(full_name, ' ', 1)</code>.</p>
+          <p class="oshibka">Считать куски с нуля, как в Python: <code>SPLIT_PART(full_name, ' ', 0)</code>. PostgreSQL ответит <code>field position must not be zero</code>, «номер куска не может быть нулём».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>SPLIT_PART(s, '@', 1)</code>: кусок до первого @, счёт с 1.</p>
+      <p>Разделитель в куски не попадает.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 12</div>
+    <h2>REPLACE: заменить кусок везде</h2>
+    <p>В твоих ссылках обратные косые: <code>https:\\gobro</code>. В адресе нужны прямые.</p>
+<pre><code class="sql">SELECT link, REPLACE(link, '\', '/') AS link2
+FROM datasets;</code></pre>
+    <p class="novoe"><code>REPLACE(s, что, на_что)</code> заменяет каждое вхождение куска во всём тексте. Различает большие и маленькие буквы. Если куска нет, текст остаётся как был.</p>
+    <p>Получится https://gobro, https://brat и так далее, обе косые заменились. У Titanic ссылки нет, и <code>REPLACE</code> от <code>NULL</code> тоже <code>NULL</code>.</p>
+    <p>Так же правят опечатку в значении: <code>REPLACE(type_task, 'analize', 'analysis')</code> у pirs даст analysis, у остальных ничего не поменяет. Это только показ. Чтобы исправить в самой таблице, ту же функцию ставят в <code>UPDATE … SET link = REPLACE(link, '\', '/')</code>, как в уроке <a href="bd-izmenenie-dannyh.html">про UPDATE</a>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Названия наборов, где пробелы заменены на подчёркивание. Какие названия изменятся?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name, REPLACE(name, ' ', '_') AS bez_probelov
+FROM datasets;</code></pre>
+          <p>Изменятся два: California_Housing и IMDB_Reviews. Остальные без пробелов, их <code>REPLACE</code> вернёт как были.</p>
+          <p class="oshibka">Перепутать порядок аргументов: <code>REPLACE(name, '_', ' ')</code>. Это «подчёркивание на пробел», а подчёркиваний в названиях нет, и ничего не поменяется. Сначала что ищем, потом на что меняем.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>REPLACE(s, 'что', 'на что')</code> меняет все вхождения.</p>
+      <p>В <code>SELECT</code> только показ, в таблице меняет <code>UPDATE … SET x = REPLACE(…)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="shag" id="shag-12" data-shag>
+    <div class="shag-nomer">Шаг 12 из 12</div>
+    <h2>Всё вместе: чистый ключ и поиск</h2>
+    <p>Функции вкладываются одна в другую. Сделаем из названия набора ключ для файла: без пробелов по краям, пробелы внутри на подчёркивание, всё маленькими.</p>
+<pre><code class="sql">SELECT name, LOWER(REPLACE(TRIM(name), ' ', '_')) AS klyuch
+FROM datasets;</code></pre>
+    <p class="novoe">Вложенные функции считаются изнутри наружу. Сначала <code>TRIM</code>, потом <code>REPLACE</code> над его ответом, потом <code>LOWER</code>. Выйдет iris, pirs, california_housing, imdb_reviews, mnist, titanic.</p>
+    <p>Строковые функции работают и в <code>WHERE</code>. Названия из двух слов можно найти так:</p>
+<pre><code class="sql">SELECT name FROM datasets WHERE POSITION(' ' IN name) &gt; 0;
+SELECT name FROM datasets WHERE name LIKE '% %';</code></pre>
+    <p>Оба дают California Housing и IMDB Reviews. <code>LIKE</code> короче, а <code>POSITION</code> пригодится, когда нужен ещё и номер символа.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Почту иногда вводят как попало: « Stepan@URFU.ru». Найди исследователей с почтой на домене urfu.ru так, чтобы такая запись тоже нашлась.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name
+FROM researchers
+WHERE LOWER(TRIM(email)) LIKE '%@urfu.ru';</code></pre>
+          <p>Сейчас все четверо. <code>TRIM</code> убирает пробел в начале, <code>LOWER</code> большие буквы. Можно и <code>TRIM(email) ILIKE '%@urfu.ru'</code>.</p>
+          <p class="oshibka">Забыть <code>TRIM</code>, если пробел стоит в конце: «stepan@urfu.ru ». Шаблон <code>'%@urfu.ru'</code> требует, чтобы текст кончался на ru, а он кончается пробелом. Такая строка не найдётся, хотя почта правильная.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Вложенные функции считаются изнутри наружу: <code>LOWER(REPLACE(TRIM(s), ' ', '_'))</code>.</p>
+      <p>Перед сравнением текста его чистят: <code>TRIM</code> и <code>LOWER</code>.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: строковые функции">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач на твоей базе. Ответов здесь нет: впиши запросы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Для каждой модели строка вида «SKLEARN: RandomForest», фреймворк большими буквами. Отсортируй по фреймворку, внутри по названию.
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Короткий код каждого набора данных: первые три буквы названия большими. Какой код у California Housing?
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Длина логина в почте каждого исследователя, то есть число символов до @. У кого самый длинный?
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Номера групп без «РИ-» и без повторов. Номер найди не по позиции 4, а через <code>POSITION</code> дефиса.
+      <textarea name="z4" placeholder="SELECT DISTINCT …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Почему <code>full_name || ', ' || grp</code> у Смирнова даёт пустоту целиком? Исправь двумя способами.
+      <textarea name="z5" placeholder="Почему … способ 1 … способ 2 …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>TRIM, LOWER, REPLACE</td><td>Модуль A2: чистка текстовых признаков. «Москва», « москва» и «МОСКВА» для модели три разных города, пока их не привели к одному виду. В pandas это <code>str.strip()</code>, <code>str.lower()</code> и <code>str.replace()</code>.</td></tr>
+      <tr><td>SUBSTRING и POSITION</td><td>Модуль A2: новый признак из куска текста, например домен почты или год из номера группы. В pandas <code>str.split('@').str[1]</code> делает то же, что <code>SPLIT_PART</code>.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Сортировка, фильтры и JOIN — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-filtry-join">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · Сортировка, фильтры и JOIN</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Сортировка, фильтры и JOIN</h1>
+  <p class="tiho">Базы данных · под самостоятельную 2, задания 1–7 · около 50 минут</p>
+
+  <p>Это первый урок по самостоятельной 2. Он раньше урока <a href="bd-left-join-group-by.html">про LEFT JOIN и GROUP BY</a>: задания 1–7 идут до них. Всё на твоей базе <code>ml_tracker</code>, поэтому каждый запрос можно сразу запустить в DBeaver и сверить с ответом. Десять шагов, в каждом одна новая вещь.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. В рамке «Главное из шага» суть шага в двух строках, к ней возвращайся перед самостоятельной. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <h2>Твоя база</h2>
+  <p>Пять таблиц. Ниже только те столбцы, которые нужны в уроке. Запустить базу на стационарном: ярлык «БД — запустить» на рабочем столе, в DBeaver подключение <code>ml_tracker</code>.</p>
+
+  <div class="tablica">
+    <div class="imya">researchers · исследователи</div>
+    <table>
+      <tr><th>id</th><th>full_name</th><th>email</th><th>grp</th></tr>
+      <tr><td>1</td><td>Павленко Степан</td><td>stepan@urfu.ru</td><td>РИ-250932</td></tr>
+      <tr><td>2</td><td>Щайхутдинов Азат</td><td>azat@urfu.ru</td><td>РИ-250932</td></tr>
+      <tr><td>3</td><td>Иванова Мария</td><td>maria@urfu.ru</td><td>РИ-250931</td></tr>
+      <tr><td>4</td><td>Смирнов Олег</td><td>oleg@urfu.ru</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+
+  <div class="tablica">
+    <div class="imya">datasets · наборы данных</div>
+    <table>
+      <tr><th>id</th><th>name</th><th>type_task</th><th>count</th><th>link</th></tr>
+      <tr><td>1</td><td>iris</td><td>classification</td><td>150</td><td>https:\\gobro</td></tr>
+      <tr><td>2</td><td>pirs</td><td>analize</td><td>210</td><td>https:\\brat</td></tr>
+      <tr><td>3</td><td>California Housing</td><td>regression</td><td>20640</td><td>https:\\fatwer</td></tr>
+      <tr><td>4</td><td>IMDB Reviews</td><td>nlp</td><td>50000</td><td>https:\\bawet</td></tr>
+      <tr><td>5</td><td>MNIST</td><td>cv</td><td>70000</td><td>https:\\hjkl</td></tr>
+      <tr><td>6</td><td>Titanic</td><td>classification</td><td>891</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+  <p><code>count</code> здесь значит число строк в наборе данных, а <code>type_task</code> тип задачи: <code>nlp</code> работа с текстом, <code>cv</code> с картинками.</p>
+
+  <div class="tablica">
+    <div class="imya">models · модели</div>
+    <table>
+      <tr><th>id</th><th>name</th><th>framework</th></tr>
+      <tr><td>1</td><td>Logisticregression</td><td>sklearn</td></tr>
+      <tr><td>2</td><td>RandomForest</td><td>sklearn</td></tr>
+      <tr><td>3</td><td>Resnet</td><td>pytorch</td></tr>
+      <tr><td>4</td><td>rubert-tiny2</td><td>pytorch</td></tr>
+      <tr><td>5</td><td>CatBoost</td><td>catboost</td></tr>
+    </table>
+  </div>
+
+  <div class="tablica">
+    <div class="imya">experiments · запуски</div>
+    <table>
+      <tr><th>id</th><th>researcher_id</th><th>dataset_id</th><th>model_id</th><th>created_at</th><th>count_apoh</th><th>status</th></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>2026-09-20 18:00</td><td>1</td><td>done</td></tr>
+      <tr><td>2</td><td>1</td><td>1</td><td>3</td><td>2026-09-21 19:30</td><td class="null">NULL</td><td>done</td></tr>
+      <tr><td>3</td><td>2</td><td>2</td><td>2</td><td>2026-09-22 10:15</td><td>1</td><td>done</td></tr>
+      <tr><td>4</td><td>3</td><td>3</td><td>3</td><td>2026-09-23 12:00</td><td>1</td><td>done</td></tr>
+      <tr><td>5</td><td>3</td><td>5</td><td>4</td><td>2026-09-24 14:40</td><td>5</td><td>done</td></tr>
+      <tr><td>6</td><td>1</td><td>4</td><td>4</td><td>2026-10-02 21:10</td><td>3</td><td>done</td></tr>
+      <tr><td>7</td><td>2</td><td>6</td><td>2</td><td>2026-10-05 16:45</td><td>1</td><td>failed</td></tr>
+      <tr><td>8</td><td>2</td><td>5</td><td>3</td><td>2026-10-11 23:20</td><td>10</td><td>running</td></tr>
+      <tr><td>9</td><td>3</td><td>1</td><td>1</td><td>2026-10-15 09:30</td><td>1</td><td>done</td></tr>
+    </table>
+  </div>
+  <p>Запуск это одно обучение модели. <code>researcher_id</code>, <code>dataset_id</code> и <code>model_id</code> хранят номер строки в другой таблице: запуск 5 сделала исследователь 3 (Иванова), на наборе 5 (MNIST), моделью 4 (rubert-tiny2). <code>count_apoh</code> число эпох, то есть сколько раз модель прошла по всему набору. <code>created_at</code> дата и время запуска. DBeaver покажет время ещё и с секундами, <code>2026-09-20 18:00:00.000</code>, здесь секунды убраны для краткости.</p>
+
+  <div class="tablica">
+    <div class="imya">metrics · оценки запусков</div>
+    <table>
+      <tr><th>id</th><th>experiments_id</th><th>name_metric</th><th>mean_metric</th></tr>
+      <tr><td>1</td><td>1</td><td>accuracy</td><td>0.787</td></tr>
+      <tr><td>2</td><td>1</td><td>f1</td><td>0.721</td></tr>
+      <tr><td>3</td><td>2</td><td>accuracy</td><td>0.835</td></tr>
+      <tr><td>4</td><td>2</td><td>f1</td><td>0.789</td></tr>
+      <tr><td>5</td><td>3</td><td>accuracy</td><td>0.960</td></tr>
+      <tr><td>6</td><td>3</td><td>f1</td><td>0.941</td></tr>
+      <tr><td>7</td><td>4</td><td>r2</td><td>0.812</td></tr>
+      <tr><td>8</td><td>5</td><td>accuracy</td><td>0.982</td></tr>
+      <tr><td>9</td><td>6</td><td>accuracy</td><td>0.874</td></tr>
+      <tr><td>10</td><td>6</td><td>f1</td><td>0.866</td></tr>
+      <tr><td>11</td><td>8</td><td>accuracy</td><td>0.991</td></tr>
+      <tr><td>12</td><td>9</td><td>accuracy</td><td>0.947</td></tr>
+    </table>
+  </div>
+  <p><code>experiments_id</code> номер запуска, к которому относится оценка. У запуска 1 две оценки: <code>accuracy</code> (доля верных ответов) и <code>f1</code>. Что они значат, сейчас не важно, это просто числа от 0 до 1.</p>
+
+  <div class="glavnoe">
+    <p>Все ответы в уроке посчитаны по этим таблицам. Если у тебя в базе другие строки (например, старая база на ноутбуке), ответы будут другими, и это не ошибка.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>ORDER BY: по убыванию</h2>
+    <p>Хотим увидеть наборы данных от самого большого к самому маленькому.</p>
+<pre><code class="sql">SELECT name, count
+FROM datasets
+ORDER BY count DESC;</code></pre>
+    <p><code>ORDER BY</code> значит «упорядочить по». После него пишешь столбец, по которому сортировать.</p>
+    <p class="novoe"><code>DESC</code> сортирует по убыванию, от большего к меньшему. Без него база сортирует по возрастанию, это называется <code>ASC</code>, и его можно не писать.</p>
+    <div class="tablica"><table>
+      <tr><th>name</th><th>count</th></tr>
+      <tr><td>MNIST</td><td>70000</td></tr>
+      <tr><td>IMDB Reviews</td><td>50000</td></tr>
+      <tr><td>California Housing</td><td>20640</td></tr>
+      <tr><td>Titanic</td><td>891</td></tr>
+      <tr><td>pirs</td><td>210</td></tr>
+      <tr><td>iris</td><td>150</td></tr>
+    </table></div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Выведи имена исследователей по алфавиту. Кто будет первым и кто последним?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name
+FROM researchers
+ORDER BY full_name;</code></pre>
+          <p>Иванова Мария, Павленко Степан, Смирнов Олег, Щайхутдинов Азат. Первая Иванова, последний Щайхутдинов. Текст сортируется по буквам, как в словаре. <code>DESC</code> здесь не нужен: по алфавиту это и есть по возрастанию.</p>
+          <p class="oshibka">Написать <code>DESC</code> «на всякий случай». Получишь алфавит задом наперёд: Щайхутдинов первым. В задании 1 наоборот: «топ» значит от большего, и без <code>DESC</code> выйдет антитоп.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ORDER BY столбец DESC</code> от большего к меньшему.</p>
+      <p>Без <code>DESC</code> от меньшего к большему, текст по алфавиту.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>LIMIT: только первые несколько</h2>
+    <p>Это задание 1: топ по числовому полю. Из всего списка шага 1 нужны только три самых больших набора.</p>
+<pre><code class="sql">SELECT name, count
+FROM datasets
+ORDER BY count DESC
+LIMIT 3;</code></pre>
+    <p class="novoe"><code>LIMIT 3</code> оставляет первые три строки результата, остальные отбрасывает. Пишется в самом конце запроса, после <code>ORDER BY</code>.</p>
+    <p>Получится MNIST 70000, IMDB Reviews 50000, California Housing 20640. Сначала база сортирует, потом отрезает три сверху.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Две самые высокие оценки из таблицы <code>metrics</code>: номер запуска, название оценки и значение.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT experiments_id, name_metric, mean_metric
+FROM metrics
+ORDER BY mean_metric DESC
+LIMIT 2;</code></pre>
+          <div class="tablica"><table>
+            <tr><th>experiments_id</th><th>name_metric</th><th>mean_metric</th></tr>
+            <tr><td>8</td><td>accuracy</td><td>0.991</td></tr>
+            <tr><td>5</td><td>accuracy</td><td>0.982</td></tr>
+          </table></div>
+          <p class="oshibka">Написать <code>LIMIT 2</code> без <code>ORDER BY</code>. База выдаст две любые строки, обычно первые записанные (0.787 и 0.721), и это не топ. «Топ» всегда пара: сначала сортировка, потом <code>LIMIT</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Топ N: <code>ORDER BY столбец DESC LIMIT N</code></p>
+      <p><code>LIMIT</code> последним, без сортировки он берёт случайные строки.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>BETWEEN: число в промежутке</h2>
+    <p>Это задание 2. Нужны наборы данных, в которых от 200 до 21000 строк.</p>
+<pre><code class="sql">SELECT name, count
+FROM datasets
+WHERE count BETWEEN 200 AND 21000
+ORDER BY count;</code></pre>
+    <p class="novoe"><code>x BETWEEN a AND b</code> значит «x от a до b», <b>обе границы включены</b>. Это то же самое, что <code>x &gt;= a AND x &lt;= b</code>, только короче. <code>AND</code> значит «и»: должны выполниться оба условия.</p>
+    <p>Подходят pirs 210, Titanic 891 и California Housing 20640. iris с 150 меньше 200, IMDB и MNIST больше 21000.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие оценки в <code>metrics</code> лежат от 0.8 до 0.9? Сначала найди их глазами в таблице выше, потом напиши запрос.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT experiments_id, name_metric, mean_metric
+FROM metrics
+WHERE mean_metric BETWEEN 0.8 AND 0.9;</code></pre>
+          <p>Четыре строки: 0.835 (запуск 2), 0.812 (запуск 4), 0.874 и 0.866 (запуск 6). 0.789 чуть меньше 0.8 и не попадает.</p>
+          <p class="oshibka">Перепутать границы: <code>BETWEEN 0.9 AND 0.8</code>. Ошибки база не покажет, просто вернёт пусто: число не может быть одновременно не меньше 0.9 и не больше 0.8. Меньшая граница всегда первая.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WHERE x BETWEEN a AND b</code>, обе границы входят.</p>
+      <p>Сначала меньшая граница, потом большая.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>Диапазон дат: ловушка со временем</h2>
+    <p>Задание 2 можно делать и по дате. Хотим запуски с 1 по 11 октября включительно.</p>
+<pre><code class="sql">SELECT id, created_at
+FROM experiments
+WHERE created_at BETWEEN '2026-10-01' AND '2026-10-11';</code></pre>
+    <p>База вернёт запуски 6 и 7. А запуск 8 от 11 октября пропал, хотя 11-е мы просили включить.</p>
+    <p class="novoe"><code>created_at</code> у тебя <code>TIMESTAMP</code>, то есть дата вместе со временем. Дата без времени <code>'2026-10-11'</code> для базы значит 11 октября <b>в 00:00</b>, самое начало дня. Запуск 8 был в 23:20, это позже границы.</p>
+    <p>Надёжный способ: «не раньше начала первого дня и <b>строго раньше</b> начала следующего за последним».</p>
+<pre><code class="sql">SELECT id, created_at
+FROM experiments
+WHERE created_at &gt;= '2026-10-01'
+  AND created_at &lt;  '2026-10-12';</code></pre>
+    <p>Теперь запуски 6, 7 и 8.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Все запуски сентября. Напиши запрос надёжным способом. Сколько строк?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id, created_at
+FROM experiments
+WHERE created_at &gt;= '2026-09-01'
+  AND created_at &lt;  '2026-10-01';</code></pre>
+          <p>Пять строк, запуски 1–5. Граница «меньше 1 октября» сама включает весь день 30 сентября до последней секунды.</p>
+          <p class="oshibka">Написать <code>&lt;= '2026-09-30'</code>. Сейчас ответ случайно верный, потому что 30-го запусков нет. Но запуск 30 сентября в 15:00 такой запрос потеряет, как потерял запуск 8 выше.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Дата со временем: <code>&gt;= 'первый день' AND &lt; 'день после последнего'</code>.</p>
+      <p><code>'2026-10-11'</code> это 11.10 в 00:00, а не весь день.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>IN: значение из списка</h2>
+    <p>Это задание 3. Нужны наборы данных для текста или для картинок, то есть с типом <code>nlp</code> или <code>cv</code>.</p>
+<pre><code class="sql">SELECT name, type_task
+FROM datasets
+WHERE type_task IN ('nlp', 'cv');</code></pre>
+    <p class="novoe"><code>x IN ('a', 'b')</code> значит «x равен одному из значений в скобках». Это короче цепочки <code>type_task = 'nlp' OR type_task = 'cv'</code>, а ответ тот же. <code>OR</code> значит «или».</p>
+    <p>Получится IMDB Reviews (nlp) и MNIST (cv).</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Запуски, которые не закончились нормально: статус <code>failed</code> (упал) или <code>running</code> (ещё идёт).
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id, status
+FROM experiments
+WHERE status IN ('failed', 'running');</code></pre>
+          <p>Две строки: запуск 7 <code>failed</code> и запуск 8 <code>running</code>.</p>
+          <p class="oshibka">Взять весь список в одни кавычки: <code>IN ('failed, running')</code>. Тогда в скобках одно значение, текст «failed, running» целиком, и такого статуса нет ни у кого. Ответ пустой. Каждое значение в свои кавычки, между ними запятая.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>WHERE x IN ('a', 'b', 'c')</code> вместо цепочки <code>OR</code>.</p>
+      <p>Каждое значение в своих кавычках.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>LIKE: поиск по куску текста</h2>
+    <p>Это задание 4. Знак <code>=</code> находит текст, только если он совпал целиком. А если нужно «начинается на R» или «содержит слово»?</p>
+<pre><code class="sql">SELECT name
+FROM models
+WHERE name LIKE 'R%';</code></pre>
+    <p class="novoe"><code>LIKE</code> сравнивает текст с шаблоном. В шаблоне знак <code>%</code> значит «тут любой кусок текста, хоть пустой». <code>'R%'</code> читается «R, а дальше что угодно».</p>
+    <p>Результат: RandomForest, Resnet. Ещё два шаблона на наборах данных:</p>
+    <ul>
+      <li><code>LIKE '%s'</code> «что угодно, а в конце s»: iris, pirs, IMDB Reviews;</li>
+      <li><code>LIKE '%Housing%'</code> «где-то внутри есть Housing»: California Housing.</li>
+    </ul>
+    <p>Есть второй знак, <code>_</code>: ровно один любой символ. <code>LIKE '_NIST'</code> найдёт MNIST, потому что перед NIST одна буква.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Найди исследователя, у которого в <code>full_name</code> есть слово «Степан».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT full_name
+FROM researchers
+WHERE full_name LIKE '%Степан%';</code></pre>
+          <p>Павленко Степан. <code>%</code> нужен с обеих сторон: перед именем стоит фамилия.</p>
+          <p class="oshibka">Забыть <code>%</code>: <code>LIKE 'Степан'</code>. Без знаков шаблон работает как <code>=</code> и ищет строку, равную «Степан» целиком. Такой нет, ответ пустой.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>LIKE 'А%'</code> начинается, <code>'%а'</code> кончается, <code>'%а%'</code> содержит.</p>
+      <p><code>%</code> любой кусок, <code>_</code> ровно один символ.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>ILIKE: без разницы, большая буква или маленькая</h2>
+    <p>Вернёмся к шагу 6. Модель <code>rubert-tiny2</code> тоже начинается на r, но запрос <code>LIKE 'R%'</code> её не нашёл. В PostgreSQL <code>LIKE</code> различает большие и маленькие буквы: R и r для него разные.</p>
+<pre><code class="sql">SELECT name
+FROM models
+WHERE name ILIKE 'r%';</code></pre>
+    <p class="novoe"><code>ILIKE</code> работает как <code>LIKE</code>, но не различает большие и маленькие буквы. Теперь ответ RandomForest, Resnet и rubert-tiny2.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие наборы данных найдёт <code>name LIKE '%m%'</code>, а какие <code>name ILIKE '%m%'</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>LIKE '%m%'</code> не найдёт ничего: маленькой m нет ни в одном названии. <code>ILIKE '%m%'</code> найдёт IMDB Reviews и MNIST, у них большая M.</p>
+          <p class="oshibka">Думать, что пустой ответ значит «запрос сломан». Запрос верный, просто <code>LIKE</code> строго отличает большие буквы от маленьких. Если ищешь по имени, которое люди пишут как попало, бери <code>ILIKE</code>. В MySQL <code>ILIKE</code> нет, там <code>LIKE</code> и так не различает большие и маленькие буквы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>LIKE</code> различает R и r, <code>ILIKE</code> нет.</p>
+      <p>Знаки <code>%</code> и <code>_</code> у них одинаковые.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>IS NULL: найти пустые клетки</h2>
+    <p>Это задание 5. У Смирнова Олега не указана группа: в клетке <code>grp</code> пусто, это <code>NULL</code>. Найдём его.</p>
+<pre><code class="sql">SELECT full_name
+FROM researchers
+WHERE grp IS NULL;</code></pre>
+    <p class="novoe"><code>IS NULL</code> значит «клетка пустая». Обратное условие <code>IS NOT NULL</code>, «клетка заполнена». Через <code>=</code> пустоту искать нельзя: <code>grp = NULL</code> для базы не «да» и не «нет», а «неизвестно», и такой запрос всегда возвращает пусто.</p>
+    <p>Результат: Смирнов Олег.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У какого набора данных нет ссылки (<code>link</code>)? И сколько наборов со ссылкой?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT name FROM datasets WHERE link IS NULL;
+SELECT name FROM datasets WHERE link IS NOT NULL;</code></pre>
+          <p>Без ссылки Titanic. Со ссылкой пять наборов, все остальные.</p>
+          <p class="oshibka">Написать <code>link = ''</code>. Две кавычки подряд это пустой текст, но это не то же самое, что <code>NULL</code>. Пустой текст это «написали ничего», <code>NULL</code> это «вообще не написали». У Titanic именно <code>NULL</code>, и <code>= ''</code> его не найдёт.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Пустая клетка: <code>IS NULL</code>. Заполненная: <code>IS NOT NULL</code>.</p>
+      <p><code>= NULL</code> не находит никогда.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>JOIN: склеить две таблицы</h2>
+    <p>Это задание 6. В <code>experiments</code> вместо имени исследователя стоит номер, <code>researcher_id</code>. Хотим видеть рядом с запуском имя.</p>
+<pre><code class="sql">SELECT e.id, r.full_name, e.status
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+ORDER BY e.id;</code></pre>
+    <p>Здесь две новые записи, но они про одно. <code>experiments e</code> даёт таблице короткое имя <code>e</code>, чтобы дальше писать <code>e.status</code> вместо <code>experiments.status</code>. Точка значит «столбец из этой таблицы».</p>
+    <p class="novoe"><code>JOIN … ON условие</code> приклеивает к каждой строке левой таблицы строку правой, для которой условие верно. <code>ON r.id = e.researcher_id</code> читается «номер исследователя совпадает с номером, записанным в запуске».</p>
+    <p>Таблицу, на строки которой ссылаются по номеру, называют <b>справочником</b>. Здесь справочники <code>researchers</code>, <code>datasets</code> и <code>models</code>, а <code>experiments</code> на них ссылается.</p>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>full_name</th><th>status</th></tr>
+      <tr><td>1</td><td>Павленко Степан</td><td>done</td></tr>
+      <tr><td>2</td><td>Павленко Степан</td><td>done</td></tr>
+      <tr><td>3</td><td>Щайхутдинов Азат</td><td>done</td></tr>
+      <tr><td>4</td><td>Иванова Мария</td><td>done</td></tr>
+      <tr><td>5</td><td>Иванова Мария</td><td>done</td></tr>
+      <tr><td>6</td><td>Павленко Степан</td><td>done</td></tr>
+      <tr><td>7</td><td>Щайхутдинов Азат</td><td>failed</td></tr>
+      <tr><td>8</td><td>Щайхутдинов Азат</td><td>running</td></tr>
+      <tr><td>9</td><td>Иванова Мария</td><td>done</td></tr>
+    </table></div>
+    <p>Девять строк, по одной на запуск. <code>ORDER BY e.id</code> стоит, чтобы строки шли по номерам: без него база отдаёт их как лежат на диске, и запуск 2 может оказаться в конце. Смирнова Олега нет: у него ни одного запуска, приклеить не к чему. Как его не терять, разобрано в уроке <a href="bd-left-join-group-by.html">про LEFT JOIN</a>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для каждого запуска выведи его номер и название набора данных. Какой набор у запуска 7?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT e.id, d.name
+FROM experiments e
+JOIN datasets d ON d.id = e.dataset_id
+ORDER BY e.id;</code></pre>
+          <p>Девять строк: 1 iris, 2 iris, 3 pirs, 4 California Housing, 5 MNIST, 6 IMDB Reviews, 7 Titanic, 8 MNIST, 9 iris. У запуска 7 Titanic.</p>
+          <p class="oshibka">Написать <code>ON d.id = e.id</code>, то есть номер набора приравнять к номеру запуска. Ошибки база не покажет, но склеит чепуху: запуску 2 достанется pirs, запуску 6 Titanic, а запуски 7–9 пропадут, наборов с такими номерами нет. В <code>ON</code> всегда «номер в справочнике = столбец со ссылкой на него», здесь <code>e.dataset_id</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>FROM a JOIN b ON b.id = a.b_id</code></p>
+      <p>В <code>ON</code> ключ справочника равен столбцу-ссылке, а не <code>id</code> основной таблицы.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>JOIN трёх таблиц</h2>
+    <p>Это задание 7. Хотим видеть в одной строке: кто запускал, какой моделью и когда.</p>
+<pre><code class="sql">SELECT r.full_name, m.name AS model, e.created_at
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+JOIN models m      ON m.id = e.model_id
+ORDER BY e.created_at;</code></pre>
+    <p class="novoe">После первого <code>JOIN</code> можно писать второй. Каждый приклеивает ещё одну таблицу к тому, что уже склеено, со своим условием <code>ON</code>. <code>AS model</code> переименовывает столбец в ответе, чтобы не было двух столбцов с похожими именами.</p>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>model</th><th>created_at</th></tr>
+      <tr><td>Павленко Степан</td><td>Logisticregression</td><td>2026-09-20 18:00</td></tr>
+      <tr><td>Павленко Степан</td><td>Resnet</td><td>2026-09-21 19:30</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>RandomForest</td><td>2026-09-22 10:15</td></tr>
+      <tr><td>Иванова Мария</td><td>Resnet</td><td>2026-09-23 12:00</td></tr>
+      <tr><td>Иванова Мария</td><td>rubert-tiny2</td><td>2026-09-24 14:40</td></tr>
+      <tr><td>Павленко Степан</td><td>rubert-tiny2</td><td>2026-10-02 21:10</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>RandomForest</td><td>2026-10-05 16:45</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>Resnet</td><td>2026-10-11 23:20</td></tr>
+      <tr><td>Иванова Мария</td><td>Logisticregression</td><td>2026-10-15 09:30</td></tr>
+    </table></div>
+    <p>CatBoost в ответе нет: его ни разу не запускали.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Все оценки <code>accuracy</code> с названием набора данных, от лучшей к худшей. Подсказка: от <code>metrics</code> к <code>experiments</code> через <code>experiments_id</code>, от <code>experiments</code> к <code>datasets</code> через <code>dataset_id</code>. <code>WHERE</code> пишется после всех <code>JOIN</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT d.name, mt.mean_metric
+FROM metrics mt
+JOIN experiments e ON e.id = mt.experiments_id
+JOIN datasets d    ON d.id = e.dataset_id
+WHERE mt.name_metric = 'accuracy'
+ORDER BY mt.mean_metric DESC;</code></pre>
+          <p>Семь строк: MNIST 0.991, MNIST 0.982, pirs 0.960, iris 0.947, IMDB Reviews 0.874, iris 0.835, iris 0.787.</p>
+          <p class="oshibka">Написать в <code>SELECT</code> просто <code>id</code>. У всех трёх таблиц есть столбец <code>id</code>, и база ответит <code>column reference "id" is ambiguous</code>, то есть «непонятно, чей id». Когда таблиц несколько, всегда пиши, чей столбец: <code>e.id</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>FROM a JOIN b ON … JOIN c ON …</code>, у каждого <code>JOIN</code> своё <code>ON</code>.</p>
+      <p>Порядок частей: <code>SELECT … FROM … JOIN … WHERE … ORDER BY … LIMIT</code>.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на самостоятельную 2</h2>
+    <ul>
+      <li>Задание 1, топ по числу: шаги 1–2.</li>
+      <li>Задание 2, диапазон: шаг 3 для чисел, шаг 4 для дат.</li>
+      <li>Задание 3, список значений: шаг 5.</li>
+      <li>Задание 4, поиск по шаблону: шаги 6–7.</li>
+      <li>Задание 5, пустые значения: шаг 8.</li>
+      <li>Задание 6, две таблицы: шаг 9. Задание 7, три таблицы: шаг 10.</li>
+    </ul>
+    <p>Запросы для сдачи бери не из урока, а придумай свои похожие: другой столбец, другая граница, другой шаблон. Над каждым напиши комментарий <code>-- Задание N. что ищем</code>. Дальше задания 8–11 в уроке <a href="bd-left-join-group-by.html">«LEFT JOIN и GROUP BY»</a>, 12, 13 и 15 в уроке <a href="bd-case-daty.html">«CASE и даты»</a>.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: сортировка, фильтры и JOIN">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач на твоей базе. Ответов здесь нет: впиши запросы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Три запуска с самым большим числом эпох (<code>count_apoh</code>): номер запуска и число эпох. У запуска 2 эпохи не записаны, посмотри, куда он встанет при <code>DESC</code>.
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Запуски с 20 по 23 сентября, причём весь день 23-го тоже входит. Сколько их?
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Модели, у которых фреймворк <code>sklearn</code> или <code>catboost</code>. Без <code>OR</code>.
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Не запуская, скажи, что выдаст этот запрос и почему. Как его исправить?
+<pre><code class="sql">SELECT full_name
+FROM researchers
+WHERE grp = NULL;</code></pre>
+      <textarea name="z4" placeholder="Что выдаст, почему, как исправить" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Для каждого запуска со статусом <code>done</code>: имя исследователя и название набора данных. Три таблицы. Сколько строк вышло?
+      <textarea name="z5" placeholder="SELECT …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-left-join-group-by.html">Дальше: LEFT JOIN и GROUP BY →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>INSERT, UPDATE, DELETE — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-izmenenie-dannyh">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · INSERT, UPDATE, DELETE</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Добавить, поправить, удалить: INSERT, UPDATE, DELETE</h1>
+  <p class="tiho">Базы данных · лекция 4 от 13.10, домашка 4 · около 50 минут</p>
+
+  <p>До сих пор ты только читал базу через <code>SELECT</code>. Здесь три команды, которые её меняют: <code>INSERT</code> добавляет строки, <code>UPDATE</code> правит, <code>DELETE</code> удаляет. Всё на твоей базе <code>ml_tracker</code>, а после каждой правки проверяем результат через <code>SELECT … WHERE</code>. Ровно это и просят в домашке 4.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Рамку «Главное из шага» перепиши в тетрадь. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <div class="glavnoe">
+    <p>Важно: эти команды меняют базу по-настоящему. На этой же базе ты делаешь самостоятельную 2, и чужие строки испортят её ответы. Поэтому в уроке каждая правка идёт внутри пробы, которая потом всё отменяет. Как она устроена, в шаге 1.</p>
+  </div>
+
+  <h2>Твоя база</h2>
+  <p>Те же пять таблиц, что в уроке <a href="bd-filtry-join.html">«Сортировка, фильтры и JOIN»</a>. Здесь коротко, только то, что понадобится.</p>
+
+  <div class="tablica">
+    <div class="imya">researchers · исследователи</div>
+    <table>
+      <tr><th>id</th><th>full_name</th><th>email</th><th>grp</th></tr>
+      <tr><td>1</td><td>Павленко Степан</td><td>stepan@urfu.ru</td><td>РИ-250932</td></tr>
+      <tr><td>2</td><td>Щайхутдинов Азат</td><td>azat@urfu.ru</td><td>РИ-250932</td></tr>
+      <tr><td>3</td><td>Иванова Мария</td><td>maria@urfu.ru</td><td>РИ-250931</td></tr>
+      <tr><td>4</td><td>Смирнов Олег</td><td>oleg@urfu.ru</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+  <p>Ещё есть столбец <code>created_at</code>, когда человека завели. <code>email</code> помечен <code>UNIQUE</code>: двух одинаковых почт база не пустит.</p>
+
+  <div class="tablica">
+    <div class="imya">datasets · наборы данных</div>
+    <table>
+      <tr><th>id</th><th>name</th><th>type_task</th><th>count</th><th>link</th></tr>
+      <tr><td>1</td><td>iris</td><td>classification</td><td>150</td><td>https:\\gobro</td></tr>
+      <tr><td>2</td><td>pirs</td><td>analize</td><td>210</td><td>https:\\brat</td></tr>
+      <tr><td>3</td><td>California Housing</td><td>regression</td><td>20640</td><td>https:\\fatwer</td></tr>
+      <tr><td>4</td><td>IMDB Reviews</td><td>nlp</td><td>50000</td><td>https:\\bawet</td></tr>
+      <tr><td>5</td><td>MNIST</td><td>cv</td><td>70000</td><td>https:\\hjkl</td></tr>
+      <tr><td>6</td><td>Titanic</td><td>classification</td><td>891</td><td class="null">NULL</td></tr>
+    </table>
+  </div>
+
+  <div class="tablica">
+    <div class="imya">models · модели</div>
+    <table>
+      <tr><th>id</th><th>name</th><th>framework</th><th>countpar</th></tr>
+      <tr><td>1</td><td>Logisticregression</td><td>sklearn</td><td>0.01</td></tr>
+      <tr><td>2</td><td>RandomForest</td><td>sklearn</td><td>0.01</td></tr>
+      <tr><td>3</td><td>Resnet</td><td>pytorch</td><td>11.70</td></tr>
+      <tr><td>4</td><td>rubert-tiny2</td><td>pytorch</td><td>29.40</td></tr>
+      <tr><td>5</td><td>CatBoost</td><td>catboost</td><td>0.50</td></tr>
+    </table>
+  </div>
+
+  <div class="tablica">
+    <div class="imya">experiments · запуски</div>
+    <table>
+      <tr><th>id</th><th>researcher_id</th><th>dataset_id</th><th>model_id</th><th>count_apoh</th><th>status</th></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>done</td></tr>
+      <tr><td>2</td><td>1</td><td>1</td><td>3</td><td class="null">NULL</td><td>done</td></tr>
+      <tr><td>3</td><td>2</td><td>2</td><td>2</td><td>1</td><td>done</td></tr>
+      <tr><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td><td>done</td></tr>
+      <tr><td>5</td><td>3</td><td>5</td><td>4</td><td>5</td><td>done</td></tr>
+      <tr><td>6</td><td>1</td><td>4</td><td>4</td><td>3</td><td>done</td></tr>
+      <tr><td>7</td><td>2</td><td>6</td><td>2</td><td>1</td><td>failed</td></tr>
+      <tr><td>8</td><td>2</td><td>5</td><td>3</td><td>10</td><td>running</td></tr>
+      <tr><td>9</td><td>3</td><td>1</td><td>1</td><td>1</td><td>done</td></tr>
+    </table>
+  </div>
+  <p>Ещё есть <code>created_at</code>, дата и время запуска. У <code>count_apoh</code> (число эпох) стоит правило <code>CHECK</code>: от 1 до 1000, другое число база не примет.</p>
+
+  <div class="tablica">
+    <div class="imya">metrics · оценки запусков</div>
+    <table>
+      <tr><th>id</th><th>experiments_id</th><th>name_metric</th><th>mean_metric</th></tr>
+      <tr><td>1</td><td>1</td><td>accuracy</td><td>0.787</td></tr>
+      <tr><td>2</td><td>1</td><td>f1</td><td>0.721</td></tr>
+      <tr><td>3</td><td>2</td><td>accuracy</td><td>0.835</td></tr>
+      <tr><td>4</td><td>2</td><td>f1</td><td>0.789</td></tr>
+      <tr><td>5</td><td>3</td><td>accuracy</td><td>0.960</td></tr>
+      <tr><td>6</td><td>3</td><td>f1</td><td>0.941</td></tr>
+      <tr><td>7</td><td>4</td><td>r2</td><td>0.812</td></tr>
+      <tr><td>8</td><td>5</td><td>accuracy</td><td>0.982</td></tr>
+      <tr><td>9</td><td>6</td><td>accuracy</td><td>0.874</td></tr>
+      <tr><td>10</td><td>6</td><td>f1</td><td>0.866</td></tr>
+      <tr><td>11</td><td>8</td><td>accuracy</td><td>0.991</td></tr>
+      <tr><td>12</td><td>9</td><td>accuracy</td><td>0.947</td></tr>
+    </table>
+  </div>
+
+  <div class="glavnoe">
+    <p>Каждый шаг считает от этих таблиц, а не от прошлого шага: проба в конце всё отменяет, и база снова такая, как выше. Все запросы урока запущены на этой базе, ответы с ней сходятся.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>Проба: BEGIN и ROLLBACK</h2>
+    <p>Сначала учимся отменять, а потом уже менять. Вот проба целиком. Средняя строка добавляет исследователя, как она устроена, разберём в шаге 2. Сейчас смотри только на первую и последнюю.</p>
+<pre><code class="sql">BEGIN;
+INSERT INTO researchers (full_name, email, grp)
+VALUES ('Козлов Илья', 'ilya@urfu.ru', 'РИ-250932');
+SELECT COUNT(*) FROM researchers;   -- 5
+ROLLBACK;
+SELECT COUNT(*) FROM researchers;   -- 4</code></pre>
+    <p class="novoe"><b>Транзакция</b> это пачка команд, которая сохраняется вся целиком или не сохраняется вообще. <code>BEGIN</code> открывает пачку. <code>ROLLBACK</code> отменяет всё, что было после <code>BEGIN</code>. <code>COMMIT</code> вместо него сохранил бы.</p>
+    <p>Внутри пробы база ведёт себя по-настоящему: первый <code>COUNT</code> видит Козлова, исследователей 5. После <code>ROLLBACK</code> его как не бывало, снова 4.</p>
+    <p>Без <code>BEGIN</code> каждая команда сохраняется сразу, как только выполнилась. Отменить её потом нечем.</p>
+    <p>В DBeaver выделяй и запускай всю пробу разом, от <code>BEGIN</code> до <code>ROLLBACK</code>, сочетанием Alt+X (выполнить скрипт). Тогда результат каждого <code>SELECT</code> откроется своей вкладкой внизу.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Внутри одной пробы запустили <code>INSERT</code> Козлова, потом <code>SELECT COUNT(*)</code>, потом <code>ROLLBACK</code>, потом ещё раз <code>SELECT COUNT(*)</code>. А потом то же самое без строки <code>BEGIN</code>. Что покажет последний <code>COUNT</code> в каждом случае?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>С <code>BEGIN</code> будет 4: вставка отменилась. Без <code>BEGIN</code> будет 5, Козлов остался в базе навсегда. <code>ROLLBACK</code> без открытой пробы ничего не отменяет, база только предупредит: <code>there is no transaction in progress</code>, «пробы нет».</p>
+          <p class="oshibka">Думать, что <code>ROLLBACK</code> это «отмена последней команды», как Ctrl+Z. Он отменяет только то, что было после <code>BEGIN</code>. Нет <code>BEGIN</code>, нечего отменять. Если Козлов всё же попал в базу, удали его командой из шага 8 или верни базу целиком (как, в конце урока).</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>BEGIN; … ROLLBACK;</code> проба, всё отменится. <code>BEGIN; … COMMIT;</code> сохранить.</p>
+      <p>Без <code>BEGIN</code> команда сохраняется сразу.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>INSERT: добавить одну строку</h2>
+    <p>Это первая часть домашки. Добавляем нового исследователя и сразу проверяем, что он появился.</p>
+<pre><code class="sql">BEGIN;
+INSERT INTO researchers (full_name, email, grp)
+VALUES ('Козлов Илья', 'ilya@urfu.ru', 'РИ-250932');
+
+SELECT id, full_name, email, grp, created_at
+FROM researchers
+WHERE email = 'ilya@urfu.ru';
+ROLLBACK;</code></pre>
+    <p class="novoe"><code>INSERT INTO таблица (столбцы) VALUES (значения)</code> добавляет строку. В первых скобках столбцы, во вторых значения <b>в том же порядке</b>: первое значение уйдёт в первый столбец, второе во второй.</p>
+    <p><code>id</code> мы не писали. У него тип <code>SERIAL</code>, это счётчик: база сама даёт следующий номер. Последний был 4, Козлов получит 5. <code>created_at</code> тоже не писали, у него правило <code>DEFAULT now()</code>: «если не сказали, ставь текущее время».</p>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>full_name</th><th>email</th><th>grp</th><th>created_at</th></tr>
+      <tr><td>5</td><td>Козлов Илья</td><td>ilya@urfu.ru</td><td>РИ-250932</td><td>время, когда запустил</td></tr>
+    </table></div>
+    <p>Проверка ищет его по почте, а не по имени: почта уникальная, найдётся ровно одна строка. В DBeaver после <code>INSERT</code> внизу будет «Updated Rows: 1», то есть добавлена одна строка.</p>
+    <p>Номер может оказаться не 5, а 6 или 7. Счётчик <code>SERIAL</code> пробой не откатывается: каждый запуск пробы забирает номер насовсем. Это нормально, номера просто пропускаются.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Внутри пробы добавь модель <code>XGBoost</code>, фреймворк <code>xgboost</code>, параметров <code>0.3</code>, и проверь через <code>SELECT … WHERE</code>. Какой номер она получит на свежей базе?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">BEGIN;
+INSERT INTO models (name, framework, countpar)
+VALUES ('XGBoost', 'xgboost', 0.3);
+
+SELECT * FROM models WHERE name = 'XGBoost';
+ROLLBACK;</code></pre>
+          <p>Номер 6 (моделей было 5), <code>countpar</code> покажется как <code>0.30</code>: у столбца два знака после точки. Текст в одинарных кавычках, число без кавычек.</p>
+          <p class="oshibka">Вписать <code>id</code> руками: <code>INSERT INTO researchers (id, full_name, …) VALUES (1, …)</code>. Номер 1 уже занят Степаном, и база ответит <code>duplicate key value violates unique constraint "researchers_pkey"</code>, «такой ключ уже есть». <code>id</code> с <code>SERIAL</code> не пиши, его выдаёт база.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>INSERT INTO t (a, b) VALUES ('x', 1);</code> столбцы и значения по порядку.</p>
+      <p><code>id</code> и столбцы с <code>DEFAULT</code> можно не писать. Проверка: <code>SELECT … WHERE</code> по уникальному столбцу.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>INSERT нескольких строк одним запросом</h2>
+    <p>Добавим сразу два набора данных.</p>
+<pre><code class="sql">BEGIN;
+INSERT INTO datasets (name, type_task, count, link) VALUES
+  ('CIFAR-10', 'cv',  60000, 'https:\\cifar'),
+  ('SST-2',    'nlp', 67349, NULL);
+
+SELECT id, name, type_task, count, link
+FROM datasets
+WHERE id &gt; 6;
+ROLLBACK;</code></pre>
+    <p class="novoe">После <code>VALUES</code> можно перечислить несколько скобок через запятую, каждая скобка это одна строка. Так быстрее, чем писать <code>INSERT</code> на каждую: база делает всё за один раз.</p>
+    <p>У SST-2 ссылки нет, и мы пишем <code>NULL</code> без кавычек: клетка пустая. <code>'NULL'</code> в кавычках был бы текстом из четырёх букв.</p>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>name</th><th>type_task</th><th>count</th><th>link</th></tr>
+      <tr><td>7</td><td>CIFAR-10</td><td>cv</td><td>60000</td><td>https:\\cifar</td></tr>
+      <tr><td>8</td><td>SST-2</td><td>nlp</td><td>67349</td><td class="null">NULL</td></tr>
+    </table></div>
+    <p>Проверка <code>WHERE id &gt; 6</code> берёт всё, что новее Titanic, последнего старого набора.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Одним запросом добавь запуску 9 две оценки: <code>f1</code> 0.939 и <code>precision</code> 0.951. Проверь, выведя все оценки запуска 9. Сколько строк в проверке?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">BEGIN;
+INSERT INTO metrics (experiments_id, name_metric, mean_metric) VALUES
+  (9, 'f1',        0.939),
+  (9, 'precision', 0.951);
+
+SELECT id, experiments_id, name_metric, mean_metric
+FROM metrics
+WHERE experiments_id = 9;
+ROLLBACK;</code></pre>
+          <p>Три строки: старая <code>accuracy</code> 0.947 (номер 12) и две новые с номерами 13 и 14.</p>
+          <p class="oshibka">Забыть запятую между скобками: <code>VALUES ('a', …) ('b', …)</code>. База ответит <code>syntax error at or near "("</code>, «ошибка возле скобки», и не добавит ни одной строки. Запятая между строками есть, после последней строки её нет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>VALUES (…), (…), (…);</code> одна скобка, одна строка.</p>
+      <p>Пустая клетка: <code>NULL</code> без кавычек.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>INSERT со ссылками: база проверяет номера</h2>
+    <p>Запуск хранит номера исследователя, набора и модели. Степан (1) учит RandomForest (2) на MNIST (5), 7 эпох.</p>
+<pre><code class="sql">BEGIN;
+INSERT INTO experiments (researcher_id, dataset_id, model_id, count_apoh)
+VALUES (1, 5, 2, 7);
+
+SELECT id, researcher_id, dataset_id, model_id, count_apoh, status
+FROM experiments
+WHERE id = 10;
+ROLLBACK;</code></pre>
+    <p>Получится строка 10 со статусом <code>running</code>: у <code>status</code> стоит <code>DEFAULT 'running'</code>, а <code>created_at</code> возьмёт текущее время.</p>
+    <p class="novoe">Столбец <code>researcher_id</code> объявлен как <b>внешний ключ</b> (<code>REFERENCES researchers(id)</code>): в нём может стоять только номер, который есть в <code>researchers</code>. Попробуй исследователя 99:</p>
+<pre><code class="sql">INSERT INTO experiments (researcher_id, dataset_id, model_id, count_apoh)
+VALUES (99, 5, 2, 7);</code></pre>
+    <p>База откажет: <code>violates foreign key constraint "experiments_researcher_id_fkey"</code>, «нарушен внешний ключ». Исследователя 99 нет, ссылаться не на кого.</p>
+    <p>Если ошибка случилась внутри пробы, база дальше ничего не выполняет и на каждую команду отвечает <code>current transaction is aborted</code>, «проба сломана». Выход один: <code>ROLLBACK</code> и начать пробу заново.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что ответит база на запуск с нулём эпох: <code>VALUES (1, 5, 2, 0)</code>? Почему?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Откажет: <code>violates check constraint "experiments_count_apoh_check"</code>. У <code>count_apoh</code> правило <code>CHECK (count_apoh BETWEEN 1 AND 1000)</code>, а 0 меньше 1. Строка не добавится.</p>
+          <p class="oshibka">Читать ошибку как «база сломалась». Наоборот, это база тебя защитила: правила <code>CHECK</code> и внешних ключей ты сам поставил в самостоятельной 1. В названии в кавычках сказано, какое правило сработало: <code>count_apoh_check</code>, значит дело в числе эпох.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Внешний ключ: номер должен существовать в справочнике, иначе ошибка.</p>
+      <p>Ошибка внутри пробы ломает её: <code>ROLLBACK</code> и заново.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>UPDATE: поправить один столбец</h2>
+    <p>Это вторая часть домашки. Запуск 8 досчитался, ставим ему статус <code>done</code>.</p>
+<pre><code class="sql">BEGIN;
+UPDATE experiments
+SET status = 'done'
+WHERE id = 8;
+
+SELECT id, status FROM experiments WHERE id = 8;
+ROLLBACK;</code></pre>
+    <p class="novoe"><code>UPDATE таблица SET столбец = новое значение WHERE условие</code> меняет значение в строках, для которых условие верно. <code>SET</code> значит «поставить». <code>WHERE</code> работает так же, как в <code>SELECT</code>: выбирает строки.</p>
+    <p>Внизу DBeaver покажет «Updated Rows: 1», а проверка выведет <code>8 | done</code>. Проверка повторяет то же <code>WHERE</code>, что было в <code>UPDATE</code>: так видно именно ту строку, которую трогали.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У Titanic нет ссылки. Поставь ей <code>https:\\titanic</code> и проверь.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">BEGIN;
+UPDATE datasets
+SET link = 'https:\\titanic'
+WHERE name = 'Titanic';
+
+SELECT name, link FROM datasets WHERE name = 'Titanic';
+ROLLBACK;</code></pre>
+          <p>Updated Rows: 1, в проверке <code>Titanic | https:\\titanic</code>. Можно и <code>WHERE link IS NULL</code>: пустая ссылка только у Titanic.</p>
+          <p class="oshibka">Написать <code>WHERE link = NULL</code>. Ошибки не будет, но «Updated Rows: 0», не поменялось ничего. Пустоту ищут только через <code>IS NULL</code>, как в <a href="bd-filtry-join.html#shag-8">шаге 8 урока про фильтры</a>. Всегда смотри на число изменённых строк: 0 значит, что <code>WHERE</code> ничего не нашёл.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>UPDATE t SET столбец = значение WHERE условие;</code></p>
+      <p>Проверка: <code>SELECT</code> с тем же <code>WHERE</code>. Смотри на число Updated Rows.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>UPDATE: несколько столбцов и расчёт от старого значения</h2>
+    <p>Запуск 8 дообучили ещё на 5 эпох и закончили. Меняем два столбца сразу.</p>
+<pre><code class="sql">BEGIN;
+UPDATE experiments
+SET count_apoh = count_apoh + 5,
+    status     = 'done'
+WHERE id = 8;
+
+SELECT id, count_apoh, status FROM experiments WHERE id = 8;
+ROLLBACK;</code></pre>
+    <p class="novoe">В <code>SET</code> можно перечислить несколько столбцов <b>через запятую</b>. А справа от <code>=</code> может стоять расчёт со старым значением: <code>count_apoh + 5</code> значит «возьми, сколько было, и прибавь 5».</p>
+    <p>Было 10 эпох, стало 15, статус <code>done</code>. Проверка: <code>8 | 15 | done</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Всем запускам Ивановой Марии (её номер 3) прибавь одну эпоху. Сколько строк изменится и какие эпохи будут в проверке?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">BEGIN;
+UPDATE experiments
+SET count_apoh = count_apoh + 1
+WHERE researcher_id = 3;
+
+SELECT id, count_apoh FROM experiments
+WHERE researcher_id = 3
+ORDER BY id;
+ROLLBACK;</code></pre>
+          <p>Updated Rows: 3. Запуск 4: было 1, стало 2. Запуск 5: было 5, стало 6. Запуск 9: было 1, стало 2.</p>
+          <p class="oshibka">Соединить столбцы через <code>AND</code>, как в <code>WHERE</code>: <code>SET status = 'done' AND count_apoh = 5</code>. База решит, что ты кладёшь в <code>status</code> одно сложное условие, и ответит <code>invalid input syntax for type boolean: "done"</code>. В <code>SET</code> разделитель запятая, <code>AND</code> только в <code>WHERE</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>SET a = 1, b = 'x'</code> через запятую, не через <code>AND</code>.</p>
+      <p><code>SET a = a + 1</code> считает от старого значения.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>Сначала SELECT, потом правка</h2>
+    <p>Азат перевёлся в группу РИ-250931. Главная опасность <code>UPDATE</code> и <code>DELETE</code> в том, что без <code>WHERE</code> они меняют <b>все строки таблицы</b>, и база не переспросит.</p>
+<pre><code class="sql">UPDATE researchers SET grp = 'РИ-250931';   -- без WHERE: Updated Rows: 4</code></pre>
+    <p>Все четыре исследователя, включая Олега без группы, окажутся в РИ-250931. Чтобы так не вышло, порядок всегда один.</p>
+    <p class="novoe">Сначала пишешь <code>SELECT</code> с нужным <code>WHERE</code> и смотришь, какие строки попали. Потом меняешь начало запроса на <code>UPDATE … SET</code> или <code>DELETE</code>, а <code>WHERE</code> не трогаешь. Число в Updated Rows должно совпасть с числом строк в <code>SELECT</code>.</p>
+<pre><code class="sql">-- 1. смотрю, кого задену
+SELECT id, full_name, grp
+FROM researchers
+WHERE full_name LIKE 'Щайхутдинов%';        -- одна строка, Азат
+
+-- 2. то же WHERE, только начало другое
+BEGIN;
+UPDATE researchers
+SET grp = 'РИ-250931'
+WHERE full_name LIKE 'Щайхутдинов%';        -- Updated Rows: 1
+
+SELECT id, full_name, grp
+FROM researchers
+WHERE full_name LIKE 'Щайхутдинов%';        -- 2 | Щайхутдинов Азат | РИ-250931
+ROLLBACK;</code></pre>
+    <p>Одна строка в <code>SELECT</code>, одна изменена. Сходится, значит задели того, кого хотели.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Хотим удалить все оценки ниже 0.8. Напиши <code>SELECT</code>, который покажет, что удалится. Сколько строк и какие?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id, experiments_id, name_metric, mean_metric
+FROM metrics
+WHERE mean_metric &lt; 0.8;</code></pre>
+          <p>Три строки: номер 1 (accuracy 0.787), номер 2 (f1 0.721), номер 4 (f1 0.789). Их и удалим в следующем шаге, с этим же <code>WHERE</code>.</p>
+          <p class="oshibka">Написать <code>&lt;= 0.8</code> или <code>&lt; 0.80</code> и думать, что разницы нет. Здесь ответ тот же, оценки ровно 0.8 нет. Но «ниже 0.8» это строго меньше, <code>&lt;</code>. Если бы оценка 0.800 была, <code>&lt;=</code> удалил бы лишнюю.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Порядок: <code>SELECT … WHERE</code> → посмотрел → то же <code>WHERE</code> в <code>UPDATE</code>/<code>DELETE</code>.</p>
+      <p>Без <code>WHERE</code> меняются все строки таблицы.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>DELETE: удалить строки</h2>
+    <p>Это третья часть домашки. Удаляем оценки ниже 0.8, которые нашли в шаге 7.</p>
+<pre><code class="sql">BEGIN;
+DELETE FROM metrics
+WHERE mean_metric &lt; 0.8;                   -- Updated Rows: 3
+
+SELECT COUNT(*) FROM metrics WHERE mean_metric &lt; 0.8;   -- 0
+SELECT COUNT(*) FROM metrics;                             -- 9
+ROLLBACK;</code></pre>
+    <p class="novoe"><code>DELETE FROM таблица WHERE условие</code> удаляет целые строки, для которых условие верно. Столбцы не пишутся: строка уходит вся.</p>
+    <p>Проверка удаления наоборот: тот же <code>WHERE</code> должен вернуть 0 строк. А общий счёт показывает, что ушло ровно три: было 12, стало 9.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Удали модель CatBoost и проверь, сколько моделей осталось.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">BEGIN;
+DELETE FROM models WHERE name = 'CatBoost';   -- Updated Rows: 1
+SELECT COUNT(*) FROM models;                   -- 4
+ROLLBACK;</code></pre>
+          <p>Удалится одна строка, моделей станет 4. Получилось, потому что CatBoost ни разу не запускали и на неё никто не ссылается. Про то, что будет, если ссылаются, следующий шаг.</p>
+          <p class="oshibka">Написать по привычке от <code>SELECT</code>: <code>DELETE * FROM models …</code>. База ответит <code>syntax error at or near "*"</code>. Звёздочки в <code>DELETE</code> нет, он всегда удаляет строку целиком.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>DELETE FROM t WHERE условие;</code> без звёздочки и без столбцов.</p>
+      <p>Проверка: тот же <code>WHERE</code> в <code>SELECT</code> даёт 0 строк.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>DELETE и связи: каскад или отказ</h2>
+    <p>Удалим запуск 6. У него две оценки, номера 9 и 10.</p>
+<pre><code class="sql">BEGIN;
+DELETE FROM experiments WHERE id = 6;
+
+SELECT COUNT(*) FROM metrics WHERE experiments_id = 6;   -- 0
+SELECT COUNT(*) FROM metrics;                             -- 10
+ROLLBACK;</code></pre>
+    <p>Мы удаляли запуск, а пропали и его оценки: было 12, стало 10.</p>
+    <p class="novoe">У <code>metrics.experiments_id</code> стоит правило <code>ON DELETE CASCADE</code>, «при удалении каскадом». Удалили запуск, база сама удалила все оценки, которые на него ссылались. Оценка без запуска не имеет смысла.</p>
+    <p>У <code>experiments.researcher_id</code> такого правила нет. Попробуй удалить Степана, у которого есть запуски:</p>
+<pre><code class="sql">DELETE FROM researchers WHERE id = 1;</code></pre>
+    <p>База откажет: <code>violates foreign key constraint "experiments_researcher_id_fkey" on table "experiments"</code>. На Степана ссылаются запуски 1, 2 и 6, и без правила база удалять не даёт. А Олега (номер 4) удалить можно: запусков у него нет.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что ответит база на <code>DELETE FROM datasets WHERE name = 'Titanic';</code>? Как удалить Titanic, если очень надо?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Откажет: на Titanic ссылается запуск 7, ошибка про <code>experiments_dataset_id_fkey</code>. Удалять надо снизу вверх: сначала запуски на этом наборе, потом сам набор.</p>
+<pre><code class="sql">BEGIN;
+DELETE FROM experiments WHERE dataset_id = 6;   -- 1 строка, запуск 7
+DELETE FROM datasets WHERE name = 'Titanic';    -- 1 строка
+SELECT COUNT(*) FROM datasets;                  -- 5
+ROLLBACK;</code></pre>
+          <p class="oshibka">Удалять в обратном порядке, сначала набор. Будет та же ошибка внешнего ключа. Сначала то, что ссылается, потом то, на что ссылаются.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ON DELETE CASCADE</code>: удалил строку, ушли и ссылки на неё.</p>
+      <p>Без него на строку со ссылками ошибка. Удалять снизу вверх.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>UPSERT: вставь, а если уже есть, обнови</h2>
+    <p>Это было на лекции 13.10. Пришли данные: Азат, <code>azat@urfu.ru</code>, группа РИ-250931. Обычный <code>INSERT</code> упадёт с <code>duplicate key value violates unique constraint "researchers_email_key"</code>: такая почта уже есть.</p>
+<pre><code class="sql">BEGIN;
+INSERT INTO researchers (full_name, email, grp)
+VALUES ('Щайхутдинов Азат', 'azat@urfu.ru', 'РИ-250931')
+ON CONFLICT (email) DO UPDATE SET grp = EXCLUDED.grp;
+
+SELECT id, full_name, grp FROM researchers WHERE email = 'azat@urfu.ru';
+SELECT COUNT(*) FROM researchers;   -- 4, нового не добавилось
+ROLLBACK;</code></pre>
+    <p class="novoe"><code>ON CONFLICT (email)</code> значит «если строка с такой почтой уже есть». <code>DO UPDATE SET</code> говорит, что тогда поправить. <code>EXCLUDED</code> это та строка, которую мы пытались вставить: <code>EXCLUDED.grp</code> равно РИ-250931.</p>
+    <p>Проверка: <code>2 | Щайхутдинов Азат | РИ-250931</code>. Номер остался 2, строка та же, новой не появилось. В скобках после <code>ON CONFLICT</code> пишут столбец с <code>UNIQUE</code> или первичным ключом, иначе базе не с чем сравнивать.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что будет, если вместо <code>DO UPDATE SET …</code> написать <code>DO NOTHING</code>, а группу дать РИ-250999?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">INSERT INTO researchers (full_name, email, grp)
+VALUES ('Щайхутдинов Азат', 'azat@urfu.ru', 'РИ-250999')
+ON CONFLICT (email) DO NOTHING;</code></pre>
+          <p>Ошибки не будет, но и ничего не поменяется: Updated Rows: 0, у Азата старая группа. <code>DO NOTHING</code> значит «есть такой, молча пропусти». Удобно, когда заливаешь данные повторно и дубли не нужны.</p>
+          <p class="oshibka">Написать <code>ON CONFLICT (full_name)</code>. Имя не помечено <code>UNIQUE</code>, и база ответит <code>there is no unique or exclusion constraint matching the ON CONFLICT specification</code>, «нет уникального правила под это». Конфликт бывает только по уникальному столбцу.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>INSERT … ON CONFLICT (уникальный столбец) DO UPDATE SET a = EXCLUDED.a;</code></p>
+      <p><code>DO NOTHING</code> пропустить дубль. <code>EXCLUDED</code> это вставляемая строка.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на домашку 4</h2>
+    <ul>
+      <li>INSERT: шаги 2–4. Добавь по строке в несколько своих таблиц и хотя бы раз несколько строк одним запросом.</li>
+      <li>UPDATE: шаги 5–6. Одна правка одного столбца и одна с расчётом от старого значения.</li>
+      <li>DELETE: шаги 8–9. Одно простое удаление и одно, где видно каскад.</li>
+      <li>Проверка: после каждой команды <code>SELECT</code> с тем же <code>WHERE</code>, порядок из шага 7.</li>
+    </ul>
+    <p>Для сдачи над каждой командой пиши комментарий <code>-- что делаю</code>, под ней проверку, и делай скрин результата проверки. Строки придумай свои, а не из урока: другой исследователь, другой набор, другое число.</p>
+    <p><b>Сначала сдай самостоятельную 2.</b> Домашку делай по-настоящему, без <code>ROLLBACK</code> (или с <code>COMMIT</code>), уже после неё: новые строки поменяют ответы самостоятельной.</p>
+    <p>Если база запуталась и хочется как было: в DBeaver по очереди запусти два файла базы, <code>1-baza-ml_tracker.sql</code> и потом <code>2-dopolnenie-pod-sr2.sql</code>. Первый удаляет все таблицы и создаёт заново, второй дописывает строки. После них база точно такая, как в начале урока.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: INSERT, UPDATE, DELETE">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач на твоей базе, каждую внутри пробы. Ответов здесь нет: впиши запросы и проверки в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Добавь набор данных <code>Fashion-MNIST</code>, тип <code>cv</code>, 70000 строк, без ссылки. Проверь через <code>SELECT … WHERE</code>. Какой номер он получил?
+      <textarea name="z1" placeholder="BEGIN; INSERT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Одним запросом добавь запуску 8 три оценки: <code>f1</code> 0.988, <code>precision</code> 0.990, <code>recall</code> 0.986. Проверь, выведя все оценки запуска 8. Сколько строк в проверке?
+      <textarea name="z2" placeholder="BEGIN; INSERT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Упавший запуск 7 перезапустили: статус <code>running</code> и на 2 эпохи больше, чем было. Одним <code>UPDATE</code>, потом проверка.
+      <textarea name="z3" placeholder="BEGIN; UPDATE …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Хотели переименовать фреймворк <code>sklearn</code> в <code>scikit-learn</code> и написали так. Сколько строк поменяется и что не так? Исправь и скажи, сколько строк должно поменяться.
+<pre><code class="sql">UPDATE models SET framework = 'scikit-learn';</code></pre>
+      <textarea name="z4" placeholder="Сколько поменяется, что не так, исправленный запрос" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Нужно удалить Иванову Марию. Что ответит база на прямой <code>DELETE</code>? В каком порядке удалять, чтобы получилось, и сколько оценок останется в <code>metrics</code> после этого?
+      <textarea name="z5" placeholder="Что ответит база, порядок удаления, сколько оценок" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-filtry-join.html">Сортировка, фильтры и JOIN</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

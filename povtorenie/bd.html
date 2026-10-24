@@ -22,13 +22,13 @@
   <h1>Базы данных: проверь себя</h1>
   <p class="tiho">Сначала ответь вслух, потом открой ответ и сверься.</p>
 
-  <h2>Основы: лекция 1 и твоя страница в тетради</h2>
+  <h2>Основы: лекция 1 и шпаргалка одной страницей</h2>
 
   <details class="vopros">
     <summary>1. Чем база данных отличается от СУБД?</summary>
     <div>
-      <p><b>База данных</b> — сами данные: таблицы, связанные между собой. <b>СУБД</b> (система управления базами данных) — программа, которая эти базы создаёт, хранит и выполняет запросы к ним: PostgreSQL, MySQL, SQLite.</p>
-      <p>Ты пишешь запрос на SQL, СУБД его выполняет и достаёт строки из базы. В DBeaver <code>ml_tracker</code> — это база, а PostgreSQL, к которому DBeaver подключён, — СУБД. Сам DBeaver ни то ни другое: это окно, через которое ты пишешь запросы.</p>
+      <p><b>База данных</b> хранит сами данные: таблицы, связанные между собой. <b>СУБД</b>, система управления базами данных, это программа, которая эти базы создаёт, хранит и выполняет запросы к ним: PostgreSQL, MySQL, SQLite.</p>
+      <p>Ты пишешь запрос на SQL, СУБД его выполняет и достаёт строки из базы. В DBeaver <code>ml_tracker</code> база, а PostgreSQL, к которому DBeaver подключён, СУБД. Сам DBeaver ни то ни другое: это окно, через которое ты пишешь запросы.</p>
     </div>
   </details>
 
@@ -36,18 +36,18 @@
     <summary>2. Какие три части у SQL и чем они отличаются?</summary>
     <div>
       <ul>
-        <li><b>DDL</b> (определение данных) меняет устройство таблиц: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>.</li>
-        <li><b>DML</b> (работа с данными) работает со строками: <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.</li>
-        <li><b>DCL</b> (управление доступом) раздаёт права: <code>GRANT</code>, <code>REVOKE</code>.</li>
+        <li><b>DDL</b>, определение данных, меняет устройство таблиц: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>.</li>
+        <li><b>DML</b>, работа с данными, работает со строками: <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.</li>
+        <li><b>DCL</b>, управление доступом, раздаёт права: <code>GRANT</code>, <code>REVOKE</code>.</li>
       </ul>
-      <p>Как запомнить: трогает устройство таблицы — DDL, строки — DML, права — DCL.</p>
+      <p>Как запомнить: трогаешь устройство таблицы, значит DDL. Трогаешь строки, значит DML. Раздаёшь права, значит DCL.</p>
     </div>
   </details>
 
   <details class="vopros">
     <summary>3. К какой части относятся ALTER TABLE и UPDATE? Почему к разным?</summary>
     <div>
-      <p><code>ALTER TABLE</code> — DDL: он меняет саму таблицу, например добавляет столбец. <code>UPDATE</code> — DML: таблица остаётся той же, меняются значения в строках.</p>
+      <p><code>ALTER TABLE</code> относится к DDL: он меняет саму таблицу, например добавляет столбец. <code>UPDATE</code> относится к DML: таблица остаётся той же, меняются значения в строках.</p>
       <p>Оба слова похожи на «изменить», поэтому их и путают. Спрашивай себя: меняется форма таблицы или её содержимое?</p>
     </div>
   </details>
@@ -55,8 +55,8 @@
   <details class="vopros">
     <summary>4. Что такое первичный ключ и внешний ключ?</summary>
     <div>
-      <p><b>Первичный ключ</b> — столбец, по которому строка отличается от всех остальных. Он не пустой и не повторяется, у таблицы он один. Обычно это <code>id</code>.</p>
-      <p><b>Внешний ключ</b> — столбец, значение которого обязано совпасть с первичным ключом строки в другой таблице. Так таблицы связываются. В уроке это <code>orders.student_id</code>, он ссылается на <code>students.id</code>. В твоей базе — <code>experiments.researcher_id</code>.</p>
+      <p><b>Первичный ключ</b> это столбец, по которому строка отличается от всех остальных. Он не пустой и не повторяется, у таблицы он один. Обычно это <code>id</code>.</p>
+      <p><b>Внешний ключ</b> это столбец, значение которого обязано совпасть с первичным ключом строки в другой таблице. Так таблицы связываются. В уроке это <code>orders.student_id</code>, он ссылается на <code>students.id</code>. В твоей базе <code>experiments.researcher_id</code>.</p>
     </div>
   </details>
 
@@ -66,13 +66,13 @@
       <ul>
         <li><b>Целостность сущностей</b>: первичный ключ не пустой и уникальный. Две строки с одним <code>id</code> база не пустит.</li>
         <li><b>Ссылочная</b>: внешний ключ указывает на существующую строку. Заказ студента номер 9, когда такого студента нет, не вставится.</li>
-        <li><b>Доменная</b>: значение из допустимых. Сюда входят правильный тип, <code>NOT NULL</code> (значение обязательно, пустым быть не может) и <code>CHECK</code> (своё условие). Например, <code>CHECK (price &gt; 0)</code> не пустит цену −50.</li>
+        <li><b>Доменная</b>: значение из допустимых. Сюда входят правильный тип, <code>NOT NULL</code> и <code>CHECK</code>. <code>NOT NULL</code> значит, что значение обязательно и пустым быть не может. <code>CHECK</code> проверяет своё условие. Например, <code>CHECK (price &gt; 0)</code> не пустит цену −50.</li>
       </ul>
     </div>
   </details>
 
   <details class="vopros">
-    <summary>6. Какая целостность нарушится: (а) студент с id = NULL; (б) заказ с student_id = 999, а такого студента нет; (в) цена −3 при CHECK (price &gt; 0)?</summary>
+    <summary>6. Какая целостность нарушится: (а) студент с id = NULL, (б) заказ с student_id = 999, а такого студента нет, (в) цена −3 при CHECK (price &gt; 0)?</summary>
     <div>
       <p>(а) целостность сущностей: первичный ключ не бывает пустым.</p>
       <p>(б) ссылочная: внешний ключ ссылается на строку, которой нет.</p>
@@ -87,8 +87,8 @@
   <details class="vopros">
     <summary>7. Какая таблица в запросе левая, а какая правая?</summary>
     <div>
-      <p>Левая — та, что после <code>FROM</code>, правая — та, что после <code>JOIN</code>. В <code>FROM students s LEFT JOIN orders o</code> левая <code>students</code>, правая <code>orders</code>.</p>
-      <p><code>LEFT JOIN</code> сохраняет все строки левой. Поменяешь таблицы местами — сохранится другая.</p>
+      <p>Левая стоит после <code>FROM</code>, правая после <code>JOIN</code>. В <code>FROM students s LEFT JOIN orders o</code> левая <code>students</code>, правая <code>orders</code>.</p>
+      <p><code>LEFT JOIN</code> сохраняет все строки левой. Поменяешь таблицы местами, и сохранится другая.</p>
     </div>
   </details>
 
@@ -151,7 +151,7 @@ END AS ocenka</code></pre>
   <details class="vopros">
     <summary>14. Веток WHEN несколько. Какая сработает? И что будет, если не подошла ни одна, а ELSE нет?</summary>
     <div>
-      <p>Первая сверху, где условие выполнилось, остальные база уже не смотрит. Поэтому ветки пишут от строгой к мягкой: 0.9 → 0.8 → 0.7. Не подошла ни одна и нет <code>ELSE</code> — в клетке будет <code>NULL</code>.</p>
+      <p>Первая сверху, где условие выполнилось, остальные база уже не смотрит. Поэтому ветки пишут от строгой к мягкой: 0.9 → 0.8 → 0.7. Если не подошла ни одна и нет <code>ELSE</code>, в клетке будет <code>NULL</code>.</p>
     </div>
   </details>
 
@@ -184,7 +184,113 @@ GROUP BY EXTRACT(MONTH FROM started_at);</code></pre>
     <summary>18. Чем ISODOW отличается от DOW? Как отобрать выходные?</summary>
     <div>
       <p><code>ISODOW</code>: понедельник 1, воскресенье 7. <code>DOW</code>: воскресенье 0, понедельник 1, суббота 6. Выходные: <code>EXTRACT(ISODOW FROM дата) IN (6, 7)</code>, а с <code>DOW</code> это <code>IN (0, 6)</code>.</p>
-      <p>Красиво показать дату: <code>TO_CHAR(дата, 'DD.MM.YYYY')</code>. Месяц в шаблоне — <code>MM</code>, а <code>MI</code> — минуты.</p>
+      <p>Красиво показать дату: <code>TO_CHAR(дата, 'DD.MM.YYYY')</code>. Месяц в шаблоне пишется <code>MM</code>, а <code>MI</code> значит минуты.</p>
+    </div>
+  </details>
+
+  <h2>После урока «База, ключи и ER-диаграмма»</h2>
+  <p>Пример везде твоя база <code>ml_tracker</code>: исследователи, наборы данных, модели, запуски, оценки.</p>
+
+  <details class="vopros">
+    <summary>19. Чем кардинальность отличается от модальности? Как прочитать researchers ||--o{ experiments?</summary>
+    <div>
+      <p>Кардинальность это сколько максимум: черта одна, лапка много. Модальность это сколько минимум: кружок может не быть, черта обязательно.</p>
+      <p>Связь читается с двух концов: у исследователя от нуля до многих запусков, у запуска ровно один исследователь. Внешний ключ лежит у лапки, в <code>experiments</code>, и раз исследователь обязателен, на нём <code>NOT NULL</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>20. Почему связь «многие ко многим» нельзя сделать одним внешним ключом? Что делают вместо?</summary>
+    <div>
+      <p>В клетке одно значение, а у каждой стороны много пар. Поставишь <code>dataset_id</code> в модели, у Resnet поместится один набор, а его запускали на трёх.</p>
+      <p>Делают таблицу-связку: по строке на пару и два внешних ключа. У тебя это <code>experiments</code>, пара «модель и набор». Свойство пары, например оценка студента за курс, лежит в связке.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>21. Как в таблицах сделать связь «один к одному»?</summary>
+    <div>
+      <p>Внешним ключом с правилом <code>UNIQUE</code>: <code>researcher_id INTEGER UNIQUE REFERENCES researchers(id)</code>. Без <code>UNIQUE</code> одному человеку можно выдать много строк, и связь на деле станет 1:N, что бы ни было нарисовано.</p>
+    </div>
+  </details>
+
+  <h2>После урока «Создание базы и таблиц»</h2>
+
+  <details class="vopros">
+    <summary>22. Что значит NUMERIC(6,3)? Поместится ли туда 1234.5, а 0.7875?</summary>
+    <div>
+      <p>Всего 6 цифр, из них 3 после точки, значит до точки 3. Самое большое 999.999. 1234.5 не поместится, ошибка <code>numeric field overflow</code>. 0.7875 поместится, но округлится до 0.788.</p>
+      <p>Деньги, баллы и метрики хранят в <code>NUMERIC</code>, а не в <code>REAL</code>: приближённый тип теряет точность при сложении.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>23. Пустит ли UNIQUE две строки, где в столбце NULL? Сработает ли DEFAULT, если в INSERT явно написать NULL?</summary>
+    <div>
+      <p>Пустит: два неизвестных база не считает равными. Чтобы поле было и обязательным, и без повторов, пишут <code>NOT NULL UNIQUE</code>.</p>
+      <p><code>DEFAULT</code> не сработает: он подставляется, только когда столбец в <code>INSERT</code> не упомянут. Явный <code>NULL</code> так и ляжет. Спасает <code>NOT NULL</code> рядом с <code>DEFAULT</code>. И ещё: <code>NULL</code> проходит любой <code>CHECK</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>24. В каком порядке создавать таблицы со ссылками? Почему ALTER TABLE researchers ALTER COLUMN grp SET NOT NULL не проходит?</summary>
+    <div>
+      <p>Сначала справочники, на которые ссылаются, потом таблицы, которые ссылаются: <code>researchers</code>, <code>datasets</code>, <code>models</code>, потом <code>experiments</code>, потом <code>metrics</code>. Вставлять данные в том же порядке.</p>
+      <p><code>SET NOT NULL</code> не проходит, потому что у Смирнова группа пустая. Новое правило база проверяет на всех старых строках. Сначала заполни пустоту через <code>UPDATE</code>, потом ставь правило.</p>
+    </div>
+  </details>
+
+  <h2>После урока «Подзапросы, WITH и множества»</h2>
+
+  <details class="vopros">
+    <summary>25. Почему NOT IN (подзапрос) иногда возвращает пусто, хотя подходящие строки есть? Чем заменить?</summary>
+    <div>
+      <p>Если в списке подзапроса есть <code>NULL</code>, сравнение с ним даёт «неизвестно», и условие никогда не становится верным. Пример: <code>grp NOT IN (SELECT grp FROM researchers WHERE id IN (3, 4))</code> пусто из-за группы Смирнова.</p>
+      <p>Замена: <code>NOT EXISTS</code> или условие <code>IS NOT NULL</code> внутри подзапроса.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>26. Что такое коррелированный подзапрос? Зачем внутри EXISTS пишут SELECT 1?</summary>
+    <div>
+<pre><code class="sql">SELECT e.id
+FROM experiments e
+WHERE NOT EXISTS (SELECT 1 FROM metrics m
+                  WHERE m.experiments_id = e.id);</code></pre>
+      <p>Коррелированный ссылается на столбец внешнего запроса, здесь <code>e.id</code>, и считается заново для каждой строки. Отдельно его не запустить. <code>EXISTS</code> проверяет только, есть ли хоть одна строка, что в ней, не важно, поэтому <code>SELECT 1</code>. Ответ здесь запуск 7.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>27. Чем WITH удобнее подзапроса в FROM? Чем UNION отличается от UNION ALL, а INTERSECT от EXCEPT?</summary>
+    <div>
+      <p><code>WITH</code> даёт подзапросу имя и ставит его наверх: запрос читается по шагам, на CTE можно сослаться несколько раз и из следующих CTE.</p>
+      <p><code>UNION</code> складывает ответы и убирает повторы, <code>UNION ALL</code> оставляет. <code>INTERSECT</code> оставляет строки, которые есть в обоих ответах, <code>EXCEPT</code> строки первого, которых нет во втором. Столбцов в обеих половинах поровну.</p>
+    </div>
+  </details>
+
+  <h2>После урока «Строковые функции»</h2>
+
+  <details class="vopros">
+    <summary>28. У Смирнова группа NULL. Что дадут full_name || ' ' || grp и CONCAT(full_name, ' ', grp)?</summary>
+    <div>
+      <p><code>||</code> даст <code>NULL</code> целиком: один пустой кусок портит всю склейку. <code>CONCAT</code> пропустит <code>NULL</code> и даст «Смирнов Олег » с пробелом в конце. Чтобы вместо пустоты было слово, <code>COALESCE(grp, 'без группы')</code>.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>29. Как достать из почты логин и домен?</summary>
+    <div>
+<pre><code class="sql">SUBSTRING(email FOR POSITION('@' IN email) - 1)  -- stepan
+SUBSTRING(email FROM POSITION('@' IN email))     -- @urfu.ru</code></pre>
+      <p><code>POSITION</code> находит номер символа @, счёт с 1. Короче в PostgreSQL: <code>SPLIT_PART(email, '@', 1)</code> и <code>SPLIT_PART(email, '@', 2)</code>, второй даст urfu.ru без @.</p>
+    </div>
+  </details>
+
+  <details class="vopros">
+    <summary>30. Что делают TRIM, LOWER и REPLACE? Что получится из LOWER(REPLACE(TRIM(' IMDB Reviews '), ' ', '_'))?</summary>
+    <div>
+      <p><code>TRIM</code> убирает пробелы по краям, <code>LOWER</code> делает буквы маленькими, <code>REPLACE</code> меняет все вхождения куска. Считается изнутри наружу: «IMDB Reviews», потом «IMDB_Reviews», потом <code>imdb_reviews</code>.</p>
     </div>
   </details>
 

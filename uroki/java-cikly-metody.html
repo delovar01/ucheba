@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Циклы и методы — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-cikly-metody">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Циклы и методы</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Циклы и статические методы</h1>
+  <p class="tiho">Java · лаба 6.10, слайды «Циклы. Статические методы» · под ПР2, срок 1.11 в 00:00 · около 60 минут</p>
+
+  <p>Второй урок по Java. Нужен первый, <a href="java-tipy-if.html">«Типы, формулы и if»</a>: переменные, Scanner и <code>if</code> здесь уже знакомы. Одиннадцать шагов. Шаги 1–6 под задания 1–3 ПР2, это циклы. Шаги 7–9 под задание 4, статические методы. Шаги 10–11 под задание 5: как развить программу ПР1.</p>
+  <p>Вариант ПР2 выдаёт тест на элеарне, попытка одна. Пройди его и сразу сохрани текст варианта, без него задачи не узнать.</p>
+  <p>Где написано «строки внутри <code>main</code>», каркас и <code>import</code> как в первом уроке. Как проходить: «сделай сам» решаешь до ответа, «Главное из шага» перечитываешь перед самостоятельной.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>for: повторить заданное число раз</h2>
+    <p>Хотим квадраты чисел от 1 до 5. Писать пять одинаковых строк не надо.</p>
+<pre><code>for (int i = 1; i &lt;= 5; i++) {
+    System.out.println(i + " в квадрате = " + i * i);
+}</code></pre>
+<pre><code>1 в квадрате = 1
+2 в квадрате = 4
+3 в квадрате = 9
+4 в квадрате = 16
+5 в квадрате = 25</code></pre>
+    <p class="novoe"><code>for (начало; условие; шаг) { тело }</code> повторяет тело, пока условие верно. Порядок: один раз выполняется начало <code>int i = 1</code>. Дальше по кругу: проверка <code>i &lt;= 5</code>, тело, шаг <code>i++</code>. Условие стало ложным, цикл кончился.</p>
+    <p><code>i++</code> значит «прибавить к i единицу». Переменная i называется счётчиком, она живёт только внутри цикла. Один проход тела называют итерацией.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Выведи числа от 10 до 0 через два: 10, 8, 6… Подсказка: <code>i -= 2</code> значит «уменьшить i на 2».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>for (int i = 10; i &gt;= 0; i -= 2) {
+    System.out.println(i);
+}</code></pre>
+          <p>Напечатает 10, 8, 6, 4, 2, 0, каждое на своей строке.</p>
+          <p class="oshibka">Оставить условие <code>i &lt;= 0</code> по привычке. При i = 10 оно сразу ложно, и тело не выполнится ни разу. Программа ничего не напечатает и не скажет об ошибке.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>for (int i = 1; i &lt;= n; i++)</code> повторяет тело n раз.</p>
+      <p>Условие проверяется перед каждым проходом. Ложно сразу, тело не выполнится.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>Накопитель: сумма в цикле</h2>
+    <p>Сумма чисел от 1 до 10.</p>
+<pre><code>int n = 10;
+int sum = 0;
+for (int i = 1; i &lt;= n; i++) {
+    sum += i;
+}
+System.out.println("Сумма: " + sum);</code></pre>
+<pre><code>Сумма: 55</code></pre>
+    <p class="novoe">Накопитель это переменная, заведённая до цикла, в которую каждый проход что-то добавляет. <code>sum += i</code> значит <code>sum = sum + i</code>. Так же работают <code>-=</code>, <code>*=</code>, <code>/=</code>.</p>
+    <p>Заводить <code>sum</code> внутри цикла нельзя: тогда на каждом проходе она создавалась бы заново с нулём.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Произведение чисел от 1 до 5. С чего начать накопитель?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int product = 1;
+for (int i = 1; i &lt;= 5; i++) {
+    product *= i;
+}
+System.out.println("Произведение: " + product);</code></pre>
+          <p>Напечатает <code>Произведение: 120</code>.</p>
+          <p class="oshibka">Начать с <code>product = 0</code>, как у суммы. Ноль, умноженный на что угодно, остаётся нулём, и программа напечатает <code>Произведение: 0</code>. Для суммы старт 0, для произведения 1.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Накопитель до цикла, в цикле <code>sum += i</code>.</p>
+      <p>Сумма с 0, произведение с 1.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>while: повторять, пока условие верно</h2>
+    <p>Сколько раз надо удвоить 1, чтобы стало больше 100? Число шагов заранее неизвестно, его и ищем.</p>
+<pre><code>int x = 1;
+int steps = 0;
+while (x &lt;= 100) {
+    x *= 2;
+    steps++;
+}
+System.out.println("Шагов: " + steps + ", число: " + x);</code></pre>
+<pre><code>Шагов: 7, число: 128</code></pre>
+    <p>Ход: 1, 2, 4, 8, 16, 32, 64, 128. После седьмого удвоения 128 больше 100, условие ложно, цикл кончился.</p>
+    <p class="novoe"><code>while (условие) { тело }</code> проверяет условие и, пока оно верно, выполняет тело. Счётчика в скобках нет: что-то в теле само должно со временем сделать условие ложным.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько цифр в числе 90517? Подсказка: <code>n /= 10</code> отрезает последнюю цифру, ведь деление целых отбрасывает дробь. Режем, пока число больше нуля.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int n = 90517;
+int count = 0;
+while (n &gt; 0) {
+    n /= 10;
+    count++;
+}
+System.out.println("Цифр: " + count);</code></pre>
+          <p><code>Цифр: 5</code>. Ход: 9051, 905, 90, 9, 0.</p>
+          <p class="oshibka">Не проверить край. При n = 0 условие сразу ложно, и программа напечатает <code>Цифр: 0</code>, хотя у нуля одна цифра. Как это починить, в шаге 5.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>while (условие) { … }</code>, когда шагов заранее не знаешь.</p>
+      <p>Тело должно двигать к выходу, иначе цикл бесконечный.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>Читать, пока не придёт стоп-число</h2>
+    <p>Пользователь вводит числа, ноль значит «конец». Сколько чисел будет, неизвестно. Особое значение, на котором цикл кончается, называется сигнальной меткой.</p>
+<pre><code>Scanner sc = new Scanner(System.in);
+System.out.println("Вводите числа, 0 конец:");
+int sum = 0;
+int x = sc.nextInt();
+while (x != 0) {
+    sum += x;
+    x = sc.nextInt();
+}
+System.out.println("Сумма: " + sum);</code></pre>
+    <p>Ввели <code>5 3 8 0</code>:</p>
+<pre><code>Вводите числа, 0 конец:
+Сумма: 16</code></pre>
+    <p class="novoe">Первое число читаем до цикла, следующее в самом конце тела. Тогда условие <code>x != 0</code> проверяет каждое новое число до того, как оно попадёт в сумму.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Вводятся числа, конец ввода <code>-1</code>. Посчитай, сколько чисел ввели, не считая −1. Что выйдет на <code>4 7 -2 9 -1</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int count = 0;
+int x = sc.nextInt();
+while (x != -1) {
+    count++;
+    x = sc.nextInt();
+}
+System.out.println("Чисел: " + count);</code></pre>
+          <p><code>Чисел: 4</code>. −2 обычное число, считается. Конец только на −1.</p>
+          <p class="oshibka">Читать новое число в начале тела, перед сложением. Тогда первое число, прочитанное до цикла, никуда не попадёт. На <code>5 3 8 0</code> такая программа напечатает <code>Сумма: 11</code> вместо 16, проверено.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Читаем до цикла, <code>while (x != метка)</code>, обработали, читаем следующее в конце тела.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>do-while: хотя бы один раз</h2>
+    <p>Просим число от 1 до 10 и спрашиваем снова, пока не введут подходящее. Спросить нужно точно хотя бы раз.</p>
+<pre><code>Scanner sc = new Scanner(System.in);
+int n;
+do {
+    System.out.println("Число от 1 до 10:");
+    n = sc.nextInt();
+} while (n &lt; 1 || n &gt; 10);
+System.out.println("Принято: " + n);</code></pre>
+    <p>Ввели <code>15</code>, потом <code>0</code>, потом <code>7</code>:</p>
+<pre><code>Число от 1 до 10:
+Число от 1 до 10:
+Число от 1 до 10:
+Принято: 7</code></pre>
+    <p class="novoe"><code>do { тело } while (условие);</code> сначала выполняет тело, потом проверяет условие. Значит, тело выполнится хотя бы один раз. У <code>while</code> условие проверяется до тела.</p>
+    <p><code>int n;</code> объявлена до цикла без значения: переменная, заведённая внутри фигурных скобок <code>do</code>, в условии после <code>while</code> уже не видна. Цифры числа 0 из шага 3 честно считаются через <code>do-while</code>: одна цифра.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает?
+<pre><code>int k = 5;
+do {
+    k++;
+} while (k &lt; 3);
+System.out.println(k);</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>6</code>. Тело выполнилось один раз, k стало 6, потом проверка 6 &lt; 3 ложна, выход. У обычного <code>while</code> с тем же условием тело не выполнилось бы, осталось бы 5.</p>
+          <p class="oshibka">Забыть <code>;</code> после <code>while (k &lt; 3)</code>. У <code>do-while</code> она обязательна, без неё программа не соберётся: <code>';' expected</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>do { … } while (условие);</code> тело хотя бы раз, точка с запятой в конце.</p>
+      <p>Удобно для «спросить, пока не введут нормальное».</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>Какой цикл под задачу</h2>
+    <p>Задания 1–3 ПР2 просят подобрать цикл под задачу. Вывод со слайдов курса:</p>
+    <div class="tablica"><table>
+      <tr><th>цикл</th><th>когда брать</th></tr>
+      <tr><td><code>for</code></td><td>число повторов известно до начала: от 1 до n, каждый символ строки, каждый элемент</td></tr>
+      <tr><td><code>while</code></td><td>число повторов неизвестно: до стоп-числа, пока число не станет нулём, пока не дойдёт до границы</td></tr>
+      <tr><td><code>do-while</code></td><td>тело нужно хотя бы раз: спросить ввод, а потом проверить</td></tr>
+    </table></div>
+    <p class="novoe">Вопрос для выбора: «знаю ли я до начала, сколько будет повторов?» Знаю, значит <code>for</code>. Не знаю, значит <code>while</code>. Не знаю, но один раз точно нужно, значит <code>do-while</code>.</p>
+    <p>Любую задачу можно решить любым циклом, программа заработает. Но за ответ «почему этот цикл» на сдаче спросят, и ответ по таблице сразу видно в коде.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой цикл взять для каждой задачи? а) Вывести таблицу умножения на 7 от 1 до 10. б) Сколько лет вклад 10 000 руб под 12 % будет расти до 20 000. в) Спрашивать пароль, пока не введут верный. г) Сумма чисел, которые вводят до слова «стоп».
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) <code>for</code>, ровно 10 повторов. б) <code>while</code>, лет заранее не знаем, крутим, пока сумма меньше 20 000. в) <code>do-while</code>, спросить нужно хотя бы раз. г) <code>while</code> с сигнальной меткой, как в шаге 4.</p>
+          <p class="oshibka">Взять <code>for</code> в задаче б с «примерным» числом лет, например 10. Если вклад дорастёт за 7 лет, цикл крутится лишние три года, а при меньшем проценте не успеет дорасти. Условие задачи говорит «до 20 000», значит и условие цикла про сумму, а не про годы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Знаю число повторов: <code>for</code>. Не знаю: <code>while</code>.</p>
+      <p>Хотя бы один раз: <code>do-while</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Статический метод: свой кусок кода с ответом</h2>
+    <p>Это задание 4 ПР2. Метод это кусок кода с именем, который можно вызвать сколько угодно раз и передать ему числа. Как <code>Math.sqrt</code>, только свой. Здесь целая программа: метод пишется рядом с <code>main</code>, внутри класса.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        double s1 = area(3, 4);
+        double s2 = area(2.5, 2);
+        System.out.println(s1);
+        System.out.println(s2);
+    }
+
+    static double area(double a, double b) {
+        return a * b;
+    }
+}</code></pre>
+<pre><code>12.0
+5.0</code></pre>
+    <p class="novoe"><code>static тип имя(параметры) { … return значение; }</code>. Тип перед именем говорит, что метод вернёт. Параметры это переменные, в которые при вызове попадут числа из скобок. <code>return</code> отдаёт ответ туда, откуда метод позвали, и заканчивает метод.</p>
+    <p>При вызове <code>area(3, 4)</code> в a попадает 3, в b попадает 4, метод возвращает 12.0, и это число кладётся в s1. Слово <code>static</code> пока просто пиши всегда, его смысл будет в теме про классы.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши метод <code>cube</code>, который возвращает куб целого числа. Что напечатает <code>System.out.println(cube(3) + cube(2));</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>static int cube(int n) {
+    return n * n * n;
+}</code></pre>
+          <p>Напечатает <code>35</code>: 27 + 8.</p>
+          <p class="oshibka">Посчитать и забыть <code>return</code>: <code>int c = n * n * n;</code> и всё. Метод обещал вернуть int, но не вернул, программа не соберётся: <code>missing return statement</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>static double имя(double a, double b) { return …; }</code> рядом с <code>main</code>.</p>
+      <p>Вызов <code>имя(3, 4)</code> подставляет числа в параметры по порядку.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>void: метод без ответа и досрочный выход</h2>
+    <p>Бывает, что метод должен что-то сделать, например напечатать, а возвращать нечего.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        stars(5);
+        stars(0);
+        stars(3);
+    }
+
+    static void stars(int n) {
+        if (n &lt;= 0) {
+            System.out.println("нечего рисовать");
+            return;
+        }
+        for (int i = 0; i &lt; n; i++) {
+            System.out.print("*");
+        }
+        System.out.println();
+    }
+}</code></pre>
+<pre><code>*****
+нечего рисовать
+***</code></pre>
+    <p class="novoe"><code>void</code> на месте типа значит «метод ничего не возвращает». В таком методе <code>return;</code> без значения просто выходит из метода досрочно.</p>
+    <p><code>System.out.print</code> печатает без перевода строки, поэтому звёздочки встают в ряд. Пустой <code>println()</code> в конце переводит строку. Проверка <code>n &lt;= 0</code> в начале защищает метод от плохих чисел, как проверка ввода в первом уроке.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что не так в строке <code>int x = stars(3);</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>stars</code> объявлен как <code>void</code>, ответа у него нет, класть в x нечего. Программа не соберётся: <code>incompatible types: void cannot be converted to int</code>. Метод <code>void</code> вызывают отдельной строкой: <code>stars(3);</code>.</p>
+          <p class="oshibka">Путать, где нужен ответ. Метод считает число для дальнейшего расчёта, значит тип и <code>return значение</code>. Метод только печатает, значит <code>void</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>void</code>: метод ничего не возвращает, вызывается отдельной строкой.</p>
+      <p><code>return;</code> в void-методе выходит досрочно.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Метод получает копию числа</h2>
+    <p>Меняем параметр внутри метода и смотрим, что стало снаружи.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        int i = 50;
+        modify(i);
+        System.out.println("в main: " + i);
+    }
+
+    static void modify(int i) {
+        i *= 5;
+        System.out.println("в методе: " + i);
+    }
+}</code></pre>
+<pre><code>в методе: 250
+в main: 50</code></pre>
+    <p class="novoe">В метод уходит копия значения. Параметр метода это его собственная переменная, даже если имя совпадает. Изменить переменную в <code>main</code> метод не может, может только вернуть новое значение через <code>return</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает программа и как её исправить, чтобы вышло 2?
+<pre><code>public static void main(String[] args) {
+    int a = 1;
+    inc(a);
+    System.out.println(a);
+}
+
+static void inc(int x) {
+    x++;
+}</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Напечатает <code>1</code>: увеличилась копия. Исправление: метод возвращает новое значение, а <code>main</code> его забирает.</p>
+<pre><code>public static void main(String[] args) {
+    int a = 1;
+    a = inc(a);
+    System.out.println(a);
+}
+
+static int inc(int x) {
+    return x + 1;
+}</code></pre>
+          <p>Теперь <code>2</code>.</p>
+          <p class="oshibka">Вернуть значение и не забрать его: написать просто <code>inc(a);</code>. Метод вернёт 2, но ответ никуда не положен и пропадёт, a останется 1.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Метод работает с копией числа.</p>
+      <p>Хочешь изменить: <code>a = метод(a);</code> и <code>return</code> в методе.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Метод ввода: спрашивать, пока не введут нормальное</h2>
+    <p>В первом уроке программа при плохом вводе останавливалась. С циклом можно спросить ещё раз. Соберём это в метод, чтобы не повторять для каждого числа.</p>
+<pre><code>import java.util.Locale;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in).useLocale(Locale.US);
+        double price = readInRange(sc, "Цена, руб:", 1, 1000000);
+        System.out.println("Цена: " + price);
+    }
+
+    static double readInRange(Scanner sc, String prompt, double min, double max) {
+        while (true) {
+            System.out.println(prompt);
+            if (!sc.hasNextDouble()) {
+                System.out.println("Это не число, ещё раз");
+                sc.next();
+            } else {
+                double x = sc.nextDouble();
+                if (x &gt;= min &amp;&amp; x &lt;= max) {
+                    return x;
+                }
+                System.out.println("Число вне границ, ещё раз");
+            }
+        }
+    }
+}</code></pre>
+    <p>Ввели <code>abc</code>, потом <code>-5</code>, потом <code>1500</code>:</p>
+<pre><code>Цена, руб:
+Это не число, ещё раз
+Цена, руб:
+Число вне границ, ещё раз
+Цена, руб:
+Цена: 1500.0</code></pre>
+    <p class="novoe"><code>while (true)</code> крутится без конца, а выходом служит <code>return x;</code>: он отдаёт хорошее число и сразу заканчивает и цикл, и метод.</p>
+    <p>Scanner передаём в метод параметром, так метод читает тот же ввод, что и <code>main</code>. Строка-подсказка <code>prompt</code> и границы тоже параметры, поэтому один метод годится и для цены, и для скидки. <code>sc.next()</code> забирает из ввода плохое слово abc и выбрасывает его.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В <code>main</code> вызов <code>readInRange(sc, "Скидка, %:", 0, 100)</code>, пользователь ввёл <code>150</code>, потом <code>30</code>. Что появится на экране и что вернёт метод?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Скидка, %:
+Число вне границ, ещё раз
+Скидка, %:</code></pre>
+          <p>Метод вернёт 30.0.</p>
+          <p class="oshibka">Забыть <code>sc.next()</code>. Слово abc останется во вводе, <code>hasNextDouble()</code> будет снова и снова видеть его и отвечать «не число». Программа без конца печатает «Это не число, ещё раз» и не даёт ничего ввести. Проверено: за пять кругов цикл не сдвинулся с abc.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Повтор ввода: <code>while (true)</code>, хорошее число <code>return x</code>.</p>
+      <p>Не число: сообщение и <code>sc.next()</code>, иначе цикл встанет.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>Развить программу ПР1 циклом и методами</h2>
+    <p>Задание 5 ПР2 разрешает строить решение на программе из прошлой практической. Покажем на программе скидки из первого урока, свою из задания 4 ПР1 развиваешь так же. Метод <code>readInRange</code> из шага 10 вставь в класс без изменений.</p>
+<pre><code>import java.util.Locale;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in).useLocale(Locale.US);
+        System.out.println("Программа считает цену со скидкой.");
+        double more;
+        do {
+            double price = readInRange(sc, "Цена, руб:", 1, 1000000);
+            double discount = readInRange(sc, "Скидка, %:", 0, 100);
+            System.out.println("К оплате: " + discounted(price, discount) + " руб");
+            more = readInRange(sc, "Ещё товар? 1 да, 0 нет", 0, 1);
+        } while (more == 1);
+        System.out.println("Готово");
+    }
+
+    static double discounted(double price, double discount) {
+        return price * (100 - discount) / 100;
+    }
+
+    // сюда метод readInRange из шага 10
+}</code></pre>
+    <p>Ввели 1500 и 20, потом 1, потом 800, abc и 10, потом 0:</p>
+<pre><code>Программа считает цену со скидкой.
+Цена, руб:
+Скидка, %:
+К оплате: 1200.0 руб
+Ещё товар? 1 да, 0 нет
+Цена, руб:
+Скидка, %:
+Это не число, ещё раз
+Скидка, %:
+К оплате: 720.0 руб
+Ещё товар? 1 да, 0 нет
+Готово</code></pre>
+    <p class="novoe">Программа раскладывается так: ввод с проверкой в одном методе, расчёт в другом, а <code>main</code> только собирает их и крутит <code>do-while</code>, пока пользователь хочет ещё. Каждый метод делает одно дело.</p>
+    <p>Сравни с шагом 12 первого урока: там четыре почти одинаковых проверки и выход при первой ошибке. Здесь проверка написана один раз, а ошибка не обрывает работу.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Доработай <code>main</code>: в конце вместо «Готово» напечатать, сколько товаров посчитали и общую сумму к оплате. Что выйдет, если ввести 1500, 20, 1, 800, 10, 0?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>double more;
+int items = 0;
+double sum = 0;
+do {
+    double price = readInRange(sc, "Цена, руб:", 1, 1000000);
+    double discount = readInRange(sc, "Скидка, %:", 0, 100);
+    double total = discounted(price, discount);
+    System.out.println("К оплате: " + total + " руб");
+    items++;
+    sum += total;
+    more = readInRange(sc, "Ещё товар? 1 да, 0 нет", 0, 1);
+} while (more == 1);
+System.out.println("Товаров: " + items + ", всего: " + sum + " руб");</code></pre>
+          <p>Последняя строка: <code>Товаров: 2, всего: 1920.0 руб</code>. 1200 + 720 = 1920.</p>
+          <p class="oshibka">Завести <code>items</code> и <code>sum</code> внутри <code>do</code>. На каждом круге они создаются заново с нулём, а после цикла их вообще не видно, и программа не соберётся: <code>cannot find symbol</code>. Накопитель всегда до цикла, как в шаге 2.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ввод в метод, расчёт в метод, <code>main</code> собирает и крутит цикл.</p>
+      <p>Накопители до цикла, итог после.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР2</h2>
+    <ul>
+      <li>Задания 1–3, циклы: шаги 1–5, выбор цикла по таблице шага 6. Подпиши в комментарии над каждой задачей, почему выбран этот цикл.</li>
+      <li>Задание 4, статические методы: шаги 7–9. Расчёт в метод с <code>return</code>, ввод и вывод в <code>main</code>.</li>
+      <li>Задание 5, развитие программы ПР1: шаги 10–11. Скорее всего, это программа из задания 4 ПР1, точнее скажет текст варианта.</li>
+    </ul>
+    <p>Каждую программу прогони на краях: 0, 1, отрицательное, очень большое, буквы вместо числа. Код ПР2 кладёшь в тот же репозиторий, что ПР1, об этом последний шаг урока <a href="java-massivy.html">«Массивы»</a>.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: циклы и методы">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Выведи все числа от 1 до 100, которые делятся на 7, и в конце их количество. Какой цикл и почему?
+      <textarea name="z1" placeholder="for (…" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Вводятся положительные числа, конец ввода 0. Выведи наибольшее. Если первым ввели 0, напечатай «чисел нет».
+      <textarea name="z2" placeholder="int x = sc.nextInt(); …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Метод <code>static int digitSum(int n)</code> возвращает сумму цифр числа. Последняя цифра это <code>n % 10</code>. Проверь на 4096 и на 0.
+      <textarea name="z3" placeholder="static int digitSum(int n) { …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Метод <code>static boolean isLeap(int year)</code>: год високосный, если делится на 4, но не на 100, или если делится на 400. В <code>main</code> выведи все високосные годы с 1990 по 2030.
+      <textarea name="z4" placeholder="static boolean isLeap(int year) { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Возьми свою программу из задания 4 ПР1. Напиши, какие методы в ней будут, что каждый принимает и возвращает, и какой цикл крутит <code>main</code>. Код не нужен, только план.
+      <textarea name="z5" placeholder="метод 1: …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Циклы while</td><td>Модуль A4: обучение модели это цикл «пока ошибка падает»: шаг, проверка, ещё шаг. Остановка по условию, как в шаге 3.</td></tr>
+      <tr><td>Методы</td><td>Модуль X1: функция с одним делом и ответом через return легко проверяется тестом. Так собирают и код подготовки данных.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="java-massivy.html">Дальше: массивы →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

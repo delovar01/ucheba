@@ -1,13 +1,36 @@
 // Карта пар с 1.09. Источник — карточки «начни отсюда» по каждому предмету.
 // tema: '' — тему не нашли; material: '' — материала нет; ne_bylo: true — пары не было.
-// urok: { id, nazvanie, ssylka } — если к паре есть урок на сайте.
+// urok: { id, nazvanie, ssylka } — если к паре есть урок на сайте; несколько уроков — массив [A, B].
 (function () {
   const LJ = { id: 'bd-left-join-group-by', nazvanie: 'LEFT JOIN и GROUP BY', ssylka: 'uroki/bd-left-join-group-by.html' };
   const CD = { id: 'bd-case-daty', nazvanie: 'CASE и даты', ssylka: 'uroki/bd-case-daty.html' };
+  const BE = { id: 'bd-er', nazvanie: 'База, ключи и ER-диаграмма', ssylka: 'uroki/bd-er.html' };
+  const BS = { id: 'bd-sozdanie-tablic', nazvanie: 'Создание базы и таблиц', ssylka: 'uroki/bd-sozdanie-tablic.html' };
+  const BF = { id: 'bd-filtry-join', nazvanie: 'Сортировка, фильтры и JOIN', ssylka: 'uroki/bd-filtry-join.html' };
+  const BI = { id: 'bd-izmenenie-dannyh', nazvanie: 'INSERT, UPDATE, DELETE', ssylka: 'uroki/bd-izmenenie-dannyh.html' };
+  const BP = { id: 'bd-podzaprosy-cte', nazvanie: 'Подзапросы, WITH и множества', ssylka: 'uroki/bd-podzaprosy-cte.html' };
+  const BR = { id: 'bd-stroki', nazvanie: 'Строковые функции', ssylka: 'uroki/bd-stroki.html' };
   const SP = { id: 'sa-process', nazvanie: 'Цикл, роли, модели', ssylka: 'uroki/sa-process.html' };
   const ST = { id: 'sa-trebovaniya', nazvanie: 'Требования и диаграммы', ssylka: 'uroki/sa-trebovaniya.html' };
+  const SR = { id: 'sa-uchastniki-riski', nazvanie: 'Участники, вопрос, риск, ограничение', ssylka: 'uroki/sa-uchastniki-riski.html' };
   const AK = { id: 'ach-nauchnaya-kommunikaciya', nazvanie: 'Научная коммуникация', ssylka: 'uroki/ach-nauchnaya-kommunikaciya.html' };
+  const TV = { id: 'tv-vyskazyvaniya', nazvanie: 'Высказывания и законы логики', ssylka: 'uroki/tv-vyskazyvaniya.html' };
+  const TD = { id: 'tv-dnf', nazvanie: 'ДНФ, КНФ и схемы', ssylka: 'uroki/tv-dnf.html' };
+  const TM = { id: 'tv-mnozhestva', nazvanie: 'События как множества', ssylka: 'uroki/tv-mnozhestva.html' };
+  const TS = { id: 'tv-sigma-algebra', nazvanie: 'Системы множеств, σ-алгебра', ssylka: 'uroki/tv-sigma-algebra.html' };
+  const TP = { id: 'tv-prostranstvo', nazvanie: 'Вероятностное пространство', ssylka: 'uroki/tv-prostranstvo.html' };
+  const TU = { id: 'tv-uslovnaya', nazvanie: 'Условная вероятность и Байес', ssylka: 'uroki/tv-uslovnaya.html' };
   const TN = { id: 'tv-nezavisimost', nazvanie: 'Полная вероятность, Байес, независимость', ssylka: 'uroki/tv-nezavisimost.html' };
+  const AA = { id: 'alg-asimptotika', nazvanie: 'Асимптотика и сложность кода', ssylka: 'uroki/alg-asimptotika.html' };
+  const AM = { id: 'alg-master-teorema', nazvanie: 'Рекурренты и мастер-теорема', ssylka: 'uroki/alg-master-teorema.html' };
+  const AL = { id: 'alg-lineynye-sortirovki', nazvanie: 'Сортировки за линейное время', ssylka: 'uroki/alg-lineynye-sortirovki.html' };
+  const AH = { id: 'alg-kuchi', nazvanie: 'Кучи и амортизация', ssylka: 'uroki/alg-kuchi.html' };
+  const AR = { id: 'alg-rekursiya', nazvanie: 'Java с нуля и рекурсия', ssylka: 'uroki/alg-rekursiya.html' };
+  const AO = { id: 'alg-grafy-obhody', nazvanie: 'Графы: BFS и DFS', ssylka: 'uroki/alg-grafy-obhody.html' };
+  const AD = { id: 'alg-deykstra', nazvanie: 'Дейкстра', ssylka: 'uroki/alg-deykstra.html' };
+  const JT = { id: 'java-tipy-if', nazvanie: 'Типы, формулы и if', ssylka: 'uroki/java-tipy-if.html' };
+  const JC = { id: 'java-cikly-metody', nazvanie: 'Циклы и статические методы', ssylka: 'uroki/java-cikly-metody.html' };
+  const JM = { id: 'java-massivy', nazvanie: 'Массивы и участки убывания', ssylka: 'uroki/java-massivy.html' };
   // Физика: темы пар нигде не подписаны, одна и та же запись для всех.
   const FN = 'не найдено, искал: Модеус (у пар только название «Лекционное занятие N», тем нет), элеарн 7500 (там только виртуальные лабы), exam1.urfu.ru курс 846 (в разделе Горы тестов и материалов нет), записи BBB комнаты p2w-k5g-y9a-obg (ни одной), сводки чатов. Курс по названию тестов и лаб (косвенно): колебания и волновая оптика';
   const FM = 'конспекты «Колебания» и «Волновая оптика» по учебнику (не со слов преподавателя)';
@@ -15,16 +38,16 @@
     {
       predmet: 'Базы данных',
       pary: [
-        { data: 'ср 9.09', tip: 'лаба', tema: 'Проектирование ER-диаграммы', material: 'конспект' },
-        { data: 'вт 15.09', tip: 'лекция 1', tema: 'Введение в БД, ER-диаграммы, установка СУБД', material: 'конспекты, слайды' },
-        { data: 'ср 16.09', tip: 'лаба', tema: 'Создание базы GrantPlatform в DBeaver', material: 'конспект' },
-        { data: 'ср 23.09', tip: 'лаба', tema: 'Тема для СР1, ER-диаграмма по ней, CREATE TABLE, тестовые данные', material: 'конспект' },
-        { data: 'вт 29.09', tip: 'лекция 2–3', tema: 'Создание таблиц, выборка, фильтры, подзапросы, JOIN', material: 'конспекты, слайды', urok: LJ },
-        { data: 'ср 30.09', tip: 'лаба', tema: 'Запросы на выборку: SELECT, WHERE, BETWEEN', material: 'конспект' },
+        { data: 'ср 9.09', tip: 'лаба', tema: 'Проектирование ER-диаграммы', material: 'конспект', urok: BE },
+        { data: 'вт 15.09', tip: 'лекция 1', tema: 'Введение в БД, ER-диаграммы, установка СУБД', material: 'конспекты, слайды', urok: BE },
+        { data: 'ср 16.09', tip: 'лаба', tema: 'Создание базы GrantPlatform в DBeaver', material: 'конспект', urok: BS },
+        { data: 'ср 23.09', tip: 'лаба', tema: 'Тема для СР1, ER-диаграмма по ней, CREATE TABLE, тестовые данные', material: 'конспект', urok: BS },
+        { data: 'вт 29.09', tip: 'лекция 2–3', tema: 'Создание таблиц, выборка, фильтры, подзапросы, JOIN', material: 'конспекты, слайды', urok: [BS, BF, LJ, BP] },
+        { data: 'ср 30.09', tip: 'лаба', tema: 'Запросы на выборку: SELECT, WHERE, BETWEEN', material: 'конспект', urok: BF },
         { data: 'ср 7.10', tip: 'лаба', tema: 'Агрегаты: COUNT, SUM, AVG, MIN, MAX', material: 'конспект', urok: LJ },
-        { data: 'вт 13.10', tip: 'лекция 4', tema: 'INSERT, UPDATE, DELETE, CASE, CTE', material: 'конспекты, слайды' },
+        { data: 'вт 13.10', tip: 'лекция 4', tema: 'INSERT, UPDATE, DELETE, CASE, CTE', material: 'конспекты, слайды', urok: [BI, CD, BP] },
         { data: 'ср 14.10', tip: 'лаба', tema: 'Функции дат и CASE: EXTRACT, TO_CHAR (по чату записей соседних групп той же недели)', material: 'конспект', urok: CD },
-        { data: 'ср 21.10', tip: 'лаба', tema: 'Строковые функции: SUBSTRING, склейка || (по чату записей 20.10 соседних групп)', material: 'конспект' },
+        { data: 'ср 21.10', tip: 'лаба', tema: 'Строковые функции: SUBSTRING, склейка || (по чату записей 20.10 соседних групп)', material: 'конспект', urok: BR },
       ],
     },
     {
@@ -32,13 +55,13 @@
       pary: [
         { data: 'сб 12.09', tip: 'лаба', tema: 'Вводная: собрать сумматор из NAND (игра; по чату потока, в Модеусе тема не подписана)', material: '' },
         { data: 'пн 14.09', tip: 'лекция', tema: 'Сорвалась, сервер лёг. Показали только устройство курса', material: 'вводные слайды: структура курса и оценивание' },
-        { data: 'чт 17.09', tip: 'лекция 1', tema: 'Асимптотика, рекуррентные соотношения, мастер-теорема, нижняя граница сортировки', material: 'конспекты, слайды, запись' },
+        { data: 'чт 17.09', tip: 'лекция 1', tema: 'Асимптотика, рекуррентные соотношения, мастер-теорема, нижняя граница сортировки, выход за модель сравнений: подсчёт и поразрядная', material: 'конспекты, слайды, запись', urok: [AA, AM, AL] },
         { data: 'сб 19.09', tip: 'лаба', tema: 'не найдено, искал: репозиторий Зубарева Java_algorithms (коммиты только с 26.09), записи BBB обеих комнат лекций (пусто), Salute Jazz (записей нет), элеарн 10052, Модеус (тема не подписана), сводки чатов (про 19.09 только «в 10:15 в Salute Jazz»). Скорее всего продолжение вводной (косвенно: 12.09 весь поток играл в игру с кодом)', material: '' },
-        { data: 'чт 24.09', tip: 'лекция 2', tema: 'Структуры данных, кучи, амортизационный анализ', material: 'конспект, слайды, запись' },
-        { data: 'сб 26.09', tip: 'лаба', tema: 'Java с нуля: типы, калькулятор, FizzBuzz, «угадай число»', material: 'код Зубарева' },
-        { data: 'сб 3.10', tip: 'лаба', tema: 'Рекурсия и перебор: сумма цифр, скобки, подмножества', material: 'конспект, код' },
-        { data: 'пн 5.10', tip: 'лекция 3', tema: 'Алгоритмы на графах', material: 'конспект, слайды' },
-        { data: 'сб 10.10', tip: 'лаба', tema: 'Графы: обход в ширину и глубину, Дейкстра, путь в лабиринте', material: 'конспект, код' },
+        { data: 'чт 24.09', tip: 'лекция 2', tema: 'Структуры данных, кучи, амортизационный анализ', material: 'конспект, слайды, запись', urok: AH },
+        { data: 'сб 26.09', tip: 'лаба', tema: 'Java с нуля: типы, калькулятор, FizzBuzz, «угадай число»', material: 'код Зубарева', urok: AR },
+        { data: 'сб 3.10', tip: 'лаба', tema: 'Рекурсия и перебор: сумма цифр, скобки, подмножества', material: 'конспект, код', urok: AR },
+        { data: 'пн 5.10', tip: 'лекция 3', tema: 'Алгоритмы на графах', material: 'конспект, слайды', urok: [AO, AD] },
+        { data: 'сб 10.10', tip: 'лаба', tema: 'Графы: обход в ширину и глубину, Дейкстра, путь в лабиринте', material: 'конспект, код', urok: [AO, AD] },
         { data: 'сб 17.10', tip: 'лаба', tema: 'не найдено, искал: репозиторий Зубарева Java_algorithms (последний коммит «class 3» 10.10, четвёртого занятия нет), Salute Jazz (записей нет), записи BBB, элеарн 10052 (в курсе ничего нового), Модеус (тема не подписана), вольт', material: '' },
         { data: 'пн 19.10', tip: 'лекция 4', tema: 'не найдено, искал: элеарн 10052 (лекций и слайдов в курсе нет совсем, форум пуст), записи BBB комнат 6kj-sn9-boc-wiz и hrp-c6w-mpp-zpy (пусто), ktalk (список записей закрыт), Модеус (тема не подписана), вольт. Лекция 3 остановилась на графах', material: '' },
       ],
@@ -46,12 +69,12 @@
     {
       predmet: 'Теорвер',
       pary: [
-        { data: 'вт 8.09', tip: 'практика', tema: 'Высказывания, таблицы истинности', material: 'конспект, задачи с решениями' },
-        { data: '14–15.09', tip: 'лекция и практика', tema: 'Законы логики, ДНФ, схемы', material: 'конспект, задачи с решениями' },
-        { data: '21–22.09', tip: 'лекция и практика', tema: 'События как множества', material: 'конспект, задачи с решениями' },
-        { data: '28–29.09', tip: 'лекция и практика', tema: 'Системы множеств, σ-алгебра', material: 'конспект, задачи с решениями' },
-        { data: '5–6.10', tip: 'лекция и практика', tema: 'Вероятностное пространство', material: 'конспект, задачи с решениями' },
-        { data: '12–13.10', tip: 'лекция и практика', tema: 'Условная и полная вероятность, Байес', material: 'конспект, задачи с решениями' },
+        { data: 'вт 8.09', tip: 'практика', tema: 'Высказывания, таблицы истинности', material: 'конспект, задачи с решениями', urok: TV },
+        { data: '14–15.09', tip: 'лекция и практика', tema: 'Законы логики, ДНФ, схемы', material: 'конспект, задачи с решениями', urok: [TV, TD] },
+        { data: '21–22.09', tip: 'лекция и практика', tema: 'События как множества', material: 'конспект, задачи с решениями', urok: TM },
+        { data: '28–29.09', tip: 'лекция и практика', tema: 'Системы множеств, σ-алгебра', material: 'конспект, задачи с решениями', urok: TS },
+        { data: '5–6.10', tip: 'лекция и практика', tema: 'Вероятностное пространство', material: 'конспект, задачи с решениями', urok: TP },
+        { data: '12–13.10', tip: 'лекция и практика', tema: 'Условная и полная вероятность, Байес', material: 'конспект, задачи с решениями', urok: TU },
         { data: '19–20.10', tip: 'лекция и практика', tema: 'Вероятностное дерево, независимость событий, полная вероятность и Байес на задачах', material: 'рабочая книга Сергеева, задачи', urok: TN },
       ],
     },
@@ -59,16 +82,16 @@
       predmet: 'Java',
       pary: [
         { data: 'вт 8.09', tip: 'лаба', tema: 'Среда разработки и первая программа', material: 'конспект' },
-        { data: 'пн 14.09', tip: 'лекция 1', tema: 'JVM, типы, переменные, Scanner, if', material: 'конспекты, запись' },
+        { data: 'пн 14.09', tip: 'лекция 1', tema: 'JVM, типы, переменные, Scanner, if', material: 'конспекты, запись', urok: JT },
         { data: 'вт 15.09', tip: 'лаба', tema: 'Ввод через Scanner, палиндром двумя указателями', material: 'конспект' },
         { data: 'пн 21.09', tip: 'лекция 2', tema: 'ООП: классы, объекты, композиция', material: 'запись, примеры лектора' },
-        { data: 'вт 22.09', tip: 'лаба', tema: 'Работа по командам, ПР1', material: 'конспект' },
+        { data: 'вт 22.09', tip: 'лаба', tema: 'Работа по командам, ПР1', material: 'конспект', urok: JT },
         { data: 'пн 28.09', tip: 'лекция 3', tema: 'Функциональное программирование', material: 'конспект, запись' },
-        { data: 'вт 29.09', tip: 'лаба', tema: 'Доделка ПР1: типы, ввод-вывод, if', material: 'конспект' },
+        { data: 'вт 29.09', tip: 'лаба', tema: 'Доделка ПР1: типы, ввод-вывод, if', material: 'конспект', urok: JT },
         { data: 'пн 5.10', tip: 'лекция 4', tema: 'sealed-типы и record', material: 'конспект, запись' },
-        { data: 'вт 6.10', tip: 'лаба', tema: 'Циклы, статические методы, строки', material: 'конспекты, слайды' },
+        { data: 'вт 6.10', tip: 'лаба', tema: 'Циклы, статические методы, строки', material: 'конспекты, слайды', urok: JC },
         { data: 'пн 12.10', tip: 'лекция 5', tema: 'Исключения и null', material: 'конспект, запись' },
-        { data: 'вт 13.10', tip: 'лаба', tema: 'Массивы', material: 'конспект, слайды' },
+        { data: 'вт 13.10', tip: 'лаба', tema: 'Массивы', material: 'конспект, слайды', urok: JM },
         { data: 'пн 19.10', tip: 'лекция 6', tema: 'не найдено, искал: элеарн 10103 (слайдов лекции нет, форум пуст), java-demos Корелина (последний коммит 2.10, новых папок нет), записи BBB комнаты лекций w2m-z8c-rdr-myp (пусто), ktalk (запись по ссылке открывается, но ссылки на 19.10 нет, список записей закрыт), Модеус (тема не подписана), вольт', material: '' },
         { data: 'вт 20.10', tip: 'лаба', tema: 'ООП: классы и объекты, инкапсуляция (косвенно: в элеарне раздел ПР4 «ООП. Инкапсуляция» и слайды «ООП часть I», выложены 22.10; записи нет)', material: 'слайды «ООП часть I» и «ООП часть II»' },
       ],
@@ -100,7 +123,7 @@
         { data: 'ср 30.09', tip: 'лаба 2', tema: 'Проблема, ценность, границы, MVP', material: 'конспект, слайды, запись' },
         { data: 'ср 30.09', tip: 'лекция МТС 3', tema: 'Анализ проблем и бизнес-требований', material: 'конспект, слайды', urok: ST },
         { data: 'ср 7.10', tip: 'лекция МТС 4', tema: 'Требования: функциональные и нефункциональные', material: 'слайды, запись', urok: ST },
-        { data: 'ср 14.10', tip: 'лаба 3', tema: 'Участники, требования, риски (по плану курса)', material: 'конспект, слайды' },
+        { data: 'ср 14.10', tip: 'лаба 3', tema: 'Участники, требования, риски (по плану курса)', material: 'конспект, слайды', urok: SR },
         { data: 'ср 14.10', tip: 'лекция МТС 5', tema: 'Прототипы и диаграммы: Use Case, BPMN', material: 'слайды, запись, шпаргалки BPMN', urok: ST },
         { data: 'ср 21.10', tip: 'лекция МТС 6', tema: 'Диаграммы: ER и Sequence (по плану курса: раздел 6 «Диаграммы (ER, Sequence)» в TeachBase). Слайдов нет: раздел там ещё черновик, запись МТС Линк закрыта организатором (403); искал также элеарн 10012', material: '' },
       ],

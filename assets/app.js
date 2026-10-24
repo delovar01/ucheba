@@ -163,13 +163,16 @@
       // срок «1.11 00:00» показываем как последний день — 31.10
       const d = s.do ? new Date(new Date(s.do).getTime() - 60000) : null;
       const skoro = d && d.getTime() - seychas < 3 * den;
-      const kogda = d ? formatDaty(d) + '<small>' + ostalos(d) + '</small>' : 'без срока<small>чем раньше, тем лучше</small>';
+      const kogda = d ? formatDaty(d) + '<small>' + ostalos(d) + '</small>'
+        : s.kogda ? s.kogda + '<small>дата не объявлена</small>'
+        : 'без срока<small>чем раньше, тем лучше</small>';
       const urok = s.urok ? sostUroka(s.urok) : null;
       return '<li class="' + (skoro ? 'skoro' : '') + '">' +
         '<div class="kogda">' + kogda + '</div>' +
         '<div>' + (sPredmetom ? '<span class="predmet">' + s.predmet + '</span>' : '') +
         '<span class="chto">' + (s.ssylka ? '<a href="' + s.ssylka + '" target="_blank" rel="noopener">' + s.chto + '</a>' : s.chto) + '</span>' +
         (s.urok ? '<a class="urok" href="' + koren + s.urok + '">' + (urok.proyden ? 'Урок пройден ✓, повторить →' : 'Урок к этому →') + '</a>' : '') +
+        (s.probnyy ? '<a class="urok probnyy" href="' + koren + s.probnyy + '">Пробный вариант →</a>' : '') +
         (s.primechanie ? '<details class="podrobnee"><summary>Подробнее</summary><p>' + s.primechanie + '</p></details>' : '') +
         '</div></li>';
     };
@@ -225,8 +228,11 @@
         }
         let urok = '<td class="pusto">нет</td>';
         if (r.urok) {
-          const sost = chitat('urok:' + r.urok.id, {});
-          urok = '<td><a href="' + koren + r.urok.ssylka + '">' + r.urok.nazvanie + '</a>' + (sost.proyden ? ' ✓' : '') + '</td>';
+          // urok — один урок или массив, если к паре их несколько
+          urok = '<td>' + [].concat(r.urok).map(u => {
+            const sost = chitat('urok:' + u.id, {});
+            return '<a href="' + koren + u.ssylka + '">' + u.nazvanie + '</a>' + (sost.proyden ? ' ✓' : '');
+          }).join('<br>') + '</td>';
         }
         return '<tr><td class="data">' + r.data + '</td><td>' + r.tip + '</td>' +
           (pusto(r.tema) ? '<td class="tema pusto">тема не найдена</td>' : '<td class="tema">' + r.tema + '</td>') +
@@ -263,6 +269,28 @@
     });
   }
 
+  // --- пробный тест: <form class="probnyy-test">, у вопроса .probnyy-v[data-verno="номер верного с 1"] ---
+  document.querySelectorAll('form.probnyy-test').forEach(f => {
+    f.addEventListener('submit', e => {
+      e.preventDefault();
+      const voprosy = [...f.querySelectorAll('.probnyy-v[data-verno]')];
+      let verno = 0;
+      voprosy.forEach(v => {
+        const metki = [...v.querySelectorAll('label')];
+        const nado = Number(v.dataset.verno) - 1;
+        metki.forEach((m, i) => {
+          m.classList.remove('verno', 'neverno');
+          const vybran = m.querySelector('input').checked;
+          if (i === nado) m.classList.add('verno');
+          else if (vybran) m.classList.add('neverno');
+          if (i === nado && vybran) verno++;
+        });
+      });
+      const itog = f.querySelector('.itog-testa p');
+      if (itog) itog.textContent = 'Верно ' + verno + ' из ' + voprosy.length + '. Зелёным отмечен правильный вариант, красным твой неверный. Разбор под кнопкой у каждого вопроса.';
+    });
+  });
+
   // --- формулы: KaTeX грузится только там, где есть data-formuly ---
   if (document.querySelector('[data-formuly]')) {
     const cdn = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/';
@@ -274,10 +302,20 @@
     s1.onload = () => {
       const s2 = document.createElement('script');
       s2.src = cdn + 'contrib/auto-render.min.js';
-      s2.onload = () => window.renderMathInElement(document.body, {
-        delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }],
-        throwOnError: false,
-      });
+      s2.onload = () => {
+        window.renderMathInElement(document.body, {
+          delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }],
+          throwOnError: false,
+        });
+        // формула шире строки на телефоне листается сама, а не тянет страницу вбок
+        const dlinnye = () => document.querySelectorAll('.katex:not(.katex-display .katex)').forEach(k => {
+          const ryad = k.closest('p, li, td, div, details') || document.body;
+          const shir = [...k.querySelectorAll('.katex-html > .base')].reduce((s, b) => s + b.getBoundingClientRect().width, 0);
+          k.classList.toggle('dlinnaya', shir > ryad.clientWidth);
+        });
+        css.sheet ? dlinnye() : css.addEventListener('load', dlinnye);
+        addEventListener('resize', dlinnye);
+      };
       document.head.appendChild(s2);
     };
     document.head.appendChild(s1);

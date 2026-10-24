@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>DISTINCT, лучший и окна — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-distinct-top-okna">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · DISTINCT, лучший и окна</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>DISTINCT, лучший и окна</h1>
+  <p class="tiho">Базы данных · под самостоятельную 2, задания 14, 16 и 17 · около 35 минут</p>
+
+  <p>Последний урок под самостоятельную 2. Нужно уже уметь <code>JOIN</code>, <code>GROUP BY</code> и <code>HAVING</code>: если плывёт, сначала уроки <a href="bd-filtry-join.html">«Сортировка, фильтры и JOIN»</a> и <a href="bd-left-join-group-by.html">«LEFT JOIN и GROUP BY»</a>. Пять шагов на твоей базе <code>ml_tracker</code>, таблицы те же, что в <a href="bd-filtry-join.html">первом уроке</a>.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <h2>Что понадобится из базы</h2>
+  <div class="tablica">
+    <div class="imya">experiments, нужные столбцы</div>
+    <table>
+      <tr><th>id</th><th>researcher_id</th><th>dataset_id</th><th>model_id</th><th>count_apoh</th></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td>1</td><td>1</td><td>3</td><td class="null">NULL</td></tr>
+      <tr><td>3</td><td>2</td><td>2</td><td>2</td><td>1</td></tr>
+      <tr><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td></tr>
+      <tr><td>5</td><td>3</td><td>5</td><td>4</td><td>5</td></tr>
+      <tr><td>6</td><td>1</td><td>4</td><td>4</td><td>3</td></tr>
+      <tr><td>7</td><td>2</td><td>6</td><td>2</td><td>1</td></tr>
+      <tr><td>8</td><td>2</td><td>5</td><td>3</td><td>10</td></tr>
+      <tr><td>9</td><td>3</td><td>1</td><td>1</td><td>1</td></tr>
+    </table>
+  </div>
+  <p>Исследователи: 1 Павленко Степан, 2 Щайхутдинов Азат, 3 Иванова Мария. Наборы: 1 iris, 2 pirs, 3 California Housing, 4 IMDB Reviews, 5 MNIST, 6 Titanic. <code>count_apoh</code> число эпох.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 5</div>
+    <h2>COUNT(DISTINCT): сколько разных</h2>
+    <p>У каждого исследователя три запуска. Но сколько <b>разных</b> моделей он пробовал?</p>
+<pre><code class="sql">SELECT r.full_name,
+  COUNT(*)                   AS zapuskov,
+  COUNT(DISTINCT e.model_id) AS modeley
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+GROUP BY r.full_name;</code></pre>
+    <p class="novoe"><code>DISTINCT</code> значит «без повторов». <code>COUNT(DISTINCT столбец)</code> считает, сколько в кучке <b>разных</b> значений, одинаковые считаются один раз.</p>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>zapuskov</th><th>modeley</th></tr>
+      <tr><td>Иванова Мария</td><td>3</td><td>3</td></tr>
+      <tr><td>Павленко Степан</td><td>3</td><td>3</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>3</td><td>2</td></tr>
+    </table></div>
+    <p>У Азата модели 2, 2 и 3: запусков три, а разных моделей две.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для каждого исследователя: на скольких разных наборах данных он запускал? Сначала посчитай по таблице.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT r.full_name, COUNT(DISTINCT e.dataset_id) AS naborov
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+GROUP BY r.full_name;</code></pre>
+          <p>Павленко 2 (наборы 1, 1, 4), Щайхутдинов 3 (2, 6, 5), Иванова 3 (3, 5, 1).</p>
+          <p class="oshibka">Написать <code>COUNT(e.dataset_id)</code> без <code>DISTINCT</code>. Тогда у Степана выйдет 3, потому что iris посчитается дважды. <code>COUNT</code> считает строки, <code>COUNT(DISTINCT)</code> разные значения.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>COUNT(DISTINCT x)</code> сколько разных x в кучке.</p>
+      <p><code>COUNT(*)</code> сколько строк, повторы тоже.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 5</div>
+    <h2>«Больше чем в одном»: HAVING с DISTINCT</h2>
+    <p>Это задание 14. На каких наборах данных пробовали больше одной разной модели?</p>
+<pre><code class="sql">SELECT d.name, COUNT(DISTINCT e.model_id) AS modeley
+FROM experiments e
+JOIN datasets d ON d.id = e.dataset_id
+GROUP BY d.name
+HAVING COUNT(DISTINCT e.model_id) &gt; 1;</code></pre>
+    <p class="novoe">Здесь нет новой команды, новое в связке: <code>HAVING</code> из прошлого урока отбирает кучки, а условие в нём стоит на <code>COUNT(DISTINCT …)</code> из шага 1.</p>
+    <p>Ответ: iris 2 (модели 1, 3, 1) и MNIST 2 (модели 4 и 3). У остальных наборов по одному запуску.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Кто из исследователей запускал больше чем на двух разных наборах данных?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT r.full_name, COUNT(DISTINCT e.dataset_id) AS naborov
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+GROUP BY r.full_name
+HAVING COUNT(DISTINCT e.dataset_id) &gt; 2;</code></pre>
+          <p>Щайхутдинов 3 и Иванова 3. Павленко с двумя не проходит.</p>
+          <p class="oshibka">В <code>HAVING</code> забыть <code>DISTINCT</code>: <code>HAVING COUNT(*) &gt; 2</code>. У всех троих по три запуска, и пройдут все, в том числе Степан. Условие в <code>HAVING</code> должно считать то же, что вопрос: разные наборы, а не строки.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>«Больше чем в одной категории»:</p>
+      <p><code>GROUP BY кто HAVING COUNT(DISTINCT категория) &gt; 1</code></p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 5</div>
+    <h2>Лучший: сортировка по итогу кучки</h2>
+    <p>Это задание 16. Кто из исследователей прогнал больше всего эпох в сумме?</p>
+<pre><code class="sql">SELECT r.full_name, SUM(e.count_apoh) AS epoh
+FROM experiments e
+JOIN researchers r ON r.id = e.researcher_id
+GROUP BY r.full_name
+ORDER BY epoh DESC
+LIMIT 1;</code></pre>
+    <p class="novoe">В <code>ORDER BY</code> можно ставить итог кучки, в том числе по имени, которое дали через <code>AS</code>. Сортируем кучки по сумме и <code>LIMIT 1</code> оставляем верхнюю.</p>
+    <p>Суммы: Павленко 1 + 3 = 4, пустую клетку у запуска 2 <code>SUM</code> пропускает. Щайхутдинов 1 + 1 + 10 = 12, Иванова 1 + 5 + 1 = 7. Ответ: Щайхутдинов Азат, 12.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> На каком наборе данных было больше всего запусков?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT d.name, COUNT(*) AS zapuskov
+FROM experiments e
+JOIN datasets d ON d.id = e.dataset_id
+GROUP BY d.name
+ORDER BY zapuskov DESC
+LIMIT 1;</code></pre>
+          <p>iris, 3 запуска (1, 2 и 9). У MNIST 2, у остальных по одному.</p>
+          <p class="oshibka">Если у двух лидеров одинаковый итог, <code>LIMIT 1</code> молча отдаст одного из них, какого попало. Убери <code>LIMIT</code> и посмотри верх списка: если там ничья, добавь второй ключ сортировки, например <code>ORDER BY zapuskov DESC, d.name</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Лучший: <code>GROUP BY … ORDER BY итог DESC LIMIT 1</code>.</p>
+      <p>При ничьей добавь второй ключ сортировки.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 5</div>
+    <h2>Окно: итог рядом с каждой строкой</h2>
+    <p>Готовимся к заданию 17. Хотим у каждой оценки видеть лучшую оценку во всей таблице, чтобы сравнить. С <code>GROUP BY</code> так не выйдет: он схлопывает строки в кучку, и отдельные оценки пропадают.</p>
+<pre><code class="sql">SELECT experiments_id, name_metric, mean_metric,
+  MAX(mean_metric) OVER () AS luchshaya
+FROM metrics;</code></pre>
+    <p class="novoe"><code>OVER</code> превращает агрегатную функцию в <b>оконную</b>: она считает итог, но не схлопывает строки, а пишет итог в каждую строку. Пустые скобки <code>()</code> значат «окно это вся таблица».</p>
+    <p>В ответе все 12 строк <code>metrics</code>, и у каждой в столбце <code>luchshaya</code> стоит 0.991.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Допиши столбец, на сколько каждая оценка отстаёт от лучшей. Сколько будет у запуска 1 с <code>accuracy</code> 0.787?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT experiments_id, name_metric, mean_metric,
+  MAX(mean_metric) OVER () - mean_metric AS otstavanie
+FROM metrics;</code></pre>
+          <p>0.991 − 0.787 = 0.204. У самой лучшей строки 0.000.</p>
+          <p class="oshibka">Написать <code>MAX(mean_metric) - mean_metric</code> без <code>OVER</code>. База ответит <code>column "metrics.mean_metric" must appear in the GROUP BY clause or be used in an aggregate function</code>: обычный <code>MAX</code> хочет схлопнуть таблицу в одну строку, а рядом стоит столбец каждой строки. С <code>OVER</code> конфликта нет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>MAX(x) OVER ()</code> максимум всей таблицы в каждой строке.</p>
+      <p>Строки не схлопываются, в отличие от <code>GROUP BY</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 5</div>
+    <h2>PARTITION BY: окно по своей категории</h2>
+    <p>Это задание 17. Сравнивать <code>f1</code> с лучшей <code>accuracy</code> нечестно, это разные оценки. Нужно сравнивать с лучшей в своей категории.</p>
+<pre><code class="sql">SELECT experiments_id, name_metric, mean_metric,
+  MAX(mean_metric) OVER (PARTITION BY name_metric) AS luchshaya,
+  MAX(mean_metric) OVER (PARTITION BY name_metric) - mean_metric AS otstavanie
+FROM metrics
+ORDER BY name_metric, mean_metric DESC;</code></pre>
+    <p class="novoe"><code>PARTITION BY столбец</code> внутри <code>OVER</code> делит строки на кучки по этому столбцу, как <code>GROUP BY</code>, но строки не схлопывает. Итог считается по своей кучке и пишется в каждую её строку.</p>
+    <div class="tablica"><table>
+      <tr><th>experiments_id</th><th>name_metric</th><th>mean_metric</th><th>luchshaya</th><th>otstavanie</th></tr>
+      <tr><td>8</td><td>accuracy</td><td>0.991</td><td>0.991</td><td>0.000</td></tr>
+      <tr><td>5</td><td>accuracy</td><td>0.982</td><td>0.991</td><td>0.009</td></tr>
+      <tr><td>3</td><td>accuracy</td><td>0.960</td><td>0.991</td><td>0.031</td></tr>
+      <tr><td>9</td><td>accuracy</td><td>0.947</td><td>0.991</td><td>0.044</td></tr>
+      <tr><td>6</td><td>accuracy</td><td>0.874</td><td>0.991</td><td>0.117</td></tr>
+      <tr><td>2</td><td>accuracy</td><td>0.835</td><td>0.991</td><td>0.156</td></tr>
+      <tr><td>1</td><td>accuracy</td><td>0.787</td><td>0.991</td><td>0.204</td></tr>
+      <tr><td>3</td><td>f1</td><td>0.941</td><td>0.941</td><td>0.000</td></tr>
+      <tr><td>6</td><td>f1</td><td>0.866</td><td>0.941</td><td>0.075</td></tr>
+      <tr><td>2</td><td>f1</td><td>0.789</td><td>0.941</td><td>0.152</td></tr>
+      <tr><td>1</td><td>f1</td><td>0.721</td><td>0.941</td><td>0.220</td></tr>
+      <tr><td>4</td><td>r2</td><td>0.812</td><td>0.812</td><td>0.000</td></tr>
+    </table></div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Для каждого запуска выведи число эпох и самое большое число эпох у того же исследователя. Что будет в строке запуска 3?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id, researcher_id, count_apoh,
+  MAX(count_apoh) OVER (PARTITION BY researcher_id) AS max_u_nego
+FROM experiments;</code></pre>
+          <p>Запуск 3 у исследователя 2, у него эпохи 1, 1 и 10. В строке будет 1 и 10. У исследователя 1 максимум 3, у исследователя 3 максимум 5.</p>
+          <p class="oshibka">Написать <code>PARTITION BY id</code>. У каждого запуска свой <code>id</code>, кучка из одной строки, и максимум равен самому числу. В <code>PARTITION BY</code> ставят категорию, внутри которой сравнивают, здесь <code>researcher_id</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>MAX(x) OVER (PARTITION BY категория)</code> максимум своей кучки в каждой строке.</p>
+      <p><code>GROUP BY</code> схлопывает, <code>PARTITION BY</code> нет.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на самостоятельную 2</h2>
+    <ul>
+      <li>Задание 14, сущность в нескольких категориях: шаги 1–2.</li>
+      <li>Задание 16, лучший: шаг 3.</li>
+      <li>Задание 17, сравнение с лидером: шаги 4–5. Лекция про оконные функции будет только 27.10, но в задании подсказано именно <code>OVER</code>, поэтому разобрали заранее.</li>
+    </ul>
+    <p>Запросы для сдачи придумай свои похожие, над каждым комментарий <code>-- Задание N. что ищем</code>.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: DISTINCT, лучший и окна">
+    <h2>Мини-самостоятельная</h2>
+    <p>Четыре задачи на твоей базе. Ответов здесь нет: впиши запросы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Для каждой модели: сколько у неё запусков и на скольких разных наборах данных.
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Исследователи, которые пробовали больше двух разных моделей.
+      <textarea name="z2" placeholder="SELECT …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Набор данных, на котором прогнали больше всего эпох в сумме, и сколько.
+      <textarea name="z3" placeholder="SELECT …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Для каждого запуска: число эпох и среднее число эпох у того же исследователя. Подсказка: вместо <code>MAX</code> функция <code>AVG</code>.
+      <textarea name="z4" placeholder="SELECT …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

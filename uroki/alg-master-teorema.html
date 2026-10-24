@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Рекурренты, мастер-теорема, нижняя граница сортировки — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="alg-master-teorema">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Алгоритмы · мастер-теорема</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Рекурренты, мастер-теорема и нижняя граница сортировки</h1>
+  <p class="tiho">Алгоритмы · лекция 17.09, вторая половина · под ПР1 «Анализ сложности» · около 50 минут</p>
+
+  <p>Вторая половина лекции 17.09. В <a href="alg-asimptotika.html">прошлом уроке</a> сложность считали по циклам. Теперь функции, которые вызывают сами себя: для них сначала пишут формулу через саму себя, а потом её решают. В конце узнаешь, почему сортировать сравнениями быстрее <code>n log n</code> нельзя в принципе. Девять шагов.</p>
+  <p>Как проходить: читаешь шаг, переписываешь рамку «Перепиши в тетрадь», решаешь «сделай сам» на бумаге и только потом открываешь ответ. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>Рекуррентное соотношение</h2>
+    <p>Сначала одна вещь из программирования: функция может вызывать сама себя на задаче поменьше. Например, сумма 1 + 2 + … + n:</p>
+<pre><code>def s(n):
+    if n == 0: return 0       # самая маленькая задача, ответ сразу
+    return n + s(n - 1)       # та же задача, но на единицу меньше</code></pre>
+    <p><code>s(3)</code> вызовет <code>s(2)</code>, та вызовет <code>s(1)</code>, потом <code>s(0) = 0</code>, и ответы сложатся: 1, 3, 6. Такой приём называют рекурсией, подробно он в <a href="alg-rekursiya.html">уроке про рекурсию</a>. Здесь хватит идеи: функция решает задачу через себя же на куске поменьше.</p>
+    <p>Сортировка слиянием: делим массив пополам, сортируем каждую половину этой же функцией, потом сливаем две отсортированные половины в одну. Слияние идёт одним проходом: каждый раз берём меньший из двух первых элементов, это n операций.</p>
+    <p>Сколько стоит сортировка n элементов? Две сортировки по n/2 плюс слияние за n. Записываем это прямо так.</p>
+    <p class="novoe">Рекуррентное соотношение, коротко рекуррента, это запись <code>T(n)</code> через <code>T</code> от меньших чисел. Для слияния <code>T(n) = 2T(n/2) + n</code>, и ещё нужна база, например <code>T(1) = 1</code>.</p>
+    <p>Как читать запись <code>aT(n/b) + f(n)</code>: функция вызывает себя a раз, каждый раз на куске в b раз меньше, и сверх вызовов делает <code>f(n)</code> своей работы. Бинарный поиск смотрит в середину и идёт в одну половину: <code>T(n) = T(n/2) + 1</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши рекурренту для возведения в степень. Функция <code>power(a, n)</code> считает aⁿ и пользуется тем, что <code>aⁿ = a^(n/2) · a^(n/2)</code>. Значок <code>^</code> значит степень. Вариант 1 считает <code>half = power(a, n/2)</code> один раз и возвращает <code>half * half</code>. Вариант 2 возвращает <code>power(a, n/2) * power(a, n/2)</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Вариант 1: <code>T(n) = T(n/2) + 1</code>, один вызов и одно умножение. Вариант 2: <code>T(n) = 2T(n/2) + 1</code>, два вызова. В шаге 6 увидишь, что первый стоит <code>log n</code>, а второй n.</p>
+          <p class="oshibka">Считать варианты одинаковыми, «ведь результат тот же». Результат тот же, но во втором одно и то же считается дважды, и на каждом уровне вызовов вдвое больше.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Рекуррента: <code>T(n)</code> через <code>T</code> от меньших + база.</p>
+      <p><code>aT(n/b) + f(n)</code>: a вызовов, кусок в b раз меньше, f своя работа. Слияние <code>2T(n/2) + n</code>, бинпоиск <code>T(n/2) + 1</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>Раскрутка: когда задача уменьшается на единицу</h2>
+    <p>Бывает, что функция отрезает от задачи один элемент: <code>T(n) = T(n − 1) + n</code>, <code>T(1) = 1</code>. Так ведёт себя быстрая сортировка, когда ей не везёт с разбиением.</p>
+    <p>Подставляем формулу в саму себя, пока не дойдём до базы:</p>
+    <p><code>T(n) = n + T(n − 1) = n + (n − 1) + T(n − 2) = … = n + (n − 1) + … + 2 + 1</code></p>
+    <p class="novoe">Раскрутка: подставляем рекурренту в саму себя до базы и складываем то, что накопилось. Здесь вышла сумма <code>n(n + 1)/2 = Θ(n²)</code>.</p>
+    <p>Проверка на числах: <code>T(1) = 1</code>, <code>T(2) = 3</code>, <code>T(3) = 6</code>, <code>T(4) = 10</code>, <code>T(5) = 15 = 5 · 6 / 2</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Ханойские башни, головоломка про перекладывание n дисков. Чтобы решить, хватит её формулы: <code>T(n) = 2T(n − 1) + 1</code>, <code>T(1) = 1</code>. Посчитай T(2), T(3), T(4), угадай формулу и найди T(10).
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>1, 3, 7, 15. Похоже на <code>2ⁿ − 1</code>. Проверка подстановкой: <code>2(2ⁿ⁻¹ − 1) + 1 = 2ⁿ − 1</code>, сходится. <code>T(10) = 1023</code>, порядок <code>Θ(2ⁿ)</code>.</p>
+          <p class="oshibka">Ответить <code>Θ(n)</code>, потому что «задача уменьшается на один, как в примере». Важно ещё, сколько вызовов: здесь их два, и на каждом уровне число вызовов удваивается.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Раскрутка: подставляю в себя до базы, складываю.</p>
+      <p><code>T(n − 1) + n → Θ(n²)</code>, <code>2T(n − 1) + 1 → 2ⁿ − 1</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>Дерево рекурсии</h2>
+    <p>Для деления пополам раскрутка путается. Нарисуем вызовы деревом для <code>T(n) = 2T(n/2) + n</code>: каждый вызов это узел, рядом пишем его собственную работу.</p>
+<pre><code>уровень 0:            n                → n
+уровень 1:       n/2      n/2          → n
+уровень 2:    n/4  n/4  n/4  n/4       → n
+…
+листья:       1 1 1 … 1  (n штук)      → n</code></pre>
+    <p class="novoe">Дерево рекурсии: узел это вызов, у узла пишем работу без учёта вложенных вызовов. <code>T(n)</code> равно сумме всех узлов. Удобно складывать по уровням.</p>
+    <p>Здесь на уровне i ровно <code>2ⁱ</code> узлов по <code>n/2ⁱ</code>, сумма уровня n. Уровней <code>log₂ n + 1</code>, потому что n делится пополам до 1. Итого <code>n(log₂ n + 1) = Θ(n log n)</code>.</p>
+    <p>Проверка на n = 8: <code>T(1) = 1</code>, <code>T(2) = 2 + 2 = 4</code>, <code>T(4) = 8 + 4 = 12</code>, <code>T(8) = 24 + 8 = 32</code>. А формула даёт <code>8 · (3 + 1) = 32</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> По той же формуле найди T(16) и проверь его по рекурренте через T(8) = 32.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Формула: <code>16 · (4 + 1) = 80</code>. Рекуррента: <code>2 · 32 + 16 = 80</code>.</p>
+          <p class="oshibka">Забыть уровень листьев и написать <code>n · log₂ n = 64</code>. Уровней на один больше, чем делений пополам. Для Θ это не важно, а для точного числа важно.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Дерево: узел = вызов, у узла его работа. T(n) = сумма по уровням.</p>
+      <p><code>2T(n/2) + n</code>: каждый уровень n, уровней <code>log₂ n + 1</code> → <code>Θ(n log n)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>Где сидит работа: в корне или в листьях</h2>
+    <p>В шаге 3 все уровни стоили одинаково. Так бывает не всегда.</p>
+    <p><code>T(n) = 2T(n/2) + n²</code>. Уровень i: <code>2ⁱ</code> узлов по <code>(n/2ⁱ)²</code>, сумма <code>n²/2ⁱ</code>. Уровни стоят n², n²/2, n²/4, … Это геометрическая сумма, она меньше удвоенного первого члена: <code>T(n) &lt; 2n²</code>. Почти вся работа в корне, ответ <code>Θ(n²)</code>.</p>
+    <p><code>T(n) = 4T(n/2) + n</code>. Уровень i: <code>4ⁱ</code> узлов по <code>n/2ⁱ</code>, сумма <code>2ⁱ · n</code>. Уровни растут: n, 2n, 4n, … Теперь самый тяжёлый последний уровень, листья. Уровней <code>log₂ n</code>, и на каждом узлов вчетверо больше, поэтому листьев <code>4^(log₂ n)</code>. Перепишем 4 как 2²: <code>4^(log₂ n) = (2^(log₂ n))² = n²</code>, потому что <code>2^(log₂ n) = n</code> по смыслу логарифма. Ответ <code>Θ(n²)</code>.</p>
+    <p class="novoe">Суммы уровней убывают в одно и то же число раз: правит корень, ответ <code>Θ(f(n))</code>. Равны: <code>Θ(f(n) · log n)</code>. Растут: правят листья, ответ равен числу листьев.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> <code>T(n) = 3T(n/2) + n</code>. Чему равна сумма уровня i? Кто правит: корень, все поровну или листья?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Уровень i: <code>3ⁱ</code> узлов по <code>n/2ⁱ</code>, сумма <code>(3/2)ⁱ · n</code>. Растёт в 1.5 раза с каждым уровнем, значит правят листья. Сколько их, посчитаем в следующем шаге.</p>
+          <p class="oshibka">Смотреть только на корень и ответить <code>Θ(n)</code>, «ведь работа f = n». Работа одного вызова маленькая, но вызовов втрое больше на каждом уровне, и внизу их сумма обгоняет корень.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Уровни убывают → корень, <code>Θ(f)</code>. Равны → <code>Θ(f log n)</code>. Растут → листья.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>Число листьев: n в степени log_b a</h2>
+    <p>У дерева для <code>aT(n/b) + f(n)</code> на каждом уровне вызовов в a раз больше, а уровней <code>log_b n</code>: столько раз n делится на b до 1. Запись <code>log_b n</code> значит логарифм n по основанию b, например <code>log_3 9 = 2</code>. Значит листьев <code>a^(log_b n)</code>.</p>
+    <p>Такую запись переводят в степень n по правилу из <a href="../matan/baza.html#shag-11">шага 11 матана</a>: <code>a^(log_b n) = n^(log_b a)</code>.</p>
+    <p class="novoe">У дерева <code>aT(n/b) + f(n)</code> листьев <code>n^(log_b a)</code>. Это число называют критической функцией, с ним сравнивают <code>f(n)</code>.</p>
+    <p>Примеры: <code>4T(n/2)</code> даёт <code>n^(log₂ 4) = n²</code> листьев. <code>2T(n/2)</code> даёт <code>n¹ = n</code>. <code>3T(n/2)</code> даёт <code>n^(log₂ 3) ≈ n^1.585</code>. <code>T(n/2)</code> даёт <code>n⁰ = 1</code>, дерево без ветвлений.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько листьев у <code>8T(n/2)</code>, <code>9T(n/3)</code> и <code>2T(n/4)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>n^(log₂ 8) = n³</code>. <code>n^(log₃ 9) = n²</code>. <code>n^(log₄ 2) = n^½ = √n</code>, потому что <code>4^½ = 2</code>.</p>
+          <p class="oshibka">Перепутать a и b и написать <code>n^(log_a b)</code>. Для <code>2T(n/4)</code> вышло бы <code>n²</code> вместо <code>√n</code>. Под логарифмом число вызовов a, основание это во сколько раз уменьшается кусок, b.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Листьев у <code>aT(n/b)</code>: <code>a^(log_b n) = n^(log_b a)</code>.</p>
+      <p>Глубина дерева <code>log_b n</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>Мастер-теорема</h2>
+    <p>Шаги 4 и 5 вместе дают готовый ответ без рисования. Сравниваем работу корня <code>f(n)</code> с числом листьев <code>n^(log_b a)</code>.</p>
+    <p class="novoe">Мастер-теорема для <code>T(n) = aT(n/b) + f(n)</code>, где a ≥ 1, b &gt; 1. Случай 1: f меньше листьев хотя бы в <code>n^ε</code> раз при каком-то ε &gt; 0, ответ <code>Θ(n^(log_b a))</code>. Случай 2: f равно листьям по порядку, ответ <code>Θ(n^(log_b a) · log n)</code>. Случай 3: f больше листьев хотя бы в <code>n^ε</code> раз, ответ <code>Θ(f(n))</code>.</p>
+    <p>ε («эпсилон») значит «какое-то положительное число, пусть маленькое». «Меньше в <code>n^ε</code> раз» значит меньше по степени, а не на логарифм.</p>
+    <div class="tablica"><table>
+      <tr><th>рекуррента</th><th>листья</th><th>f</th><th>случай</th><th>ответ</th></tr>
+      <tr><td>4T(n/2) + n</td><td>n²</td><td>n</td><td>1</td><td>Θ(n²)</td></tr>
+      <tr><td>4T(n/2) + n²</td><td>n²</td><td>n²</td><td>2</td><td>Θ(n² log n)</td></tr>
+      <tr><td>4T(n/2) + n³</td><td>n²</td><td>n³</td><td>3</td><td>Θ(n³)</td></tr>
+      <tr><td>2T(n/2) + n</td><td>n</td><td>n</td><td>2</td><td>Θ(n log n)</td></tr>
+    </table></div>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Реши мастер-теоремой: а) <code>T(n/2) + 1</code>, б) <code>2T(n/4) + √n</code>, в) <code>7T(n/2) + n²</code>, г) <code>2T(n/2) + 1</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Листьев <code>n⁰ = 1</code>, f = 1, случай 2: <code>Θ(log n)</code>, это бинарный поиск. б) Листьев <code>√n</code>, f = √n, случай 2: <code>Θ(√n log n)</code>. в) Листьев <code>n^(log₂ 7) ≈ n^2.81</code>, f = n² меньше, случай 1: <code>Θ(n^(log₂ 7))</code>, это алгоритм Штрассена для матриц. г) Листьев n, f = 1 меньше, случай 1: <code>Θ(n)</code>. Это вариант 2 из шага 1.</p>
+          <p class="oshibka">В пункте а сказать «случай 1, ведь f = 1 совсем маленькая». Сравнивают не с n, а с числом листьев, а их здесь тоже 1. Равны, значит случай 2.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Сравни f с <code>n^(log_b a)</code>:</p>
+      <p>меньше по степени → <code>Θ(n^(log_b a))</code>. Равно → <code>Θ(n^(log_b a) log n)</code>. Больше по степени → <code>Θ(f)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>Когда мастер-теорема молчит</h2>
+    <p>У случая 3 есть ещё условие регулярности: <code>a · f(n/b) ≤ c · f(n)</code> с каким-то c &lt; 1. По-простому: суммы уровней правда убывают. Для <code>4T(n/2) + n³</code>: <code>4 · (n/2)³ = ½n³</code>, c = ½, условие выполнено. Для обычных степеней n оно выполняется само.</p>
+    <p class="novoe">Мастер-теорема не применима в четырёх случаях. Задача уменьшается вычитанием, как <code>T(n − 1)</code>. Куски разного размера, как <code>T(n/3) + T(2n/3)</code>. Число вызовов a не постоянное. Или f отличается от числа листьев только в <code>log n</code> раз.</p>
+    <p>Последний случай самый коварный. <code>2T(n/2) + n log n</code>: листьев n, а f больше в <code>log n</code> раз. Это меньше, чем <code>n^ε</code> при любом ε, так что ни случай 2, ни случай 3. Тогда складываем уровни дерева руками, логарифм тут по основанию 2.</p>
+    <ol>
+      <li>На уровне i стоят <code>2ⁱ</code> узлов, у каждого кусок <code>n/2ⁱ</code>, и работа узла <code>(n/2ⁱ) · log(n/2ⁱ)</code>.</li>
+      <li>Логарифм дроби: <code>log(n/2ⁱ) = log n − i</code>. Умножаем на число узлов: уровень стоит <code>2ⁱ · (n/2ⁱ) · (log n − i) = n(log n − i)</code>.</li>
+      <li>Складываем уровни i = 0, 1, …, log n − 1: <code>n · (log n + (log n − 1) + … + 1) = n · log n · (log n + 1) / 2</code>. Это сумма 1 + 2 + … + k из прошлого урока.</li>
+      <li>Итого <code>Θ(n log² n)</code>. Запись <code>log² n</code> значит <code>log n · log n</code>.</li>
+    </ol>
+    <p>Для кусков разного размера на лекции была теорема Акра–Бацци. <code>T(n/3) + T(2n/3) + n</code> там решается за <code>Θ(n log n)</code>: куски в сумме дают n, и каждый полный уровень дерева стоит n. Самая длинная ветка идёт по кускам 2n/3, уровней около <code>log n</code>, отсюда n log n.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Где мастер-теорема работает, реши. Где нет, скажи почему. а) <code>3T(n/4) + n²</code>, б) <code>T(n − 1) + 1</code>, в) <code>2T(n/2) + n / log n</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Листьев <code>n^(log₄ 3) ≈ n^0.79</code>, f = n² больше по степени. Регулярность: <code>3 · (n/4)² = 3/16 · n²</code>, c = 3/16 &lt; 1. Случай 3, <code>Θ(n²)</code>. б) Вычитание, теорема молчит. Раскрутка: <code>1 + 1 + … + 1 = n</code>, <code>Θ(n)</code>. в) f меньше листьев n только в <code>log n</code> раз, это дыра между случаями 1 и 2.</p>
+          <p class="oshibka">В пункте в выбрать случай 1, «ведь <code>n / log n</code> меньше n». Для случая 1 нужно меньше в <code>n^ε</code> раз, а <code>log n</code> растёт медленнее любой степени n.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Не применима: <code>T(n − 1)</code>, разные куски, a не число, разница с листьями только в <code>log n</code>.</p>
+      <p>Случай 3 требует <code>a·f(n/b) ≤ c·f(n)</code>, c &lt; 1.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>Дерево решений: нижняя граница сортировки</h2>
+    <p>Слияние сортирует за <code>n log n</code>. Можно ли быстрее, если элементы только сравнивать? Ответ с лекции: нельзя. Это утверждение не про один алгоритм, а про все сразу.</p>
+    <p>Любую сортировку сравнениями можно нарисовать деревом решений. В узле сравнение «x₁ &lt; x₂?», две ветки «да» и «нет», в листе готовый порядок. Для трёх элементов:</p>
+<pre><code>x1&lt;x2 ?
+├─да─ x2&lt;x3 ?
+│     ├─да── x1&lt;x2&lt;x3
+│     └─нет─ x1&lt;x3 ?
+│           ├─да── x1&lt;x3&lt;x2
+│           └─нет─ x3&lt;x1&lt;x2
+└─нет─ x1&lt;x3 ?
+      ├─да── x2&lt;x1&lt;x3
+      └─нет─ x2&lt;x3 ?
+            ├─да── x2&lt;x3&lt;x1
+            └─нет─ x3&lt;x2&lt;x1</code></pre>
+    <p>Разных порядков трёх элементов <code>3! = 6</code>, и у каждого должен быть свой лист, иначе на одном из входов алгоритм ошибётся. Высота дерева это самый длинный путь, то есть число сравнений в худшем случае. Дерево бинарное, у каждого узла не больше двух веток. Поэтому с каждым уровнем узлов становится не больше чем вдвое больше: 1, 2, 4, …, и в дереве высоты h листьев не больше <code>2ʰ</code>.</p>
+    <p class="novoe">Листьев не меньше <code>n!</code> и не больше <code>2ʰ</code>. Значит <code>2ʰ ≥ n!</code>, и <code>h ≥ log₂ n!</code>. Любая сортировка сравнениями делает в худшем случае не меньше <code>⌈log₂ n!⌉</code> сравнений.</p>
+    <p>Для трёх: <code>log₂ 6 ≈ 2.58</code>, округляем вверх, 3. В дереве выше так и есть.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Не меньше скольких сравнений нужно в худшем случае, чтобы отсортировать 4 элемента? А 5? Подсказка: <code>2⁴ = 16</code>, <code>2⁵ = 32</code>, <code>2⁷ = 128</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>4 элемента: <code>4! = 24</code>. <code>2⁴ = 16 &lt; 24 ≤ 32 = 2⁵</code>, значит 5 сравнений. 5 элементов: <code>5! = 120</code>, <code>64 &lt; 120 ≤ 128</code>, значит 7.</p>
+          <p class="oshibka">Считать, что граница это <code>log₂ n</code>, то есть 2 для четырёх элементов. Листья это не элементы, а все их порядки, их <code>n!</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Дерево решений: узел = сравнение, лист = порядок. Листьев ≥ n!, ≤ 2ʰ.</p>
+      <p>Сравнений в худшем ≥ <code>⌈log₂ n!⌉</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>log₂ n! растёт как n log n</h2>
+    <p>Осталось понять, что такое <code>log₂ n!</code> по порядку. Оценим n! сверху и снизу.</p>
+    <p>Сверху: <code>n! = 1 · 2 · … · n ≤ n · n · … · n = nⁿ</code>. По правилу <code>log(x^k) = k log x</code> из <a href="../matan/baza.html#shag-2">шага 2 матана</a>: <code>log₂ n! ≤ n log₂ n</code>.</p>
+    <p>Снизу: в произведении n! верхняя половина множителей, от n/2 до n, каждый не меньше n/2. Их n/2 штук. Значит <code>n! ≥ (n/2)^(n/2)</code> и <code>log₂ n! ≥ (n/2) · log₂(n/2)</code>.</p>
+    <p>Почему низ тоже порядка n log n. <code>log₂(n/2) = log₂ n − 1</code>. При n ≥ 4 единица не больше половины <code>log₂ n</code>, поэтому <code>log₂ n − 1 ≥ ½ log₂ n</code>. Тогда <code>(n/2) · log₂(n/2) ≥ (n/2) · ½ log₂ n = ¼ n log₂ n</code>. Сверху <code>n log₂ n</code>, снизу <code>¼ n log₂ n</code>, это Θ по определению из прошлого урока.</p>
+    <p class="novoe"><code>log₂ n! = Θ(n log n)</code>. Поэтому сортировка сравнениями не бывает быстрее <code>n log n</code>, а слияние с его <code>Θ(n log n)</code> оптимально.</p>
+    <p>На числах при n = 8: <code>8! = 40 320</code>, <code>log₂ 40 320 ≈ 15.3</code>. Сверху <code>8 · 3 = 24</code>, снизу <code>4 · 2 = 8</code>. Число зажато между ними.</p>
+    <p>Граница только для сравнений. Сортировка подсчётом использует само число как номер ячейки массива и обходит <code>n log n</code>. Это тема ПР2.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Не меньше скольких сравнений нужно для 10 элементов? <code>10! = 3 628 800</code>, <code>2²¹ = 2 097 152</code>, <code>2²² = 4 194 304</code>. Сравни с <code>n log₂ n</code> при n = 10.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>2²¹ &lt; 10! ≤ 2²²</code>, значит не меньше 22 сравнений. <code>n log₂ n = 10 · 3.32 ≈ 33</code>. Граница 22 меньше, но того же порядка: верхняя оценка <code>n log n</code>, нижняя <code>(n/2) log(n/2) = 5 · 2.32 ≈ 12</code>.</p>
+          <p class="oshibka">Думать, что граница запрещает любую быструю сортировку. Она запрещает только сортировки, которые узнают порядок одними сравнениями. Подсчёт и поразрядная сортировка устроены иначе.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>(n/2)^(n/2) ≤ n! ≤ nⁿ</code> → <code>log₂ n! = Θ(n log n)</code>.</p>
+      <p>Сортировка сравнениями <code>Ω(n log n)</code>, слияние оптимально.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: рекурренты и мастер-теорема">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: реши в тетради, впиши ответ и ход решения в поле и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Раскруткой реши <code>T(n) = T(n − 1) + 2</code>, <code>T(1) = 0</code>. Найди точную формулу и Θ.
+      <textarea name="z1" placeholder="T(n) = …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Нарисуй дерево для <code>T(n) = 2T(n/2) + 1</code>, <code>T(1) = 1</code>. Сколько узлов на уровне i, чему равна сумма всех уровней при n = 8?
+      <textarea name="z2" placeholder="Уровни … сумма …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Мастер-теорема: а) <code>9T(n/3) + n</code>, б) <code>T(2n/3) + 1</code>, в) <code>3T(n/3) + n</code>, г) <code>2T(n/2) + n²</code>. Для каждой: число листьев, случай, ответ. В пункте б кусок <code>2n/3 = n / (3/2)</code>, то есть b = 3/2, а a = 1.
+      <textarea name="z3" placeholder="а) … б) … в) … г) …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Почему мастер-теорема не решает <code>T(n) = 4T(n/2) + n² log n</code>? Чему, по-твоему, равен ответ, если сложить уровни дерева? Действуй как в шаге 7 с <code>2T(n/2) + n log n</code>.
+      <textarea name="z4" placeholder="…" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Сколько сравнений минимум нужно в худшем случае, чтобы отсортировать 6 элементов? <code>6! = 720</code>.
+      <textarea name="z5" placeholder="…" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Бинпоиск и слияние</td><td>Модуль X1.5: бинарный поиск за <code>log n</code> и <code>sorted()</code> за <code>n log n</code>. Теперь видно, откуда эти числа и почему сортировать быстрее нельзя.</td></tr>
+      <tr><td>Штрассен, блоки</td><td>Модуль A5: внимание в трансформере это умножения матриц. Оценка «сколько стоит, если вдвое длиннее текст» делается тем же сравнением степеней.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../alg/">← Алгоритмы</a> · <a href="../povtorenie/alg.html">Повторение</a> · <a href="alg-kuchi.html">Дальше: кучи и амортизация →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

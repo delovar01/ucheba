@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: алгоритмы — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · алгоритмы</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Алгоритмы: проверь себя</h1>
+  <p class="tiho">Лекции 17.09, 24.09, 5.10 и лабы 26.09, 3.10, 10.10. Числа в вопросах новые, не из уроков. Решай в тетради, потом открывай ответ.</p>
+  <p>Не помнишь, вернись в урок: <a href="../uroki/alg-asimptotika.html">асимптотика</a>, <a href="../uroki/alg-master-teorema.html">мастер-теорема</a>, <a href="../uroki/alg-lineynye-sortirovki.html">линейные сортировки</a>,<a href="../uroki/alg-kuchi.html">кучи</a>, <a href="../uroki/alg-rekursiya.html">Java и рекурсия</a>, <a href="../uroki/alg-grafy-obhody.html">BFS и DFS</a>, <a href="../uroki/alg-deykstra.html">Дейкстра</a>.</p>
+
+  <h2>Одной страницей</h2>
+  <div class="tablica"><table>
+    <tr><th>что</th><th>правило</th></tr>
+    <tr><td>O, Ω, Θ</td><td>≤, ≥, = с точностью до множителя, при n ≥ n₀</td></tr>
+    <tr><td>упрощение</td><td>множители выбросить, в сумме оставить самое быстрое</td></tr>
+    <tr><td>циклы</td><td>подряд складываем, вложенные перемножаем, зависимый пишем суммой, ×2 даёт log n</td></tr>
+    <tr><td>листья дерева</td><td><code>aT(n/b)</code>: <code>n^(log_b a)</code></td></tr>
+    <tr><td>мастер-теорема</td><td>f меньше листьев по степени → листья, равно → листья · log n, больше по степени → f. Разница только в log n → теорема молчит</td></tr>
+    <tr><td>нижняя граница</td><td>сортировка сравнениями ≥ <code>⌈log₂ n!⌉ = Θ(n log n)</code></td></tr>
+    <tr><td>подсчёт</td><td>счётчики, префиксы, справа налево, <code>O(n + k)</code>, устойчив</td></tr>
+    <tr><td>поразрядная, карманная</td><td>LSD устойчивыми проходами <code>O(d(n + b))</code>. Карманы <code>⌊n · x⌋</code>, в среднем <code>O(n)</code>, худший <code>O(n²)</code></td></tr>
+    <tr><td>куча в массиве</td><td>сыновья <code>2i+1</code>, <code>2i+2</code>, родитель <code>(i−1)//2</code></td></tr>
+    <tr><td>операции кучи</td><td>вставка вверх, извлечение вниз, обе <code>O(log n)</code>, построение <code>O(n)</code></td></tr>
+    <tr><td>амортизация</td><td>удвоение: всего &lt; 2n, <code>O(1)</code> на добавление</td></tr>
+    <tr><td>рекурсия</td><td>база + шаг к базе, память <code>O(глубина)</code>, откат после «беру»</td></tr>
+    <tr><td>BFS, DFS</td><td>очередь и волны, рекурсия вглубь, оба <code>O(n + m)</code></td></tr>
+    <tr><td>Дейкстра</td><td>фиксируем ближайшую, релаксируем, веса ≥ 0</td></tr>
+  </table></div>
+
+  <h2>Вопросы</h2>
+
+  <details class="vopros">
+    <summary>1. Упрости O(4n³ + n² log n + 1000) и O(log₅ n + 7).</summary>
+    <div><p><code>O(n³)</code>: <code>n² log n</code> ниже <code>n³</code> по лестнице, ведь <code>log n</code> растёт медленнее n. <code>O(log n)</code>: основание логарифма не пишут, число 7 младше логарифма.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>2. Начинаем с i = 1. Пока i ≤ n, внутренний цикл делает i шагов, потом i удваивается. Сколько всего шагов внутреннего цикла при n = 64 и какой порядок?</summary>
+    <div><p>i проходит 1, 2, 4, …, 64. Сумма <code>1 + 2 + … + 64 = 127</code>, меньше <code>2n</code>. Порядок <code>Θ(n)</code>, а не <code>n log n</code>: внутренний цикл идёт до i, а не до n.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>3. Реши мастер-теоремой T(n) = 8T(n/2) + n².</summary>
+    <div><p>Листьев <code>n^(log₂ 8) = n³</code>. f = n² меньше по степени, случай 1. Ответ <code>Θ(n³)</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>4. Не меньше скольких сравнений нужно в худшем случае, чтобы отсортировать 7 элементов? 7! = 5040.</summary>
+    <div><p><code>2¹² = 4096 &lt; 5040 ≤ 8192 = 2¹³</code>, значит не меньше 13. Дерево решений должно иметь 5040 листьев, а у дерева высоты 12 их не больше 4096.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>5. Вставь 1 в min-кучу [2, 4, 3, 6, 5]. Какой массив получится?</summary>
+    <div><p>В конец, индекс 5. Родитель 2, там 3, меняем: <code>[2, 4, 1, 6, 5, 3]</code>. Родитель 0, там 2, меняем: <code>[1, 4, 2, 6, 5, 3]</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>6. Динамический массив удваивается, ёмкость сначала 1. Сколько всего операций, записей и копирований, на 32 добавления?</summary>
+    <div><p>Записей 32. Копирования при ёмкости 1, 2, 4, 8, 16: <code>1 + 2 + 4 + 8 + 16 = 31</code>. Всего 63, меньше <code>2 · 32</code>, по <code>O(1)</code> на добавление.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>7. Чему равен digitSum(4096) и сколько вызовов будет в стеке одновременно? База n &lt; 10, шаг n % 10 + digitSum(n / 10).</summary>
+    <div><p><code>6 + 9 + 0 + 4 = 19</code>. Вызовы для 4096, 409, 40 и 4, все ждут друг друга, глубина 4.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>8. Сколько подмножеств у {2, 4, 6}? Какие из них дают в сумме 6? Зачем в переборе строка отката remove?</summary>
+    <div><p><code>2³ = 8</code> подмножеств. Сумма 6 у <code>{6}</code> и <code>{2, 4}</code>. Откат убирает элемент после ветки «беру», чтобы следующая ветка начала с того же набора. Без него элементы копятся и печатается лишнее.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>9. Граф: рёбра 1–2, 2–3, 3–4, 1–4, 4–5. BFS из 1, соседи по возрастанию. Расстояния до всех вершин?</summary>
+    <div><p>1:0, 2:1, 4:1, 3:2, 5:2. Из очереди выходят 1, 2, 4, 3, 5. До 3 два ребра любым путём, через 2 или через 4.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>10. Вершины 1–7, рёбра 1–2, 3–4, 4–5, 6–7. Сколько компонент связности и как их посчитать кодом?</summary>
+    <div><p>Три: {1, 2}, {3, 4, 5}, {6, 7}. Перебираем вершины по порядку и от каждой непосещённой запускаем DFS с общим массивом меток. Запусков будет 3.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>11. Ориентированный граф: A→B 6, A→C 2, C→B 3, B→D 1, C→D 7. Расстояния Дейкстрой из A?</summary>
+    <div><p>Фиксируем A: B = 6, C = 2. Фиксируем C: B = min(6, 5) = 5, D = 9. Фиксируем B: D = min(9, 6) = 6. Фиксируем D. Итог A 0, C 2, B 5, D 6.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>12. Почему Дейкстра не работает с отрицательными весами и что брать вместо неё?</summary>
+    <div><p>Дейкстра фиксирует ближайшую вершину навсегда, считая, что обходной путь только длиннее. С отрицательным ребром обход через дальнюю вершину может оказаться короче, а исправить зафиксированное уже нельзя. Вместо неё Форд–Беллман, <code>O(n · m)</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>13. Отсортируй подсчётом [1, 3, 1, 0, 3], k = 3. Запиши счётчики, префиксные суммы и итог.</summary>
+    <div><p>Счётчики <code>[1, 2, 0, 2]</code>, префиксы <code>[1, 3, 3, 5]</code>. Справа налево: 3 в <code>B[4]</code>, 0 в <code>B[0]</code>, 1 в <code>B[2]</code>, 3 в <code>B[3]</code>, 1 в <code>B[1]</code>. Итог <code>[0, 1, 1, 3, 3]</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>14. Почему в устойчивом подсчёте по входу идут справа налево? Что сломается слева направо?</summary>
+    <div><p>После префиксов <code>C[x]</code> указывает на конец места для x. С конца входа последний из равных встаёт на последнее место, предыдущий левее, и порядок равных сохраняется. Слева направо первый из равных займёт последнее место, порядок равных развернётся, и поразрядная сортировка на таком проходе даст неверный ответ.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>15. Отсортируй поразрядно с младшей цифры [324, 142, 321, 244]. Что после каждого прохода?</summary>
+    <div><p>По единицам: <code>[321, 142, 324, 244]</code>. По десяткам: <code>[321, 324, 142, 244]</code>. По сотням: <code>[142, 244, 321, 324]</code>. У 321 и 324 одна сотня, их порядок сохранил устойчивый проход.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>16. Миллион целых, каждое меньше 10¹². Подсчёт, поразрядная или карманная? Сколько проходов при основании 10⁶ и примерно шагов?</summary>
+    <div><p>Подсчёту нужен массив на <code>10¹²</code> ячеек, столько памяти нет. Карманная рассчитана на равномерные дроби. Поразрядная в основании <code>10⁶</code>: у числа меньше <code>10¹²</code> два разряда, значит 2 прохода по <code>10⁶ + 10⁶</code>, всего около <code>4 · 10⁶</code> шагов.</p></div>
+  </details>
+
+  <p class="niz"><a href="../alg/">← Алгоритмы</a> · <a href="./">Всё повторение</a> · <a href="../uroki/alg-asimptotika.html">Первый урок</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

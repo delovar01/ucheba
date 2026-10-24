@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Повторение: Java — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Повторение · Java</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Java: проверь себя</h1>
+  <p class="tiho">Три урока под ПР1–ПР3, 14 вопросов. Числа в вопросах новые, не из уроков. Ответь вслух или в голове, потом открывай ответ. Все ответы с выводом программы проверены запуском.</p>
+  <p>Не помнишь, вернись в урок: 1–5 <a href="../uroki/java-tipy-if.html">типы, формулы и if</a>, 6–10 <a href="../uroki/java-cikly-metody.html">циклы и методы</a>, 11–14 <a href="../uroki/java-massivy.html">массивы</a>.</p>
+
+  <h2>Одной страницей</h2>
+  <div class="tablica"><table>
+    <tr><th>что</th><th>как</th></tr>
+    <tr><td>объявление</td><td><code>int n = 5;</code>, <code>long</code> с L, <code>float</code> с f, <code>char</code> в одинарных</td></tr>
+    <tr><td>деление</td><td>целое / целое = целое, дробь: <code>(double) a / b</code></td></tr>
+    <tr><td>степень</td><td><code>Math.pow(x, n)</code>, знак <code>^</code> не степень</td></tr>
+    <tr><td>ввод</td><td><code>new Scanner(System.in).useLocale(Locale.US)</code>, проверка <code>hasNextDouble()</code> до чтения</td></tr>
+    <tr><td>ветки</td><td><code>if … else if … else</code>, срабатывает первая верная</td></tr>
+    <tr><td>держу лучшего</td><td><code>max = a</code>, дальше отдельный <code>if</code> на каждое</td></tr>
+    <tr><td>цикл</td><td>знаю число повторов <code>for</code>, не знаю <code>while</code>, хотя бы раз <code>do-while</code></td></tr>
+    <tr><td>метод</td><td><code>static тип имя(параметры) { return …; }</code>, получает копию числа</td></tr>
+    <tr><td>массив</td><td>индексы с 0 до <code>length - 1</code>, вывод <code>Arrays.toString(a)</code></td></tr>
+    <tr><td>участки</td><td>флаг <code>inRun</code>, считать в начале участка</td></tr>
+  </table></div>
+
+  <h2>Вопросы</h2>
+
+  <details class="vopros">
+    <summary>1. Что напечатает <code>System.out.println(9 / 4 + " " + 9 % 4 + " " + 9 / 4.0);</code>?</summary>
+    <div><p><code>2 1 2.25</code>. Целое деление, остаток, деление с дробью: 4.0 дробное, поэтому и ответ дробный.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>2. Почини строки <code>float t = 36.6;</code> и <code>char c = "x";</code>.</summary>
+    <div><p><code>float t = 36.6f;</code>: число с точкой без f считается double. <code>char c = 'x';</code>: символ пишется в одинарных кавычках, двойные дают строку.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>3. Функция <code>y = √(x − 1) / (x + 2)</code>. Какое условие «не определена» достаточно написать?</summary>
+    <div><p><code>x &lt; 1</code>. Знаменатель ноль при x = −2, но −2 меньше 1 и уже попало под запрет корня. Писать <code>x &lt; 1 || x == -2</code> не ошибка, просто вторая часть лишняя.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>4. Цепочка: сначала <code>if (s &gt;= 50)</code> «удовлетворительно», потом <code>else if (s &gt;= 85)</code> «отлично». Что получит s = 90?</summary>
+    <div><p>«удовлетворительно». Цепочка берёт первую верную ветку, 90 ≥ 50 верно, до проверки на 85 дело не дойдёт. Условия ставят от самого строгого к мягкому.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>5. Почему <code>hasNextDouble()</code> проверяют до <code>nextDouble()</code>, а не после?</summary>
+    <div><p>Если ввели буквы, <code>nextDouble()</code> сам падает с <code>InputMismatchException</code>, и до проверки программа не доходит. <code>hasNextDouble()</code> только заглядывает во ввод и ничего не забирает.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>6. Сколько раз надо целочисленно разделить 1000 на 3, чтобы получился 0? Какой цикл возьмёшь?</summary>
+    <div><p>7 раз: 333, 111, 37, 12, 4, 1, 0. Число шагов заранее неизвестно, значит <code>while (n &gt; 0)</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>7. <code>k = 10</code>. Чему равно k после <code>while (k &lt; 5) k++;</code>, и чему после <code>do { k++; } while (k &lt; 5);</code>, если начать снова с 10?</summary>
+    <div><p>10 и 11. <code>while</code> проверяет условие до тела и не выполнит его ни разу. <code>do-while</code> выполняет тело хотя бы один раз.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>8. Сумма нечётных чисел от 1 до 9 одним <code>for</code>. Как будет выглядеть заголовок цикла и что выйдет?</summary>
+    <div><p><code>for (int i = 1; i &lt;= 9; i += 2)</code>, накопитель с 0, ответ 25: 1 + 3 + 5 + 7 + 9.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>9. <code>static int twice(int x) { x = x * 2; return x; }</code>. В <code>main</code>: <code>int a = 4; twice(a); System.out.println(a);</code>. Что напечатает?</summary>
+    <div><p><code>4</code>. Метод удвоил свою копию и вернул 8, но ответ никто не забрал. Нужно <code>a = twice(a);</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>10. Почему не собирается <code>static double half(double x) { double h = x / 2; }</code>?</summary>
+    <div><p>Метод обещает вернуть double, а <code>return</code> нет. Компилятор скажет <code>missing return statement</code>. Нужно <code>return x / 2;</code>.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>11. <code>int[] a = {6, 1, 8};</code>. Что даст <code>a[a.length - 1]</code>, а что <code>a[3]</code>?</summary>
+    <div><p>8, последний элемент. <code>a[3]</code> уронит программу с <code>ArrayIndexOutOfBoundsException</code>: индексы только 0, 1, 2.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>12. Массив <code>{-3, -7}</code>, максимум начали с <code>max = 0</code>. Что выйдет и как правильно?</summary>
+    <div><p>Выйдет 0, хотя нуля в массиве нет. Правильно начать с <code>max = a[0]</code> и цикл с <code>i = 1</code>, тогда −3.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>13. По правилу Павлова сколько участков убывания в <code>{7, 7, 3, 5, 2, 2, 9}</code>?</summary>
+    <div><p>Два: <code>7, 7, 3</code> и <code>5, 2, 2</code>. Равные соседи участок не рвут, рвёт только рост: 3 и 5, 2 и 9.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>14. Чем отличаются <code>System.out.println(a)</code> и <code>System.out.println(Arrays.toString(a))</code> для массива?</summary>
+    <div><p>Первое печатает служебный адрес вроде <code>[I@…</code>, второе содержимое <code>[6, 1, 8]</code>. Для <code>Arrays</code> нужен <code>import java.util.Arrays;</code>.</p></div>
+  </details>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="./">Всё повторение</a> · <a href="../uroki/java-massivy.html">Урок</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

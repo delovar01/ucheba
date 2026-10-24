@@ -257,6 +257,16 @@ pre code { font-size: var(--t-mel); }
 .kom { color: var(--tekst-2); font-style: italic; }
 
 .tablica { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: var(--o3) 0; max-width: 100%; }
+/* длинная формула листается сама, страница на телефоне не уезжает вбок */
+.katex-display { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; -webkit-overflow-scrolling: touch; }
+.katex-display > .katex { white-space: nowrap; }
+.katex.dlinnaya { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 2px 0; -webkit-overflow-scrolling: touch; }
+/* запасной предел: ничего не тянет страницу вбок, даже если вылезло до загрузки стилей формул */
+body { overflow-x: clip; }
+main { overflow-wrap: break-word; }
+/* таблица без обёртки .tablica тоже листается внутри себя */
+:not(.tablica) > table { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.ml-blok table { display: table; }
 .tablica .imya { font-size: var(--t-mel); color: var(--tekst-2); margin-bottom: 2px; font-family: var(--shrift-kod); }
 .tablica .podpis { font-size: var(--t-mel); color: var(--tekst-2); margin-bottom: 2px; }
 table { border-collapse: collapse; font-size: var(--t-mel); line-height: 1.4; }
@@ -282,7 +292,8 @@ tr.kuchka-4 td { background: var(--oshibka-fon); }
 .zadacha { margin: var(--o5) 0; }
 .zadacha textarea {
   display: block; width: 100%; min-height: 104px; margin-top: var(--o2);
-  font: 400 var(--t-mel)/1.5 var(--shrift-kod);
+  /* не меньше 16px: иначе айфон приближает страницу при вводе и она уезжает вбок */
+  font: 400 1rem/1.5 var(--shrift-kod);
   background: var(--kod-fon); color: var(--tekst);
   border: 1px solid var(--linia); border-radius: var(--r); padding: var(--o3);
 }
@@ -421,3 +432,19 @@ details.shpargalka ol { list-style: none; padding: var(--o2) var(--o4) var(--o3)
 details.shpargalka li { margin: var(--o3) 0; font-size: var(--t-mel); }
 details.shpargalka li > a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
 details.shpargalka li p { margin: var(--o1) 0; }
+
+/* пробный тест: вопрос с вариантами, ответ под кнопкой */
+.probnyy-v { border-top: 1px solid var(--linia); margin-top: var(--o5); padding-top: var(--o3); }
+.probnyy-v > p:first-child { font-weight: 600; }
+.probnyy-v label {
+  display: flex; gap: var(--o3); align-items: flex-start; min-height: 44px;
+  padding: var(--o2) var(--o3); margin: var(--o2) 0; cursor: pointer;
+  border: 1px solid var(--linia); border-radius: var(--r); background: var(--fon-2); line-height: 1.45;
+}
+.probnyy-v input[type="radio"] { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--akcent); }
+.probnyy-v label.verno { border-color: var(--ok); background: var(--ok-fon); }
+.probnyy-v label.neverno { border-color: var(--oshibka); background: var(--oshibka-fon); }
+.itog-testa { margin: var(--o5) 0; padding: var(--o4); border-radius: var(--r-bol); background: var(--fon-2); border: 1px solid var(--linia); }
+.itog-testa p { margin: 0 0 var(--o3); }
+.gorit a.probnyy { font-weight: 600; }
+.gorit a.urok + a.probnyy { margin-left: var(--o3); }

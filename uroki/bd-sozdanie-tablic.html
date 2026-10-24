@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Создание базы и таблиц — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-sozdanie-tablic">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · Создание базы и таблиц</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Создание базы и таблиц</h1>
+  <p class="tiho">Базы данных · лабы 16.09 и 23.09 · около 55 минут</p>
+
+  <p>На лабе 16.09 вы создавали в DBeaver учебную базу GrantPlatform, а 23.09 каждый начал свою по теме самостоятельной 1. Твоя тема трекер ML-экспериментов, база <code>ml_tracker</code>. Самостоятельную 1 ты сдал 16.10, а этот урок разбирает, что в твоём скрипте значит каждое слово и какие правила в нём стоило бы добавить.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. В рамке «Главное из шага» суть шага в двух строках. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <div class="glavnoe">
+    <p>Важно: все примеры урока делай в отдельной пробной базе <code>probnaya</code>, как её создать, в шаге 1. Свою <code>ml_tracker</code> не трогай, на ней самостоятельная 2.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>CREATE DATABASE и активная база в DBeaver</h2>
+    <p>Открой SQL-редактор на подключении к PostgreSQL и выполни:</p>
+<pre><code class="sql">CREATE DATABASE probnaya;</code></pre>
+    <p class="novoe"><code>CREATE DATABASE имя</code> создаёт пустую базу. Это команда части SQL, которая строит устройство базы, она называется <b>DDL</b>. К ней же относятся <code>CREATE TABLE</code>, <code>ALTER</code> и <code>DROP</code>.</p>
+    <p>Теперь в DBeaver обнови список баз клавишей F5, найди <code>probnaya</code> и сверху в редакторе выбери её активной, чтобы рядом стояла зелёная галочка. Грабля с лабы GrantPlatform: если активна база по умолчанию <code>postgres</code>, все таблицы уедут туда, а твоя останется пустой.</p>
+    <p>Удалить базу целиком: <code>DROP DATABASE IF EXISTS probnaya;</code>. Слова <code>IF EXISTS</code> значат «если есть»: базы нет, нет и ошибки. Сам <code>DROP</code> удаляет насовсем, отменить нельзя. Запускай его, когда активна другая база, например <code>postgres</code>: базу, к которой ты сейчас подключён, PostgreSQL удалить не даст.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что ответит PostgreSQL, если выполнить <code>CREATE DATABASE probnaya;</code> второй раз? А если написать <code>CREATE DATABASE IF NOT EXISTS probnaya;</code>, как на слайдах для MySQL?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Первое: ошибка <code>database "probnaya" already exists</code>, «база уже есть». Второе: тоже ошибка, но про синтаксис. В PostgreSQL у <code>CREATE DATABASE</code> нет <code>IF NOT EXISTS</code>, это есть только в MySQL.</p>
+          <p class="oshibka">Переносить команды со слайдов MySQL один в один. На слайдах ещё <code>USE имя_базы</code> и <code>CHARACTER SET utf8mb4</code>, в PostgreSQL их нет: базу выбирают галочкой в DBeaver, а кодировка UTF8 там обычно стоит сама.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CREATE DATABASE имя;</code> потом F5 и зелёная галочка на своей базе.</p>
+      <p><code>DROP DATABASE IF EXISTS имя;</code> удаляет насовсем.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>CREATE TABLE: имя, столбцы, типы</h2>
+    <p>Самая простая таблица моделей, пока без всяких правил.</p>
+<pre><code class="sql">CREATE TABLE models (
+    name      VARCHAR(100),
+    framework VARCHAR(30)
+);</code></pre>
+    <p class="novoe"><code>CREATE TABLE имя ( … )</code> создаёт пустую таблицу. В скобках столбцы через запятую, у каждого имя и <b>тип</b>, то есть что в нём можно хранить. <code>VARCHAR(100)</code> значит «текст длиной до 100 символов». После последнего столбца запятой нет.</p>
+    <p>Если таблицу надо пересоздать, сначала удали старую: <code>DROP TABLE IF EXISTS models;</code>. Иначе база ответит <code>relation "models" already exists</code>, «такая таблица уже есть». Слово relation здесь значит таблицу.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши <code>CREATE TABLE datasets</code> с четырьмя столбцами: название (текст до 100), тип задачи (текст до 30), число строк <code>count</code> (целое, тип <code>INTEGER</code>), ссылка <code>link</code> (текст до 200).
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">CREATE TABLE datasets (
+    name      VARCHAR(100),
+    type_task VARCHAR(30),
+    count     INTEGER,
+    link      VARCHAR(200)
+);</code></pre>
+          <p>Это четыре столбца из твоей таблицы, без <code>id</code> и без правил. Их добавим в следующих шагах.</p>
+          <p class="oshibka">Поставить запятую после <code>link VARCHAR(200)</code>. База ответит <code>syntax error at or near ")"</code>: после запятой она ждёт ещё один столбец, а видит скобку.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CREATE TABLE t (столбец тип, столбец тип);</code> без запятой в конце.</p>
+      <p>Пересоздать: сначала <code>DROP TABLE IF EXISTS t;</code></p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>Типы PostgreSQL</h2>
+    <p>На слайдах типы MySQL, а у тебя PostgreSQL, и часть названий другие. Вот типы, которые нужны в твоей базе, и где они у тебя стоят.</p>
+    <div class="tablica"><table>
+      <tr><th>тип</th><th>что хранит</th><th>у тебя</th></tr>
+      <tr><td><code>INTEGER</code></td><td>целое до двух миллиардов</td><td><code>count</code>, <code>count_apoh</code></td></tr>
+      <tr><td><code>SMALLINT</code>, <code>BIGINT</code></td><td>целое поменьше и побольше</td><td></td></tr>
+      <tr><td><code>NUMERIC(p, s)</code></td><td>точное дробное: p цифр всего, из них s после точки</td><td><code>mean_metric NUMERIC(6,3)</code></td></tr>
+      <tr><td><code>REAL</code>, <code>DOUBLE PRECISION</code></td><td>дробное приближённо</td><td></td></tr>
+      <tr><td><code>VARCHAR(n)</code></td><td>текст до n символов</td><td><code>full_name</code>, <code>status</code></td></tr>
+      <tr><td><code>TEXT</code></td><td>текст любой длины</td><td></td></tr>
+      <tr><td><code>DATE</code></td><td>только дата</td><td></td></tr>
+      <tr><td><code>TIMESTAMP</code></td><td>дата и время</td><td><code>created_at</code></td></tr>
+      <tr><td><code>BOOLEAN</code></td><td>да или нет</td><td></td></tr>
+    </table></div>
+    <p class="novoe"><code>NUMERIC(6,3)</code> хранит число точно: всего 6 цифр, из них 3 после точки. Самое большое такое число 999.999. Лишние цифры после точки база округлит, а слишком большое число не примет.</p>
+    <p>Правило со слайдов: деньги, баллы и рейтинги хранят в <code>NUMERIC</code>, а не в <code>REAL</code> или <code>FLOAT</code>. В MySQL <code>NUMERIC</code> называется <code>DECIMAL</code>. Приближённый тип хранит 0.1 как 0.10000000149…, и при сложении тысяч таких чисел копейки уползают.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В столбец <code>mean_metric NUMERIC(6,3)</code> записывают (а) 0.7875, (б) 1234.5. Что окажется в базе?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>(а) 0.788: после точки помещаются три цифры, четвёртая округляется. (б) Ничего, база ответит ошибкой <code>numeric field overflow</code>, «число не помещается»: до точки можно только три цифры, а здесь четыре.</p>
+          <p class="oshibka">Думать, что 6 в <code>NUMERIC(6,3)</code> это цифры до точки. Это все цифры вместе. До точки остаётся 6 − 3 = 3. Для числа параметров модели в миллионах вроде 29.40 у тебя стоит <code>NUMERIC(8,2)</code>, там до точки 6 цифр.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>NUMERIC(p, s)</code>: p цифр всего, s после точки. Деньги и баллы только в нём.</p>
+      <p><code>TIMESTAMP</code> дата и время, <code>DATE</code> только дата, <code>VARCHAR(n)</code> текст до n.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>PRIMARY KEY и SERIAL: номер выдаёт база</h2>
+    <p>У каждой таблицы нужен первичный ключ, номер строки, который не повторяется. Писать номера руками неудобно, пусть их выдаёт база.</p>
+<pre><code class="sql">DROP TABLE IF EXISTS models;
+CREATE TABLE models (
+    id        SERIAL PRIMARY KEY,
+    name      VARCHAR(100),
+    framework VARCHAR(30)
+);
+INSERT INTO models (name, framework) VALUES
+    ('Resnet', 'pytorch'),
+    ('CatBoost', 'catboost');</code></pre>
+    <p class="novoe"><code>PRIMARY KEY</code> делает столбец первичным ключом: база не пустит повтор и пустоту. <code>SERIAL</code> это целое число со счётчиком: если номер не написать, база возьмёт следующий. Resnet получит 1, CatBoost 2.</p>
+    <p>Строки в таблицу кладёт команда <code>INSERT INTO таблица (столбцы) VALUES (значения), (значения);</code>. В первых скобках столбцы, которые заполняешь, дальше по скобкам на строку. Столбец <code>id</code> мы не назвали, поэтому номер выдал счётчик. Подробно <code>INSERT</code> будет в уроке <a href="bd-izmenenie-dannyh.html">про изменение данных</a>, здесь хватит этого.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В пустую таблицу с <code>id SERIAL PRIMARY KEY</code> вставили строку, вписав номер руками: <code>INSERT INTO models (id, name) VALUES (1, 'Resnet');</code>. Потом вставляют следующую без номера: <code>INSERT INTO models (name) VALUES ('CatBoost');</code>. Что будет?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Вторая вставка упадёт: <code>duplicate key value violates unique constraint "models_pkey"</code>, «такой ключ уже есть». Счётчик не знал про ручную единицу и выдал CatBoost тоже 1. Constraint по-английски «ограничение», правило на столбце. <code>models_pkey</code> имя этого правила, база склеила его из имени таблицы и pkey, первичного ключа.</p>
+          <p class="oshibka">Вписывать <code>id</code> руками «для порядка». С <code>SERIAL</code> номера пиши только базе, иначе счётчик рано или поздно наткнётся на твой номер.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>id SERIAL PRIMARY KEY</code>: номер даёт база, в <code>INSERT</code> его не пиши.</p>
+      <p><code>INSERT INTO t (a, b) VALUES (1, 'x');</code> кладёт строку.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>GENERATED AS IDENTITY: тот же счётчик по стандарту</h2>
+    <p><code>SERIAL</code> есть только в PostgreSQL. В стандарте SQL счётчик записывают длиннее.</p>
+<pre><code class="sql">id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY</code></pre>
+    <p class="novoe"><code>GENERATED AS IDENTITY</code> значит «номер генерирует база». Слово <code>ALWAYS</code>, «всегда», запрещает вписывать номер обычным <code>INSERT</code>. Если вместо него написать <code>BY DEFAULT</code>, «по умолчанию», номер вписать можно, как с <code>SERIAL</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Повтори вставку из прошлого шага, <code>INSERT INTO models (id, name) VALUES (1, 'Resnet');</code>, но в таблицу с <code>id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY</code>. Что ответит база?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Не пустит сразу, на первой же вставке: <code>cannot insert a non-DEFAULT value into column "id"</code>, «в этот столбец свои значения нельзя». Ошибка выходит раньше и понятнее, чем с <code>SERIAL</code>.</p>
+          <p class="oshibka">Думать, что с <code>BY DEFAULT</code> будет так же. Там ручная единица пройдёт, а следующая вставка без номера упадёт на повторе ключа, ровно как в прошлом шаге.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>GENERATED ALWAYS AS IDENTITY</code>: номер даёт база, руками не впишешь.</p>
+      <p>С <code>BY DEFAULT</code> вписать можно, и грабля та же, что у <code>SERIAL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>NOT NULL и UNIQUE</h2>
+    <p>Так у тебя устроены исследователи.</p>
+<pre><code class="sql">CREATE TABLE researchers (
+    id        SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email     VARCHAR(100) UNIQUE,
+    grp       VARCHAR(20)
+);</code></pre>
+    <p class="novoe">Правила пишут после типа, их называют <b>ограничениями</b>, по-английски constraint. Это слово ты уже видел в тексте ошибки в шаге 4. <code>NOT NULL</code> значит «клетка обязана быть заполнена»: без имени исследователя не завести. <code>UNIQUE</code> значит «два одинаковых значения в столбце нельзя»: вторую строку с <code>stepan@urfu.ru</code> база не пустит.</p>
+    <p>У <code>grp</code> правил нет, поэтому у Смирнова группа может быть <code>NULL</code>. Можно ставить два правила сразу: <code>email VARCHAR(100) NOT NULL UNIQUE</code>, тогда почта обязательна и не повторяется.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В таблицу выше вставили двух исследователей вообще без почты: <code>INSERT INTO researchers (full_name) VALUES ('Без почты 1'), ('Без почты 2');</code>. Пустит ли база, ведь у обоих <code>email</code> одинаковый, пустой?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Пустит. <code>NULL</code> значит «неизвестно», и два неизвестных база не считает равными. <code>UNIQUE</code> запрещает повторять только настоящие значения.</p>
+          <p class="oshibka">Думать, что <code>UNIQUE</code> делает поле обязательным. У тебя в <code>ml_tracker</code> у <code>email</code> стоит только <code>UNIQUE</code>, и людей без почты можно завести сколько угодно. Нужна обязательная почта, допиши <code>NOT NULL</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>NOT NULL</code> обязательно, <code>UNIQUE</code> без повторов.</p>
+      <p><code>UNIQUE</code> пропускает сколько угодно <code>NULL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>DEFAULT: что подставить, если не сказали</h2>
+    <p>В твоих запусках два столбца с запасным значением.</p>
+<pre><code class="sql">created_at TIMESTAMP   DEFAULT now(),
+status     VARCHAR(20) DEFAULT 'running'</code></pre>
+    <p class="novoe"><code>DEFAULT значение</code> подставляется, когда столбец в <code>INSERT</code> не упомянули вовсе. <code>now()</code> значит «текущие дата и время»: новый запуск сам получит время записи и статус <code>running</code>, «идёт».</p>
+    <p>Запасное значение можно попросить и явно, словом <code>DEFAULT</code> на месте значения:</p>
+<pre><code class="sql">INSERT INTO experiments (researcher_id, dataset_id, count_apoh, status)
+VALUES (1, 1, 3, DEFAULT);   -- статус станет running</code></pre>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Две вставки в запуски. В первой столбца <code>status</code> нет совсем. Во второй он есть, и в нём явно написано <code>NULL</code>. Какой статус будет у каждого запуска?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Первый получит <code>running</code>. У второго будет <code>NULL</code>: ему прямо сказали «пусто», и база послушалась. <code>DEFAULT</code> срабатывает только когда про столбец молчат.</p>
+          <p class="oshibka">Ждать, что <code>DEFAULT</code> заменит любую пустоту. Чтобы пустой статус был невозможен совсем, к <code>DEFAULT</code> добавляют <code>NOT NULL</code>: <code>status VARCHAR(20) NOT NULL DEFAULT 'running'</code>. Тогда явный <code>NULL</code> база не примет.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>DEFAULT x</code> работает, когда столбец в <code>INSERT</code> не упомянут.</p>
+      <p>Явный <code>NULL</code> проходит мимо <code>DEFAULT</code>, от него спасает <code>NOT NULL</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>CHECK: значение проходит проверку</h2>
+    <p>В твоих наборах данных число строк не может быть нулём или минусом.</p>
+<pre><code class="sql">count INTEGER NOT NULL CHECK (count &gt; 0)</code></pre>
+    <p class="novoe"><code>CHECK (условие)</code> пропускает строку, только если условие верно. Попытка записать набор с <code>count = 0</code> упадёт с ошибкой <code>violates check constraint "datasets_count_check"</code>. Имя правила база склеила сама: таблица, столбец, слово check.</p>
+    <p>У эпох проверка на промежуток: <code>CHECK (count_apoh BETWEEN 1 AND 1000)</code>. <code>BETWEEN 1 AND 1000</code> значит «от 1 до 1000», обе границы входят. Список допустимых значений тоже делают через <code>CHECK</code>: в PostgreSQL пишут <code>CHECK (status IN ('running', 'done', 'failed'))</code>, где <code>IN</code> значит «одно из перечисленных». В MySQL для этого есть ещё тип <code>ENUM</code>.</p>
+    <p>У тебя на <code>status</code> такой проверки нет. Значит, опечатка <code>'dnoe'</code> спокойно ляжет в базу, а запрос <code>WHERE status = 'done'</code> этот запуск не увидит.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> У <code>count_apoh</code> стоит <code>CHECK (count_apoh BETWEEN 1 AND 1000)</code>, а <code>NOT NULL</code> нет. Пройдут ли вставки с эпохами (а) 1000, (б) 1001, (в) <code>NULL</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>(а) пройдёт, граница входит. (б) упадёт. (в) пройдёт: <code>CHECK</code> отказывает, только когда условие ложно, а с <code>NULL</code> оно «неизвестно».</p>
+          <p class="oshibka">Думать, что <code>CHECK</code> заодно запрещает пустоту. Не запрещает. Если эпохи обязательны, пиши оба правила: <code>count_apoh INTEGER NOT NULL CHECK (count_apoh BETWEEN 1 AND 1000)</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>CHECK (условие)</code>, список значений: <code>CHECK (x IN ('a', 'b'))</code>.</p>
+      <p><code>NULL</code> проходит любой <code>CHECK</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>FOREIGN KEY: REFERENCES и порядок таблиц</h2>
+    <p>Запуск ссылается на исследователя и на набор данных.</p>
+<pre><code class="sql">CREATE TABLE experiments (
+    id            SERIAL PRIMARY KEY,
+    researcher_id INTEGER NOT NULL REFERENCES researchers(id),
+    dataset_id    INTEGER NOT NULL REFERENCES datasets(id),
+    created_at    TIMESTAMP DEFAULT now(),
+    count_apoh    INTEGER CHECK (count_apoh BETWEEN 1 AND 1000),
+    status        VARCHAR(20) DEFAULT 'running'
+);</code></pre>
+    <p class="novoe"><code>REFERENCES таблица(id)</code> делает столбец внешним ключом: в него можно записать только номер, который есть в той таблице. Тип внешнего ключа <code>INTEGER</code>, а не <code>SERIAL</code>: номер сюда переписывают, а не выдают.</p>
+    <p>Отсюда правило порядка. Сначала создают и заполняют таблицы, на которые ссылаются, потом те, что ссылаются. Создашь <code>experiments</code> раньше <code>researchers</code>, база ответит <code>relation "researchers" does not exist</code>.</p>
+    <p>Что делать с запусками, если удалить исследователя, задают словами <code>ON DELETE</code>. Это разобрано в уроке <a href="bd-izmenenie-dannyh.html">про DELETE</a>, шаг 9.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В каком порядке создавать пять таблиц <code>ml_tracker</code>: <code>metrics</code>, <code>experiments</code>, <code>models</code>, <code>researchers</code>, <code>datasets</code>? И почему твой скрипт начинается с <code>DROP TABLE IF EXISTS … CASCADE</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сначала три справочника в любом порядке: <code>researchers</code>, <code>datasets</code>, <code>models</code>. Потом <code>experiments</code>, он ссылается на все три. Последней <code>metrics</code>, она ссылается на запуски.</p>
+          <p>Удалить <code>researchers</code>, пока на неё ссылаются запуски, база не даст: <code>cannot drop table researchers because other objects depend on it</code>. Слово <code>CASCADE</code> в <code>DROP TABLE</code> разрешает снести и эти ссылки. Поэтому скрипт можно гонять сколько угодно раз.</p>
+          <p class="oshibka">Поставить внешнему ключу тип <code>SERIAL</code>. Тогда у столбца появится свой счётчик, и если номер не написать, база подставит 1, 2, 3 по счётчику, а не нужного исследователя.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>столбец INTEGER REFERENCES таблица(id)</code></p>
+      <p>Сначала таблицы, на которые ссылаются, потом те, что ссылаются.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Скрипт целиком и тестовые данные</h2>
+    <p>Соберём пробную базу одним скриптом, как в самостоятельной 1. В DBeaver выделяй всё и запускай Alt+X, «выполнить скрипт».</p>
+<pre><code class="sql">DROP TABLE IF EXISTS experiments, datasets, researchers, models CASCADE;
+
+CREATE TABLE researchers (
+    id        SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email     VARCHAR(100) UNIQUE,
+    grp       VARCHAR(20)
+);
+CREATE TABLE datasets (
+    id        SERIAL PRIMARY KEY,
+    name      VARCHAR(100) NOT NULL,
+    type_task VARCHAR(30),
+    count     INTEGER NOT NULL CHECK (count &gt; 0),
+    link      VARCHAR(200)
+);
+CREATE TABLE experiments (
+    id            SERIAL PRIMARY KEY,
+    researcher_id INTEGER NOT NULL REFERENCES researchers(id),
+    dataset_id    INTEGER NOT NULL REFERENCES datasets(id),
+    created_at    TIMESTAMP DEFAULT now(),
+    count_apoh    INTEGER CHECK (count_apoh BETWEEN 1 AND 1000),
+    status        VARCHAR(20) DEFAULT 'running'
+);
+
+INSERT INTO researchers (full_name, email, grp) VALUES
+    ('Павленко Степан', 'stepan@urfu.ru', 'РИ-250932'),
+    ('Иванова Мария',   'maria@urfu.ru',  'РИ-250931'),
+    ('Смирнов Олег',    'oleg@urfu.ru',   NULL);
+INSERT INTO datasets (name, type_task, count) VALUES
+    ('iris',  'classification', 150),
+    ('MNIST', 'cv',             70000);
+INSERT INTO experiments (researcher_id, dataset_id, count_apoh, status) VALUES
+    (1, 1, 1,  'done'),
+    (2, 2, 5,  'done'),
+    (1, 2, 10, 'failed');</code></pre>
+    <p class="novoe"><b>Тестовые данные</b> подбирают не случайно, а чтобы проверить правила и будущие запросы. Здесь Смирнов без группы и без запусков, набор MNIST с двумя запусками. А потом нарочно пробуют вставить мусор: если база его пустила, правило не работает.</p>
+    <p>После скрипта у Павленко <code>id</code> 1, у Ивановой 2, у Смирнова 3. В запусках время подставилось само по <code>DEFAULT</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какие из вставок упадут и какое правило сработает?
+<pre><code class="sql">INSERT INTO experiments (researcher_id, dataset_id, count_apoh) VALUES (7, 1, 3);
+INSERT INTO datasets (name, type_task, count) VALUES ('пустой', 'cv', 0);
+INSERT INTO researchers (full_name, email) VALUES ('Козлов Илья', 'maria@urfu.ru');
+INSERT INTO researchers (email) VALUES ('ilya@urfu.ru');
+INSERT INTO experiments (researcher_id, dataset_id, count_apoh) VALUES (3, 1, 2);</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Первая: исследователя 7 нет, внешний ключ. Вторая: <code>CHECK (count &gt; 0)</code>. Третья: почта Ивановой уже есть, <code>UNIQUE</code>. Четвёртая: нет имени, <code>NOT NULL</code>. Пятая пройдёт: Смирнов 3 существует, набор 1 тоже, а статус сам станет <code>running</code>.</p>
+          <p class="oshibka">Запустить все пять одним скриптом и решить, что упала только первая. DBeaver на первой ошибке останавливает скрипт и спрашивает, что делать дальше, и остальные строки могли не выполниться вовсе. Проверочные вставки запускай по одной, Ctrl+Enter на строке.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Скрипт: <code>DROP … CASCADE</code>, потом <code>CREATE</code> по порядку ссылок, потом <code>INSERT</code> в том же порядке.</p>
+      <p>Правило проверяют вставкой, которая обязана упасть.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>ALTER TABLE: поменять готовую таблицу</h2>
+    <p>Таблица уже с данными, а в неё нужно добавить столбец или правило. Удалять и создавать заново жалко данных.</p>
+<pre><code class="sql">ALTER TABLE experiments ADD COLUMN notes TEXT;
+
+ALTER TABLE experiments
+    ADD CONSTRAINT experiments_status_check
+    CHECK (status IN ('running', 'done', 'failed'));
+
+ALTER TABLE datasets RENAME COLUMN count TO rows_count;</code></pre>
+    <p class="novoe"><code>ALTER TABLE</code> меняет устройство готовой таблицы и не трогает строки, если не просили. <code>ADD COLUMN</code> добавляет столбец, у старых строк в нём будет <code>NULL</code>. <code>ADD CONSTRAINT имя …</code> добавляет правило, своё имя нужно, чтобы по ошибке было понятно, что сработало. <code>RENAME COLUMN</code> переименовывает столбец.</p>
+    <p>Ещё пригодятся <code>DROP COLUMN</code>, он убирает столбец, и <code>ALTER COLUMN имя SET NOT NULL</code>, он делает столбец обязательным. Новое правило база проверяет на всех старых строках. Если хоть одна не проходит, правило не добавится.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В пробной базе из шага 10 выполняют <code>ALTER TABLE researchers ALTER COLUMN grp SET NOT NULL;</code>. Получится? Если нет, как сделать, чтобы получилось? Подсказка: посмотри, какие группы вставлял скрипт шага 10. Значение в уже записанной клетке меняет команда <code>UPDATE таблица SET столбец = значение WHERE условие;</code>, а пустые клетки находит условие <code>столбец IS NULL</code>. Подробно <code>UPDATE</code> будет в уроке про изменение данных.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Не получится: <code>column "grp" of relation "researchers" contains null values</code>, у Смирнова группа пустая. Сначала заполни пустоту, например <code>UPDATE researchers SET grp = 'РИ-250932' WHERE grp IS NULL;</code>, а уже потом ставь <code>SET NOT NULL</code>.</p>
+          <p class="oshibka">Путать <code>ALTER TABLE</code> и <code>UPDATE</code>. Оба «меняют», но <code>ALTER</code> меняет устройство таблицы, это DDL из шага 1. А <code>UPDATE</code> меняет значения в строках, это другая часть SQL, она называется DML. Новый столбец через <code>UPDATE</code> не добавить.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ALTER TABLE t ADD COLUMN …</code>, <code>ADD CONSTRAINT имя CHECK (…)</code>, <code>RENAME COLUMN a TO b</code>.</p>
+      <p>Новое правило не добавится, если старые строки его нарушают.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: создание базы и таблиц">
+    <h2>Мини-самостоятельная</h2>
+    <p>Четыре задачи. Запускай в пробной базе <code>probnaya</code>. Ответов здесь нет: впиши ответы в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Напиши <code>CREATE TABLE metrics</code>: номер от базы, обязательная ссылка на запуск, название оценки (обязательное, текст до 30), значение, точное число с тремя знаками после точки, от 0 до 1.
+      <textarea name="z1" placeholder="CREATE TABLE metrics (…" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Допиши в таблицу из задачи 1 правило, что у одного запуска не может быть двух оценок с одним названием. Подсказка: <code>UNIQUE</code> можно поставить сразу на два столбца, отдельной строкой <code>UNIQUE (столбец1, столбец2)</code>.
+      <textarea name="z2" placeholder="UNIQUE (…)" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> В пробной базе из шага 10 у <code>experiments.status</code> нет ни проверки, ни <code>NOT NULL</code>. Напиши две команды <code>ALTER TABLE</code>: проверку, что статус один из <code>running</code>, <code>done</code>, <code>failed</code>, и обязательный статус. Пройдут ли они на данных скрипта шага 10? А если перед ними вставить запуск со статусом <code>'dnoe'</code>?
+      <textarea name="z3" placeholder="ALTER TABLE experiments …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Придумай три вставки в пробную базу, каждая должна упасть из-за своего правила: <code>NOT NULL</code>, <code>CHECK</code>, внешний ключ. Напиши, какую ошибку ждёшь у каждой.
+      <textarea name="z4" placeholder="INSERT …  -- ждём …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Таблицы и типы</td><td>Модуль A7: логи запусков модели (параметры, метрики, время) пишут в таблицы, устроенные как твои <code>experiments</code> и <code>metrics</code>. Метрику хранят в <code>NUMERIC</code> или <code>DOUBLE PRECISION</code>, время в <code>TIMESTAMP</code>.</td></tr>
+      <tr><td>CHECK и UNIQUE</td><td>Модуль A2: правила в базе ловят мусор до того, как он попал в датасет. Опечатка в статусе или accuracy 7.8 вместо 0.78 испортит выборку молча, если базе не сказали, что так нельзя.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-filtry-join.html">Дальше: сортировка, фильтры и JOIN →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

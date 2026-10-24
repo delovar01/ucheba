@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Массивы — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="java-massivy">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Java · Массивы</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Массивы</h1>
+  <p class="tiho">Java · лаба 13.10, слайды «Массивы», разъяснение Павлова 10.10 · под ПР3, срок 1.11 в 00:00 · около 55 минут</p>
+
+  <p>Третий урок по Java. Нужны первые два: <a href="java-tipy-if.html">типы и if</a>, <a href="java-cikly-metody.html">циклы и методы</a>. Одиннадцать шагов: создать массив, заполнить, вывести, пройти циклом и посчитать минимум, максимум, среднее, найти участки убывания по правилу Павлова. Последний шаг про то, как сдать все три ПР одним репозиторием.</p>
+  <p>Вариант ПР3 выдаёт тест на элеарне, попытка одна. Пройди его и сразу сохрани текст варианта. Где написано «строки внутри <code>main</code>», каркас как в первом уроке.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 11</div>
+    <h2>Массив: много значений под одним именем</h2>
+    <p>Четыре цены. Можно завести четыре переменные, а можно одну, с номерами внутри.</p>
+<pre><code>int[] prices = {120, 85, 240, 60};
+System.out.println(prices[0]);
+System.out.println(prices[3]);
+System.out.println(prices.length);
+prices[1] = 90;
+System.out.println(prices[1]);</code></pre>
+<pre><code>120
+60
+4
+90</code></pre>
+    <p class="novoe">Массив это ряд переменных одного типа под общим именем. <code>int[]</code> значит «массив целых». Каждая ячейка имеет номер, он называется индексом. Индексы начинаются с 0: первая ячейка <code>prices[0]</code>, последняя <code>prices[3]</code>.</p>
+    <p><code>prices.length</code> это длина массива, здесь 4. Пишется без скобок. Длину после создания поменять нельзя, а значения в ячейках можно: <code>prices[1] = 90</code> положил 90 на место 85.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Как достать последний элемент массива любой длины, не считая ячейки руками?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>System.out.println(prices[prices.length - 1]);</code></pre>
+          <p>Напечатает <code>60</code>. Длина 4, индексы 0, 1, 2, 3, последний на единицу меньше длины.</p>
+          <p class="oshibka">Написать <code>prices[prices.length]</code>. Ячейки с номером 4 нет, программа упадёт: <code>ArrayIndexOutOfBoundsException: Index 4 out of bounds for length 4</code>, «индекс 4 за границей массива длины 4».</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>int[] a = {…};</code> индексы с 0 до <code>a.length - 1</code>.</p>
+      <p>Чтение <code>a[i]</code>, запись <code>a[i] = …</code>, длина <code>a.length</code> без скобок.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 11</div>
+    <h2>Вывести массив целиком: Arrays.toString</h2>
+    <p>Хотим увидеть все цены одной строкой. Здесь целая программа, потому что нужен свой <code>import</code>.</p>
+<pre><code>import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] prices = {120, 85, 240, 60};
+        System.out.println(Arrays.toString(prices));
+    }
+}</code></pre>
+<pre><code>[120, 85, 240, 60]</code></pre>
+    <p class="novoe"><code>Arrays.toString(массив)</code> превращает массив в строку вида <code>[1, 2, 3]</code>. Для него сверху нужна строка <code>import java.util.Arrays;</code>.</p>
+    <p>Так удобно проверять себя после каждого шага: заполнил, вывел, посмотрел глазами.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Массив дробных <code>double[] w = {1.5, 2.0, 0.25};</code>. Что напечатает <code>System.out.println(Arrays.toString(w));</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>[1.5, 2.0, 0.25]</code></pre>
+          <p>У дробных Java всегда пишет точку и хотя бы одну цифру после неё, поэтому 2.0, а не 2.</p>
+          <p class="oshibka">Напечатать просто <code>System.out.println(w);</code>. Выйдет не содержимое, а служебная метка вроде <code>[D@28a418fc</code>, на каждом запуске своя. Это адрес массива в памяти, а не числа.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>System.out.println(Arrays.toString(a));</code> и <code>import java.util.Arrays;</code></p>
+      <p>Просто <code>println(a)</code> печатает адрес, а не числа.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 11</div>
+    <h2>Заполнить массив по формуле</h2>
+    <p>Квадраты чисел от 0 до 5. Значения заранее не пишем, считаем в цикле. Строки внутри <code>main</code>, <code>import java.util.Arrays;</code> сверху, как в шаге 2.</p>
+<pre><code>int[] sq = new int[6];
+System.out.println(Arrays.toString(sq));
+for (int i = 0; i &lt; sq.length; i++) {
+    sq[i] = i * i;
+}
+System.out.println(Arrays.toString(sq));</code></pre>
+<pre><code>[0, 0, 0, 0, 0, 0]
+[0, 1, 4, 9, 16, 25]</code></pre>
+    <p class="novoe"><code>new int[6]</code> создаёт массив из шести ячеек, все пока равны нулю. Дальше <code>for</code> от 0 до <code>length - 1</code> проходит каждую ячейку и кладёт в неё значение по формуле от индекса.</p>
+    <p>Условие <code>i &lt; sq.length</code> именно со знаком «меньше»: последний индекс 5, а длина 6.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Первые шесть степеней двойки: 1, 2, 4… Каждый следующий элемент вдвое больше предыдущего. Подсказка: предыдущий элемент это <code>p[i - 1]</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int[] p = new int[6];
+p[0] = 1;
+for (int i = 1; i &lt; p.length; i++) {
+    p[i] = 2 * p[i - 1];
+}
+System.out.println(Arrays.toString(p));</code></pre>
+<pre><code>[1, 2, 4, 8, 16, 32]</code></pre>
+          <p>Первый элемент кладём руками, цикл начинается с 1.</p>
+          <p class="oshibka">Начать цикл с <code>i = 0</code>. На первом же проходе программа полезет в <code>p[-1]</code> и упадёт: <code>Index -1 out of bounds for length 6</code>. Если формула берёт предыдущий элемент, цикл начинается с 1.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>new int[n]</code> даёт n нулей. Заполнение: <code>for (i = 0; i &lt; a.length; i++) a[i] = …</code></p>
+      <p>Берёшь <code>a[i - 1]</code>, начинай с <code>i = 1</code>.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 11</div>
+    <h2>Заполнить массив с клавиатуры</h2>
+    <p>Пользователь сначала говорит, сколько будет чисел, потом вводит их.</p>
+<pre><code>import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Сколько чисел?");
+        int n = sc.nextInt();
+        int[] a = new int[n];
+        System.out.println("Введите числа через пробел:");
+        for (int i = 0; i &lt; n; i++) {
+            a[i] = sc.nextInt();
+        }
+        System.out.println(Arrays.toString(a));
+    }
+}</code></pre>
+    <p>Ввели <code>4</code>, потом <code>7 2 9 4</code>:</p>
+<pre><code>Сколько чисел?
+Введите числа через пробел:
+[7, 2, 9, 4]</code></pre>
+    <p class="novoe">Длину массива можно взять из переменной: <code>new int[n]</code>. Сначала читаем n, создаём массив, потом в цикле <code>a[i] = sc.nextInt()</code> читаем по числу в каждую ячейку.</p>
+    <p>Числа можно вводить через пробел в одну строку или каждое с новой строки, Scanner понимает оба способа. Есть ещё заполнение случайными числами через <code>Math.random()</code>, но тогда вывод на каждом запуске другой, и сверять ответ труднее.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Без клавиатуры: массив из 5 элементов 10, 20, 30, 40, 50. Через <code>new</code> и цикл, без фигурных скобок со значениями.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int[] a = new int[5];
+for (int i = 0; i &lt; a.length; i++) {
+    a[i] = 10 * (i + 1);
+}
+System.out.println(Arrays.toString(a));</code></pre>
+<pre><code>[10, 20, 30, 40, 50]</code></pre>
+          <p class="oshibka">Написать <code>a[i] = 10 * i</code>. Индексы с нуля, и первым выйдет 0: <code>[0, 10, 20, 30, 40]</code>. Когда нужен порядковый номер «первый, второй», это <code>i + 1</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Читаем n, <code>new int[n]</code>, в цикле <code>a[i] = sc.nextInt()</code>.</p>
+      <p>Порядковый номер элемента это <code>i + 1</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 11</div>
+    <h2>Сумма и среднее массива</h2>
+    <p>Тот же массив 7, 2, 9, 4. Это накопитель из урока про циклы, только складываем ячейки.</p>
+<pre><code>int[] a = {7, 2, 9, 4};
+int sum = 0;
+for (int i = 0; i &lt; a.length; i++) {
+    sum += a[i];
+}
+double avg = (double) sum / a.length;
+System.out.println("Сумма: " + sum);
+System.out.println("Среднее: " + avg);</code></pre>
+<pre><code>Сумма: 22
+Среднее: 5.5</code></pre>
+    <p class="novoe">Обход массива: <code>for (int i = 0; i &lt; a.length; i++)</code> и внутри работа с <code>a[i]</code>. Так проходят по массиву для любого подсчёта: сумма, количество, произведение, только чётные, только положительные.</p>
+    <p>Среднее это сумма, делённая на число элементов. Сумма целая, длина целая, поэтому <code>(double)</code> перед делением, как в первом уроке.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Среднее массива <code>{3, 4, 4}</code>. Что напечатает правильная программа и что выйдет без <code>(double)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>Среднее: 3.6666666666666665
+Без double: 3</code></pre>
+          <p>Сумма 11, делим на 3. Последняя цифра 5 вместо 7 это обычная погрешность дробных чисел в компьютере, а не ошибка программы.</p>
+          <p class="oshibka">Считать <code>sum / a.length</code> без приведения. Целое деление молча отбросит дробь, ошибки не будет, просто неверное среднее 3.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Обход: <code>for (int i = 0; i &lt; a.length; i++) { … a[i] … }</code></p>
+      <p>Среднее: <code>(double) sum / a.length</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 11</div>
+    <h2>Минимум и максимум</h2>
+    <p>Приём «держу лучшего» из первого урока, только по всем ячейкам сразу.</p>
+<pre><code>int[] a = {7, 2, 9, 4};
+int min = a[0];
+int max = a[0];
+for (int i = 1; i &lt; a.length; i++) {
+    if (a[i] &lt; min) {
+        min = a[i];
+    }
+    if (a[i] &gt; max) {
+        max = a[i];
+    }
+}
+System.out.println("Минимум: " + min + ", максимум: " + max);</code></pre>
+<pre><code>Минимум: 2, максимум: 9</code></pre>
+    <p class="novoe">Лучшего начинаем с первого элемента <code>a[0]</code>, а не с придуманного числа. Цикл тогда идёт с <code>i = 1</code>: сравнивать первый с самим собой незачем.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Температуры <code>{-5, -2, -8}</code>. Кто-то начал максимум с нуля: <code>int max = 0;</code> и цикл с <code>i = 0</code>. Что напечатает его программа и что правильно?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>С нуля: 0
+С первого: -2</code></pre>
+          <p>Ни одна температура не больше нуля, max так и остался 0. Но нуля в массиве нет. Правильно −2.</p>
+          <p class="oshibka">Начинать с 0 «потому что так проще». На положительных числах это работает и выглядит верно, а на отрицательных молча врёт. С минимумом наоборот, старт 0 врёт на положительных.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>min = a[0]</code>, <code>max = a[0]</code>, цикл с <code>i = 1</code>.</p>
+      <p>Не начинай с 0: врёт на отрицательных.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 11</div>
+    <h2>Соседи: текущий и предыдущий</h2>
+    <p>Сколько раз значение выросло по сравнению с предыдущим? Сравнивать надо пары соседей.</p>
+<pre><code>int[] a = {3, 5, 4, 6, 6, 8};
+int ups = 0;
+for (int i = 1; i &lt; a.length; i++) {
+    if (a[i] &gt; a[i - 1]) {
+        ups++;
+    }
+}
+System.out.println("Росло раз: " + ups);</code></pre>
+<pre><code>Росло раз: 3</code></pre>
+    <p>Пары: 3 и 5 рост, 5 и 4 нет, 4 и 6 рост, 6 и 6 нет, 6 и 8 рост. Три.</p>
+    <p class="novoe">Пара соседей это <code>a[i - 1]</code> и <code>a[i]</code>, предыдущий и текущий. Цикл с <code>i = 1</code> до конца: так перебираются все пары, а их на одну меньше, чем элементов.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько пар равных соседей в <code>{1, 1, 2, 2, 2, 3}</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>int[] a = {1, 1, 2, 2, 2, 3};
+int same = 0;
+for (int i = 1; i &lt; a.length; i++) {
+    if (a[i] == a[i - 1]) {
+        same++;
+    }
+}
+System.out.println("Равных пар: " + same);</code></pre>
+          <p>Напечатает <code>Равных пар: 3</code>: 1 и 1, потом 2 и 2 дважды, ведь в тройке 2, 2, 2 две пары соседей.</p>
+          <p class="oshibka">Сравнивать <code>a[i]</code> с <code>a[i + 1]</code> и гнать цикл до <code>i &lt; a.length</code>. На последнем i программа полезет в несуществующую ячейку и упадёт с <code>ArrayIndexOutOfBoundsException</code>. Пары через <code>i - 1</code> и старт с 1 безопаснее.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Пары соседей: <code>for (int i = 1; …)</code> и <code>a[i]</code> против <code>a[i - 1]</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 11</div>
+    <h2>Участки: флаг «я сейчас внутри»</h2>
+    <p>Шаг 7 считал пары. А участок это несколько пар подряд, и его надо посчитать один раз. Пример на соседней задаче: сколько участков, где числа растут.</p>
+<pre><code>int[] a = {1, 3, 2, 4, 5, 5, 1};
+int runs = 0;
+boolean inRun = false;
+for (int i = 1; i &lt; a.length; i++) {
+    if (a[i] &gt; a[i - 1]) {
+        if (!inRun) {
+            runs++;
+            inRun = true;
+        }
+    } else {
+        inRun = false;
+    }
+}
+System.out.println("Участков роста: " + runs);</code></pre>
+<pre><code>Участков роста: 2</code></pre>
+    <p>Ход: 1 и 3 рост, участок начался, runs = 1. 3 и 2 нет, участок кончился. 2 и 4 рост, новый участок, runs = 2. 4 и 5 рост, но мы уже внутри, не считаем. Пары 5 и 5, 5 и 1 не рост. Итого 2: участки 1, 3 и 2, 4, 5.</p>
+    <p class="novoe">Флаг это переменная <code>boolean</code>, которая помнит состояние. <code>inRun</code> отвечает на вопрос «сейчас идёт участок?». Участок считаем в момент, когда он начался: пара подходит, а флаг ещё <code>false</code>. Пара не подходит, флаг сбрасываем.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Пройди программу руками на <code>{5, 6, 7, 1, 2}</code>. Сколько участков роста?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Два. 5 и 6 начало, runs = 1. 6 и 7 продолжение. 7 и 1 конец. 1 и 2 начало, runs = 2. Программа печатает <code>Участков роста: 2</code>.</p>
+          <p class="oshibka">Делать <code>runs++</code> на каждой подходящей паре, без флага. Это снова подсчёт пар из шага 7, а не участков. На массиве из примера выйдет 3 вместо 2: 4, 5 посчитается как отдельный участок.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Участок считается один раз, в начале: подходит и <code>!inRun</code>.</p>
+      <p>Не подходит: <code>inRun = false</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 11</div>
+    <h2>Участки убывания по правилу Павлова</h2>
+    <p>Одна из задач курса: найти количество участков, на которых элементы монотонно убывают. Монотонно значит без скачков вверх внутри участка. Павлов 10.10 в чате практик пояснил, как считать:</p>
+    <ul>
+      <li>Участок это два и больше элемента подряд.</li>
+      <li>Убывание нестрогое: пара подходит, если <code>a[i] &lt;= a[i - 1]</code>. Равные соседи участок не рвут.</li>
+      <li>Участок кончается, когда текущий элемент больше предыдущего.</li>
+    </ul>
+    <p>Его пример: <code>{5, 4, 5, 7, 6, 8, 9, 9, 6, 2}</code>. Участки <code>5, 4</code>, потом <code>7, 6</code>, потом <code>9, 9, 6, 2</code>. Ответ 3.</p>
+    <p class="novoe">Правило Павлова это флаг из шага 8, где вместо «рост» стоит «текущий не больше предыдущего». Равенство тоже подходит, поэтому пара 9 и 9 начинает участок.</p>
+    <p>Проверь любое решение на краях, по правилу ответы такие. Массив из одного элемента: 0, пар нет. Весь массив убывает, например 9, 7, 3: 1. Все равные, например 2, 2, 2: 1.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Руками, по правилу Павлова: сколько участков убывания в <code>{8, 6, 6, 9, 3, 4, 4}</code>? Выпиши сами участки.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Три: <code>8, 6, 6</code>, потом <code>9, 3</code>, потом <code>4, 4</code>. Пара 6 и 9 рвёт первый участок, 3 и 4 рвёт второй, а 4 и 4 равные, по правилу это уже убывание.</p>
+          <p>Программа с флагом и условием <code>a[i] &lt;= a[i - 1]</code> на этих массивах даёт ровно 3, 0, 1, 1 и 3, проверено запуском.</p>
+          <p class="oshibka">Взять строгое <code>a[i] &lt; a[i - 1]</code>. Тогда 4, 4 не участок, и выйдет 2 вместо 3. Массив 2, 2, 2 даст 0 вместо 1. А на примере Павлова строгое и нестрогое случайно совпадают, оба 3, поэтому проверять только на нём мало.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Павлов: участок от 2 элементов, пара подходит при <code>a[i] &lt;= a[i - 1]</code>, рвётся при росте.</p>
+      <p>Проверка: пример Павлова 3, один элемент 0, всё убывает 1, все равные 1.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 11</div>
+    <h2>Массив в метод: каждая задача отдельно</h2>
+    <p>В ПР3 несколько задач на один массив. Удобно каждую сделать методом, который принимает массив и возвращает ответ.</p>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        int[] a = {7, 2, 9, 4};
+        int[] empty = {};
+        System.out.println(average(a));
+        System.out.println(average(empty));
+    }
+
+    static double average(int[] a) {
+        if (a.length == 0) {
+            return 0;
+        }
+        int sum = 0;
+        for (int i = 0; i &lt; a.length; i++) {
+            sum += a[i];
+        }
+        return (double) sum / a.length;
+    }
+}</code></pre>
+<pre><code>5.5
+0.0</code></pre>
+    <p class="novoe">Параметр метода может быть массивом: <code>int[] a</code>. Метод видит тот же массив, что и <code>main</code>, и работает с ним как обычно. Внутри метода сначала проверяем край, пустой массив, и только потом считаем.</p>
+    <p><code>{}</code> это массив без элементов, его длина 0. Без проверки <code>average(empty)</code> поделит 0 на 0 и вернёт <code>NaN</code>, «не число», проверено.</p>
+    <p>С числом метод работал с копией, урок про методы, шаг 9. С массивом иначе: метод получает тот же самый массив. Если метод что-то запишет в ячейку, это изменение увидит и <code>main</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Метод <code>static int max(int[] a)</code> возвращает наибольший элемент. Что вернёт для <code>{3, 11, 6}</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>static int max(int[] a) {
+    int best = a[0];
+    for (int i = 1; i &lt; a.length; i++) {
+        if (a[i] &gt; best) {
+            best = a[i];
+        }
+    }
+    return best;
+}</code></pre>
+          <p>Вернёт 11.</p>
+          <p class="oshibka">Поставить <code>return best;</code> внутрь цикла. Метод вернёт ответ после первого же сравнения. На <code>{3, 11, 6}</code> это случайно 11, а на <code>{3, 6, 11}</code> метод вернёт 6, проверено. <code>return</code> с итогом стоит после цикла.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>static тип имя(int[] a) { …; return ответ; }</code>, ответ после цикла.</p>
+      <p>Пустой массив проверь в начале метода.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 11</div>
+    <h2>Один репозиторий на ПР1–ПР3</h2>
+    <p>Павлов 10.10: в ПР3 добавлена форма для ссылки на репозиторий, все три практические можно положить в один репозиторий. Unit-тесты добавлять можно. Репозиторий это папка с кодом на GitHub, у которой есть своя ссылка.</p>
+    <p class="novoe">Одна папка проекта, внутри по папке на каждую практическую. Ссылку на этот репозиторий вставляешь в форму ответа на элеарне.</p>
+<pre><code>java-praktiki/
+  README.md
+  pr1/
+    Task1.java
+    Task2.java
+    Task3.java
+    Task4.java
+  pr2/
+    …
+  pr3/
+    …</code></pre>
+    <p>README это короткое описание в начале репозитория, GitHub показывает его на главной странице. Проверь ссылку, открыв её в браузере, где ты не вошёл в GitHub: преподаватель увидит ровно это.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что написать в README, чтобы преподаватель за минуту нашёл нужное?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Фамилию и группу, номер варианта каждой практической и какая папка к какой ПР. Например: «Павленко Степан, группа такая-то. ПР1 вариант N, папка pr1. ПР2 вариант N, папка pr2. ПР3 вариант N, папка pr3».</p>
+          <p class="oshibka">Положить код, но не сохранить текст варианта ПР2 и ПР3. Тест даёт одну попытку, и без условия не докажешь, какую задачу решал. Сохрани текст варианта сразу после теста.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Один репозиторий: папки pr1, pr2, pr3 и README с вариантами.</p>
+      <p>Ссылку в форму ответа, проверить без входа.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР3</h2>
+    <ul>
+      <li>Заполнить и вывести массив: шаги 1–4.</li>
+      <li>Обход с подсчётом, минимум, максимум, среднее: шаги 5–6.</li>
+      <li>Участки убывания: шаги 7–9, правило Павлова в шаге 9.</li>
+      <li>Каждая задача отдельным методом, проверка краёв: шаг 10.</li>
+      <li>Сдача: шаг 11.</li>
+    </ul>
+    <p>Перед сдачей прогони каждый метод на краях: пустой массив, один элемент, все равные, отрицательные.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: массивы">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: впиши код в поля и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся. Перед отправкой запусти код в IDEA.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Создай массив из 8 элементов по формуле <code>a[i] = 3 * i - 5</code> и выведи его через <code>Arrays.toString</code>. Какой будет последний элемент?
+      <textarea name="z1" placeholder="int[] a = new int[8]; …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Метод <code>static double averagePositive(int[] a)</code>: среднее только положительных элементов. Если положительных нет, вернуть 0. Проверь на <code>{-3, 4, 0, 8, -1}</code>.
+      <textarea name="z2" placeholder="static double averagePositive(int[] a) { …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Найди не сам минимум, а его индекс, то есть номер ячейки. Если минимумов несколько, первый. Проверь на <code>{4, 1, 7, 1}</code>.
+      <textarea name="z3" placeholder="int idx = 0; …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Метод <code>static int countDownRuns(int[] a)</code> по правилу Павлова. Проверь на его примере и на трёх краях из шага 9. Выпиши, что вернул метод на каждом.
+      <textarea name="z4" placeholder="static int countDownRuns(int[] a) { …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Напиши README для своего репозитория с ПР1–ПР3: что в нём будет и в каких папках.
+      <textarea name="z5" placeholder="# Практические по Java …" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Массив и обход</td><td>Модуль A1: массив numpy это тот же ряд чисел одного типа, а сумма, среднее, минимум и максимум там пишутся одной командой без цикла.</td></tr>
+      <tr><td>Соседи и участки</td><td>Модуль A2: разница с предыдущим значением и подсчёт серий это частые признаки во временных рядах, например «сколько дней подряд падала цена».</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../java/">← Java</a> · <a href="../povtorenie/java.html">Повторение</a> · <a href="../java/">Дальше: страница Java →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

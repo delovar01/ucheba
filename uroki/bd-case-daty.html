@@ -177,7 +177,8 @@ FROM runs;</code></pre>
   COUNT(*) AS vsego,
   SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS gotovo
 FROM runs
-GROUP BY researcher;</code></pre>
+GROUP BY researcher
+ORDER BY researcher;</code></pre>
     <p class="novoe"><code>CASE</code> превращает каждую строку в 1 (подходит) или 0 (не подходит). <code>SUM</code> складывает эти единицы и нули по кучке. Сумма единиц и есть количество подходящих строк.</p>
     <p>Кучка Ани: запуски 1, 2, 6. Статусы <code>done</code>, <code>failed</code>, <code>running</code> → 1, 0, 0 → сумма 1.</p>
     <div class="tablica"><table>
@@ -371,13 +372,13 @@ ORDER BY mesyac;</code></pre>
       <li>Задание 13, особые в кучке: шаг 4. На твоей базе это кучки по <code>researcher_id</code> в таблице <code>experiments</code>.</li>
       <li>Задание 15, аналитика по датам: шаги 5–7.</li>
       <li><code>created_at</code> у тебя <code>TIMESTAMP</code>, то есть дата со временем. <code>EXTRACT</code> и <code>TO_CHAR</code> работают с ним точно так же.</li>
-      <li>Задания 14 и 16 решаются тем же <code>GROUP BY</code>, что в прошлом уроке. Задание 17 на оконные функции, к нему будет следующий урок.</li>
+      <li>Задания 14, 16 и 17 в следующем уроке <a href="bd-distinct-top-okna.html">«DISTINCT, лучший и окна»</a>. Задания 1–7 в уроке <a href="bd-filtry-join.html">«Сортировка, фильтры и JOIN»</a>.</li>
     </ul>
   </section>
 
   <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: CASE и даты">
     <h2>Мини-самостоятельная</h2>
-    <p>Пять задач. Первые четыре на таблице <code>runs</code>, последняя на твоей базе. Ответов здесь нет: впиши запросы в поля, нажми кнопку внизу и пришли в чат. Проверю и разберу, где споткнулся.</p>
+    <p>Пять задач. Первые четыре на таблице <code>runs</code>, последняя на твоей базе. Ответов здесь нет: впиши запросы в поля, отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
 
     <div class="zadacha">
       <b>1.</b> Для каждого запуска выведи <code>id</code> и метку: «нет данных», если точности нет, «зачёт», если от 0.75, иначе «незачёт». Какая метка у запуска 3?
@@ -411,7 +412,7 @@ FROM runs;</code></pre>
     <button class="knopka" type="button">Урок пройден ✓</button>
   </div>
 
-  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a></p>
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-distinct-top-okna.html">Дальше: DISTINCT, лучший и окна →</a></p>
 </main>
 <script src="../assets/app.js"></script>
 </body>

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Асимптотика и сложность кода — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="alg-asimptotika">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Алгоритмы · асимптотика</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Асимптотика и сложность кода</h1>
+  <p class="tiho">Алгоритмы · лекция 17.09, первая половина · под ПР1 «Анализ сложности» · около 50 минут</p>
+
+  <p>Первая половина лекции Чернышова 17.09. Как ещё до запуска понять, будет программа работать секунду или три часа. Вторая половина лекции, рекурсия и мастер-теорема, в следующем уроке. Десять шагов, в каждом одна новая вещь.</p>
+  <p>Как проходить: читаешь шаг, переписываешь рамку «Перепиши в тетрадь», решаешь «сделай сам» на бумаге и только потом открываешь ответ. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+  <p>Понадобится матан: логарифмы, пределы и суммы. Они разобраны в уроке <a href="../matan/baza.html">«Матан для алгоритмов»</a>, ссылки на нужные шаги будут по ходу. Код в уроке на Python, как в конспекте лекции. <code>range(n)</code> перебирает числа 0, 1, …, n − 1.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 10</div>
+    <h2>Размер входа и число операций T(n)</h2>
+    <p>Ищем минимум в массиве <code>[5, 3, 8, 1, 4]</code>. Запоминаем первое число 5, потом сравниваем его по очереди с 3, 8, 1 и 4, и каждый раз оставляем меньшее. Сравнений вышло 4.</p>
+    <p>Секунды мерить бесполезно: на другом компьютере выйдет другое число. Поэтому считают операции: сравнения, сложения, записи в память. И считают их не для одного массива, а как формулу от размера.</p>
+    <p class="novoe">Размер входа n это сколько данных пришло на вход, для массива число элементов. <code>T(n)</code> это число элементарных операций алгоритма на самом плохом входе размера n. Это называют худшим случаем.</p>
+    <p>Для минимума <code>T(n) = n − 1</code>: каждый элемент, кроме первого, сравнили один раз. Худший случай берут потому, что он даёт гарантию на любом входе.</p>
+    <p>Зачем это. Компьютер делает около 10⁸ простых операций в секунду. При n = 10⁶ алгоритм с <code>n²</code> операций сделает 10¹² операций, это 10⁴ секунд, почти три часа. Алгоритм с <code>n log₂ n</code> сделает около 2 · 10⁷ операций, пятую часть секунды.</p>
+    <p><code>log₂ n</code> показывает, сколько раз n можно поделить пополам, пока не останется 1. Например, <code>log₂ 8 = 3</code>: 8, 4, 2, 1. Для миллиона выходит около 20. Подробно в <a href="../matan/baza.html#shag-1">шаге 1 матана</a>, а пока хватит этого смысла.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Ищем, есть ли в массиве из n элементов число 7, перебирая элементы слева направо. Сколько сравнений в худшем случае? Какой вход худший?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>T(n) = n</code>. Худший вход: семёрки нет совсем или она стоит последней. Тогда приходится посмотреть все n элементов.</p>
+          <p class="oshibka">Ответить «одно сравнение, если 7 стоит первой». Это лучший случай. Он ничего не обещает: на другом входе работа будет в n раз дольше. По умолчанию сложность считают по худшему.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>n это размер входа. <code>T(n)</code> это число операций на худшем входе размера n.</p>
+      <p>Минимум массива: <code>T(n) = n − 1</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 10</div>
+    <h2>O большое: верхняя граница</h2>
+    <p>Точная формула вроде <code>3n + 5</code> часто не нужна. Важно, что при росте n она растёт как n, а тройка и пятёрка зависят от того, что именно считать операцией.</p>
+    <p>Проверим, что <code>3n + 5 ≤ 4n</code>. Переносим: <code>5 ≤ n</code>. Значит, начиная с n = 5, функция <code>3n + 5</code> не больше <code>4n</code>. Говорят: <code>3n + 5 = O(n)</code>.</p>
+    <p class="novoe"><code>f(n) = O(g(n))</code>, если есть число c &gt; 0 и номер n₀, что <code>f(n) ≤ c · g(n)</code> для всех n ≥ n₀. Читается «f растёт не быстрее g». Это как знак ≤, только с точностью до множителя.</p>
+    <p>Две детали. Числа c и n₀ выбираешь ты сам, но они не должны зависеть от n. И что творится при маленьких n, неважно, смотрим только на n ≥ n₀. Здесь подошли c = 4 и n₀ = 5. Подошли бы и c = 8, n₀ = 1: <code>3n + 5 ≤ 3n + 5n = 8n</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Докажи, что <code>2n + 10 = O(n)</code>: подбери c и n₀.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Возьмём c = 3. <code>2n + 10 ≤ 3n</code> значит <code>10 ≤ n</code>, то есть n₀ = 10. Можно и c = 12, n₀ = 1: при n ≥ 1 верно <code>10 ≤ 10n</code>, поэтому <code>2n + 10 ≤ 12n</code>.</p>
+          <p class="oshibka">Взять c = 2. Тогда нужно <code>2n + 10 ≤ 2n</code>, то есть <code>10 ≤ 0</code>, и это неверно ни при каком n. Множитель должен быть с запасом, больше, чем при n в самой функции.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>f = O(g)</code> ⇔ есть c &gt; 0 и n₀: <code>f(n) ≤ c·g(n)</code> при всех n ≥ n₀.</p>
+      <p>c и n₀ не зависят от n.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 10</div>
+    <h2>Ω и Θ: нижняя граница и точный порядок</h2>
+    <p>O говорит только «не быстрее». Формально <code>n = O(n³)</code> тоже правда, но толку от неё мало. Нужна ещё граница снизу.</p>
+    <p class="novoe"><code>f = Ω(g)</code> («омега»), если <code>f(n) ≥ c · g(n)</code> при всех n ≥ n₀, растёт не медленнее. <code>f = Θ(g)</code> («тета»), если верно и O, и Ω сразу: <code>c₁ · g(n) ≤ f(n) ≤ c₂ · g(n)</code>. Это точный порядок роста.</p>
+    <p>Пример с лекции: <code>3n² + 10n + 5 = Θ(n²)</code>.</p>
+    <ol>
+      <li>Снизу: <code>3n² + 10n + 5 ≥ 3n²</code> при любом n. Значит c₁ = 3.</li>
+      <li>Сверху: при n ≥ 1 верно <code>10n ≤ 10n²</code> и <code>5 ≤ 5n²</code>. Сумма не больше <code>3n² + 10n² + 5n² = 18n²</code>, значит c₂ = 18.</li>
+      <li>Обе границы верны с n₀ = 1, поэтому Θ(n²).</li>
+    </ol>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Докажи <code>½n² − 3n = Θ(n²)</code>: найди c₁, c₂ и n₀. Подсказка для низа: здесь минус, и выкинуть слагаемое, как в примере, нельзя. Найди, с какого n вычитаемое <code>3n</code> не больше <code>¼n²</code>. Тогда от <code>½n²</code> отнимается не больше четверти <code>n²</code> и остаётся хотя бы <code>¼n²</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сверху: <code>½n² − 3n ≤ ½n²</code>, c₂ = ½. Снизу: <code>3n ≤ ¼n²</code> при n ≥ 12 (делим на n: <code>3 ≤ n/4</code>). Тогда <code>½n² − 3n ≥ ½n² − ¼n² = ¼n²</code>, c₁ = ¼. Итого c₁ = ¼, c₂ = ½, n₀ = 12. Проверка на n = 12: <code>72 − 36 = 36</code>, и <code>¼ · 144 = 36</code>, равенство.</p>
+          <p class="oshibka">Взять n₀ = 1. При n = 1 функция равна <code>0.5 − 3 = −2.5</code>, она отрицательная и меньше любого <code>c₁ · 1</code>. Нижняя граница работает только с того места, где минус уже не перевешивает.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>Ω</code>: <code>f ≥ c·g</code> (не медленнее). <code>Θ</code>: и O, и Ω (<code>c₁g ≤ f ≤ c₂g</code>).</p>
+      <p>O ≈ «≤», Ω ≈ «≥», Θ ≈ «=» с точностью до множителя.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 10</div>
+    <h2>Правила упрощения</h2>
+    <p>Доказывать через c и n₀ каждый раз долго. Из определения сразу следуют правила, по ним O пишут за секунду.</p>
+    <p class="novoe">Множители-константы выбрасываем: <code>O(8n + 6) = O(n)</code>. В сумме остаётся самое быстрое слагаемое: <code>O(3n² + 7n + 6) = O(n²)</code>. Какое слагаемое быстрее, смотрим по лестнице роста.</p>
+    <p>Лестница из <a href="../matan/baza.html#shag-5">шага 5 матана</a>, каждая ступень растёт быстрее всех левых:</p>
+    <p><code>1 ≪ log n ≪ √n ≪ n ≪ n log n ≪ n² ≪ n³ ≪ 2ⁿ ≪ n!</code></p>
+    <p>Знак <code>≪</code> читается «растёт гораздо медленнее». <code>n!</code> читается «эн факториал», это произведение <code>1 · 2 · 3 · … · n</code>, например <code>4! = 24</code>. Единица в начале значит число операций, которое от n не зависит.</p>
+    <p>Пример:<code>O(10 log n + 85 + n) = O(n)</code>, потому что n выше логарифма и числа на лестнице.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Упрости: а) <code>O(5n log n + 2n + 100)</code>, б) <code>O(n² + 2ⁿ)</code>, в) <code>O(7)</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) <code>O(n log n)</code>. б) <code>O(2ⁿ)</code>. в) <code>O(1)</code>: число операций не зависит от n.</p>
+          <p class="oshibka">В пункте б оставить <code>n²</code>, «потому что при n = 3 оно больше». При n = 3 правда <code>9 &gt; 8</code>, но уже при n = 10 выходит <code>100</code> против <code>1024</code>. Важно, кто больше при больших n.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Константы-множители выбрасываем, в сумме остаётся самое быстрое слагаемое.</p>
+      <p><code>1 ≪ log n ≪ √n ≪ n ≪ n log n ≪ n² ≪ n³ ≪ 2ⁿ ≪ n!</code></p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 10</div>
+    <h2>Основание логарифма неважно, основание степени важно</h2>
+    <p>Почему в <code>O(log n)</code> не пишут основание? По правилу смены основания из <a href="../matan/baza.html#shag-2">шага 2 матана</a> <code>log₂ n = log₁₀ n / log₁₀ 2 ≈ 3.32 · log₁₀ n</code>. Логарифмы отличаются только множителем 3.32, а множители O выбрасывает.</p>
+    <p>Со степенью иначе. <code>4ⁿ = (2²)ⁿ = 2²ⁿ</code>. Делим: <code>4ⁿ / 2ⁿ = 2ⁿ</code>, и эта дробь растёт без конца. Никакой постоянный множитель c не удержит <code>4ⁿ ≤ c · 2ⁿ</code>.</p>
+    <p class="novoe">Основание логарифма в O неважно: <code>log₂ n = Θ(log₁₀ n)</code>. Основание степени важно: <code>4ⁿ ≠ O(2ⁿ)</code>.</p>
+    <p>Зато сдвиг в показателе не страшен: <code>2ⁿ⁺¹ = 2 · 2ⁿ</code>, это множитель 2, и <code>2ⁿ⁺¹ = O(2ⁿ)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Верно или нет: а) <code>log₃ n = Θ(log₂ n)</code>, б) <code>2²ⁿ = O(2ⁿ)</code>, в) <code>3ⁿ⁺² = O(3ⁿ)</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Да, отличаются множителем <code>log₂ 3 ≈ 1.58</code>. б) Нет, <code>2²ⁿ = 4ⁿ</code>. в) Да, <code>3ⁿ⁺² = 9 · 3ⁿ</code>, множитель 9.</p>
+          <p class="oshibka">Перенести правило с логарифмов на степени: «основание же не важно, значит <code>4ⁿ = O(2ⁿ)</code>». Логарифмы по разным основаниям отличаются в постоянное число раз, а степени в <code>2ⁿ</code> раз, и это число растёт.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>log_a n = log_b n / log_b a</code> → основание логарифма в O не пишут.</p>
+      <p><code>4ⁿ = 2²ⁿ ≠ O(2ⁿ)</code>, а <code>2ⁿ⁺¹ = 2·2ⁿ = O(2ⁿ)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 10</div>
+    <h2>Сравнение двух алгоритмов через предел</h2>
+    <p>Алгоритм A делает <code>n log₂ n</code> операций, алгоритм B делает <code>n²</code>. Какой лучше на больших данных? Смотрим на дробь A / B, когда n растёт. Предел дроби разобран в <a href="../matan/baza.html#shag-4">шаге 4 матана</a>, правило Лопиталя в <a href="../matan/baza.html#shag-7">шаге 7</a>.</p>
+    <p>Сокращаем на n: <code>n log₂ n / n² = log₂ n / n</code>. Сверху и снизу бесконечность, поэтому берём Лопиталя: заменяем верх и низ их производными. Производная <code>log₂ n</code> равна <code>1/(n ln 2)</code>, где <code>ln</code> это логарифм по основанию e ≈ 2.72. Производная n равна 1. Выходит <code>(1/(n ln 2)) / 1</code>, а это при росте n уходит в 0. Предел 0, значит A растёт медленнее, A эффективнее.</p>
+    <p class="novoe"><code>L = lim f_A(n) / f_B(n)</code>. L = 0: A эффективнее. L конечное и больше 0: один порядок, Θ. L = ∞: B эффективнее.</p>
+    <p>Ещё пример: <code>n³</code> против <code>2ⁿ</code>. Производная <code>2ⁿ</code> равна <code>2ⁿ ln 2</code>, то есть каждый раз добавляется множитель ln 2. Запись <code>ln² 2</code> значит <code>ln 2 · ln 2</code>. Лопиталь три раза: <code>3n² / (2ⁿ ln 2)</code>, потом <code>6n / (2ⁿ ln² 2)</code>, потом <code>6 / (2ⁿ ln³ 2) → 0</code>. Кубический лучше, хотя при n = 5 выходит <code>125 &gt; 32</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сравни через предел: а) A = <code>100n</code> и B = <code>0.01n²</code>, б) A = <code>5n² + n</code> и B = <code>n²</code>.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) <code>100n / 0.01n² = 10⁴ / n → 0</code>. A эффективнее, большие константы B не спасают. б) <code>(5n² + n) / n² = 5 + 1/n → 5</code>. Конечное и больше нуля, один порядок <code>Θ(n²)</code>.</p>
+          <p class="oshibka">В пункте а решить по маленькому n: при n = 100 у A <code>10 000</code>, у B <code>100</code>, «значит B лучше». Они сравняются при n = 10 000, а дальше B только хуже. Предел смотрит на большие n.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>lim f_A / f_B</code>: 0 → A лучше, число &gt; 0 → Θ, один порядок, ∞ → B лучше.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 10</div>
+    <h2>Код: блоки подряд и вложенные циклы</h2>
+    <p>Теперь считаем сложность прямо по коду. Два случая.</p>
+<pre><code># подряд
+for i in range(n):
+    работа()
+for j in range(m):
+    работа()
+
+# вложенные
+for i in range(n):
+    for j in range(m):
+        работа()</code></pre>
+    <p>Подряд: сначала n раз, потом m раз, всего <code>n + m</code>. Вложенные: на каждый из n шагов внешнего цикла внутренний делает m шагов, всего <code>n · m</code>.</p>
+    <p class="novoe">Блоки подряд складываем, остаётся самый тяжёлый. Вложенные независимые циклы перемножаем: <code>O(f) · O(g) = O(f·g)</code>.</p>
+    <p>Пример с лекции: умножение матриц n × n в лоб. Три вложенных цикла по n, внутри одно умножение и сложение, итого <code>Θ(n³)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Оцени код. Сколько раз выполнится <code>работа()</code> при n = 10?
+<pre><code>for i in range(n):
+    for j in range(n):
+        for k in range(3):
+            работа()
+for i in range(n):
+    работа()</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Первый блок <code>n · n · 3 = 3n²</code>, второй n. Сумма <code>3n² + n = Θ(n²)</code>. При n = 10: <code>300 + 10 = 310</code>.</p>
+          <p class="oshibka">Написать <code>Θ(n³)</code>, потому что «три цикла один в другом». Третий цикл идёт до 3, а не до n. Он даёт множитель 3, который выбрасывается.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Подряд: складываем, остаётся тяжёлый. Вложенные: перемножаем.</p>
+      <p>Цикл до константы даёт множитель, а не n.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 10</div>
+    <h2>Внутренний цикл зависит от внешнего</h2>
+    <p>Сравнить каждую пару элементов один раз:</p>
+<pre><code>for i in range(n):
+    for j in range(i + 1, n):
+        сравнить(a[i], a[j])</code></pre>
+    <p class="tiho"><code>a[i]</code> это элемент массива a под номером i, счёт с нуля. <code>range(i + 1, n)</code> перебирает числа от i + 1 до n − 1.</p>
+    <p>Здесь внутренний цикл короче на каждом шаге. При i = 0 он делает n − 1 шагов, при i = 1 делает n − 2, и так до 0. Перемножить n на n нельзя, длины разные.</p>
+    <p class="novoe">Если внутренний цикл зависит от внешнего, выписываем число шагов как сумму и считаем её. Здесь <code>(n − 1) + (n − 2) + … + 0 = n(n − 1)/2 = Θ(n²)</code>.</p>
+    <p>Формула суммы <code>1 + 2 + … + n = n(n + 1)/2</code> выведена в <a href="../matan/baza.html#shag-8">шаге 8 матана</a>. При n = 1024 выходит <code>1024 · 1023 / 2 = 523 776</code>. Это вдвое меньше <code>n²</code>, но множитель ½ порядок не меняет.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько раз выполнится <code>сравнить</code> при n = 6? А если добавить третий цикл <code>for k in range(j + 1, n)</code>, какой будет порядок?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>5 + 4 + 3 + 2 + 1 + 0 = 15 = 6 · 5 / 2</code>. С третьим циклом перебираются тройки <code>i &lt; j &lt; k</code>, их <code>n(n − 1)(n − 2)/6</code>, это <code>Θ(n³)</code>. При n = 6 выйдет 20.</p>
+          <p class="oshibka">Посчитать <code>6 · 6 = 36</code>. Так было бы, если бы внутренний цикл всегда шёл от 0 до n. Он начинается с <code>i + 1</code>, поэтому каждая пара считается один раз.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Внутренний зависит от внешнего → пишу сумму.</p>
+      <p>Все пары: <code>n(n − 1)/2 = Θ(n²)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 10</div>
+    <h2>Счётчик умножается: логарифм</h2>
+<pre><code>i = 1
+while i &lt; n:
+    i = i * 2</code></pre>
+    <p><code>while</code> повторяет тело, пока условие верно. i проходит 1, 2, 4, 8, … После k шагов <code>i = 2ᵏ</code>. Цикл кончится, когда <code>2ᵏ ≥ n</code>, то есть при <code>k = ⌈log₂ n⌉</code>. Скобки <code>⌈ ⌉</code> значат «округлить вверх». При n = 1000 тело выполнится 10 раз: i = 1, 2, 4, …, 512.</p>
+    <p class="novoe">Если счётчик умножается или делится на постоянное число, шагов <code>Θ(log n)</code>. Основание логарифма неважно, по шагу 5.</p>
+    <p>Так же работает бинарный поиск: каждый шаг выкидывает половину массива. Смысл логарифма как «сколько раз делим пополам» разобран в <a href="../matan/baza.html#shag-1">шаге 1 матана</a>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько раз выполнится тело при n = 100 и какой порядок?
+<pre><code>while n &gt; 1:
+    n = n // 3</code></pre>
+      <p class="tiho"><code>//</code> это деление нацело: <code>100 // 3 = 33</code>.</p>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>100 → 33 → 11 → 3 → 1, четыре раза. Порядок <code>Θ(log n)</code>, здесь <code>log₃ n</code>, а <code>log₃ 100 ≈ 4.2</code>.</p>
+          <p class="oshibka">Сказать «n шагов, потому что цикл по n». Число шагов определяет не то, по какой переменной цикл, а как она меняется. Вычитание единицы даёт n шагов, деление даёт логарифм.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Счётчик ×2 или ÷3 → <code>Θ(log n)</code> шагов.</p>
+      <p><code>i = 1, пока i &lt; n: i = i * 2</code> → <code>⌈log₂ n⌉</code> раз.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 10</div>
+    <h2>Ловушка: внутренний цикл до i, а не до n</h2>
+<pre><code>i = 1
+while i &lt;= n:
+    for j in range(i):
+        работа()
+    i = i * 2</code></pre>
+    <p>Хочется сказать: внешний цикл <code>log n</code> раз, внутренний до n, итого <code>n log n</code>. Но внутренний идёт до i, а i растёт: 1, 2, 4, …, до самой большой степени двойки, не больше n.</p>
+    <p class="novoe">Сумма <code>1 + 2 + 4 + … + 2ᵏ = 2ᵏ⁺¹ − 1</code> меньше удвоенного последнего слагаемого. Поэтому здесь всего <code>Θ(n)</code> работы, а не <code>n log n</code>.</p>
+    <p>При n = 1024: <code>1 + 2 + … + 1024 = 2047</code>, меньше <code>2n</code>. Сумма геометрической прогрессии разобрана в <a href="../matan/baza.html#shag-9">шаге 9 матана</a>. <code>O(n log n)</code> здесь формально тоже верно, это верхняя граница, но неточная. Если знаешь точно, пиши Θ.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько раз выполнится <code>работа()</code> в коде выше при n = 100?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>i принимает 1, 2, 4, 8, 16, 32, 64. На 128 условие <code>128 ≤ 100</code> ложно. Сумма <code>1 + 2 + 4 + 8 + 16 + 32 + 64 = 127 = 128 − 1</code>. Это меньше <code>2 · 100</code>, порядок <code>Θ(n)</code>.</p>
+          <p class="oshibka">Посчитать <code>7 · 100 = 700</code>: семь внешних шагов, каждый «до n». Внутренний цикл на каждом шаге свой, до текущего i. Перемножать можно только независимые циклы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>1 + 2 + 4 + … + 2ᵏ = 2ᵏ⁺¹ − 1 &lt; 2·2ᵏ</code></p>
+      <p>Внутренний до i, i удваивается → <code>Θ(n)</code>, не <code>n log n</code>.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: асимптотика и сложность кода">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: реши в тетради, впиши ответ и ход решения в поле и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Расставь по скорости роста, от медленного: <code>n²</code>, <code>2ⁿ</code>, <code>n log n</code>, <code>√n</code>, <code>log n</code>, <code>n!</code>, <code>n^1.5</code>, <code>1</code>. Запись <code>n^1.5</code> значит n в степени 1.5, это <code>n · √n</code>. Её нет на лестнице из шага 4. Подсказка: сравни с соседями, вынеся общий множитель n. <code>n log n = n · log n</code>, <code>n^1.5 = n · √n</code>, <code>n² = n · n</code>. Дальше сравнивай только вторые множители по той же лестнице.
+      <textarea name="z1" placeholder="1 ≪ …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Докажи по определению, что <code>4n² + 3n = Θ(n²)</code>: назови c₁, c₂ и n₀.
+      <textarea name="z2" placeholder="Снизу … сверху …" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Верно или нет, и почему: а) <code>n log n = O(n²)</code>, б) <code>n² = O(n log n)</code>, в) <code>3ⁿ = O(2ⁿ)</code>, г) <code>log₁₀ n = Θ(log₂ n)</code>.
+      <textarea name="z3" placeholder="а) … б) … в) … г) …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Оцени каждый кусок через Θ:
+<pre><code># а
+for i in range(n):
+    j = 1
+    while j &lt; n:
+        j = j * 2
+# б
+for i in range(n):
+    for j in range(i):
+        x += 1
+# в
+i = 2
+while i &lt; n:
+    i = i * i</code></pre>
+      <p class="tiho"><code>x += 1</code> значит <code>x = x + 1</code>. Подсказка к «в»: выпиши i по шагам: 2, 4, 16, 256, 65 536. Запиши их степенями двойки: 2¹, 2², 2⁴, 2⁸, 2¹⁶. Показатель каждый раз удваивается, как счётчик в шаге 9. Цикл кончится, когда показатель дойдёт до <code>log₂ n</code>. Сколько удвоений для этого нужно?</p>
+      <textarea name="z4" placeholder="а) … б) … в) …" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Одногруппник говорит: «два цикла один в другом, значит всегда <code>n²</code>». Приведи пример двух вложенных циклов по n, у которых сложность не <code>n²</code>, и посчитай её.
+      <textarea name="z5" placeholder="Код и сложность" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Сложность кода</td><td>Модуль X1.2: почему <code>x in список</code> внутри цикла тихо делает из n квадрат, а <code>set</code> нет.</td></tr>
+      <tr><td>Вложенные циклы</td><td>Модуль A1: numpy заменяет вложенные циклы одной операцией над массивом. Умножение матриц n × n остаётся <code>n³</code>, на нём держатся нейросети.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../alg/">← Алгоритмы</a> · <a href="../povtorenie/alg.html">Повторение</a> · <a href="alg-master-teorema.html">Дальше: рекурренты и мастер-теорема →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

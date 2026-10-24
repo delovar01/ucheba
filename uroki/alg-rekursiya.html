@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Java с нуля и рекурсия — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="alg-rekursiya">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">Алгоритмы · Java и рекурсия</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Java с нуля и рекурсия</h1>
+  <p class="tiho">Алгоритмы · лабы 26.09 и 3.10 · около 55 минут</p>
+
+  <p>Две лабы Зубарева. 26.09 был Java для алгоритмов с нуля: типы, калькулятор, FizzBuzz, «угадай число», статистика по массиву. 3.10 рекурсия и перебор: сумма цифр, скобки, подмножества. Лабы идут на Java 17, поэтому и код здесь на Java, в стиле Зубарева: всё в одном классе, а главная функция <code>main</code> вызывает остальные. Что значат служебные слова перед функциями, разберём по ходу. Двенадцать шагов: первые восемь это минимум Java, без которого рекурсию не написать, последние четыре сама рекурсия.</p>
+  <p>Как проходить: читаешь шаг, переписываешь рамку «Перепиши в тетрадь», решаешь «сделай сам» на бумаге и только потом открываешь ответ. Код из шагов можно запустить в IntelliJ IDEA и сверить вывод. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 12</div>
+    <h2>Первая программа: класс и main</h2>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Привет, алгоритмы");
+    }
+}</code></pre>
+    <p>В Java любой код живёт внутри класса. Класс здесь называется <code>Main</code>, и файл обязан называться так же: <code>Main.java</code>. Фигурные скобки <code>{ }</code> показывают, где класс и где функция начинаются и кончаются.</p>
+    <p class="novoe">Программа начинается с функции <code>public static void main(String[] args)</code>. <code>System.out.println(…)</code> печатает строку и переводит курсор на новую. Каждая команда кончается точкой с запятой.</p>
+    <p>Строку с <code>main</code> пока переписывай целиком, как есть. По словам: <code>public</code> значит, что функцию видно снаружи класса. <code>static</code> разберём в шаге 6. <code>void</code> значит, что функция ничего не возвращает. <code>String[] args</code> это строки, которые можно передать программе при запуске, нам они не понадобятся.</p>
+    <p>Запуск из терминала: <code>javac Main.java</code> проверяет текст и переводит его в код, понятный Java, <code>java Main</code> запускает. В IDEA то же делает зелёный треугольник слева от <code>main</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что не так в этой программе и что скажет компилятор?
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("раз")
+        System.out.println("два");
+    }
+}</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>После <code>println("раз")</code> нет точки с запятой. <code>javac</code> не соберёт программу и напишет <code>';' expected</code> с номером строки 3. Ни одна строка не напечатается, даже «раз».</p>
+          <p class="oshibka">Думать, что программа напечатает «раз» и упадёт на второй строке. Java сначала проверяет весь текст целиком, и с ошибкой в любом месте не запустится ничего.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Класс <code>Main</code> в файле <code>Main.java</code>. Старт в <code>public static void main(String[] args)</code>.</p>
+      <p><code>System.out.println(x);</code> печатает. В конце команды <code>;</code>.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 12</div>
+    <h2>Типы переменных</h2>
+    <p>В Java у каждой переменной тип, и он пишется перед именем. Поменять тип потом нельзя. В коде ниже после <code>//</code> идёт комментарий: Java его не читает, он для человека.</p>
+<pre><code>int a = 17;                 // целое, до 2 147 483 647
+long big = 3000000000L;     // большое целое, L в конце
+double d = 3.4;             // дробное
+boolean ok = a &gt; 10;        // true или false
+String s = "сумма";         // текст</code></pre>
+    <p class="novoe">Тип говорит, что лежит в переменной. Для алгоритмов хватает пяти: <code>int</code> целое, <code>long</code> большое целое, <code>double</code> дробное, <code>boolean</code> правда или ложь, <code>String</code> текст.</p>
+    <p>Ловушка: <code>int</code> переполняется молча. <code>int x = 2147483647; x = x + 1;</code> даст <code>−2147483648</code>, ошибки не будет. Когда числа больше двух миллиардов, например факториалы, бери <code>long</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Какой тип взять для: числа студентов в группе, среднего балла, ответа «сдал или нет», фамилии, числа людей на Земле, около 8 миллиардов?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, <code>long</code>. Восемь миллиардов больше 2 147 483 647, в <code>int</code> не влезет.</p>
+          <p class="oshibka">Взять <code>int</code> для населения Земли. Программа не упадёт, а молча получит переполнение и неверное число. Если число может перевалить за два миллиарда, нужен <code>long</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>int</code>, <code>long</code>, <code>double</code>, <code>boolean</code>, <code>String</code>. Тип пишется перед именем.</p>
+      <p><code>int</code> до ~2·10⁹ и переполняется молча, больше → <code>long</code>.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 12</div>
+    <h2>Деление целых и остаток</h2>
+<pre><code>System.out.println(17 / 5);     // 3
+System.out.println(17 % 5);     // 2
+System.out.println(17 / 5.0);   // 3.4</code></pre>
+    <p class="novoe">Деление двух <code>int</code> даёт целое, дробная часть отбрасывается: <code>17 / 5 = 3</code>. Остаток от деления <code>%</code>: <code>17 % 5 = 2</code>. Если хоть одно число дробное, деление обычное: <code>17 / 5.0 = 3.4</code>.</p>
+    <p>Зачем это алгоритмам: <code>n % 10</code> даёт последнюю цифру числа, <code>n / 10</code> отрезает её, а <code>x % 2</code> у чётных чисел равно 0. Всё это пригодится дальше.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатают <code>7 / 2</code>, <code>7 % 2</code>, <code>7 / 2.0</code> и <code>(double) (7 / 2)</code>? Запись <code>(double) x</code> превращает x в дробное.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>3, 1, 3.5 и 3.0. В последнем сначала считается скобка <code>7 / 2 = 3</code> как целое, и только потом тройка становится дробной.</p>
+          <p class="oshibka">Ответить 3.5 на последний пункт. Превращение в <code>double</code> после деления уже не вернёт потерянную половину. Чтобы вышло 3.5, превращай до деления: <code>(double) 7 / 2</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>int / int</code> отбрасывает дробь. <code>%</code> остаток. <code>(double)</code> до деления, а не после.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 12</div>
+    <h2>Цикл for и условие if: FizzBuzz</h2>
+    <p>Задача с лабы. Напечатать числа от 1 до 15, но вместо чисел, делящихся на 3, писать Fizz, на 5 писать Buzz, а на 3 и на 5 сразу писать FizzBuzz.</p>
+<pre><code>for (int i = 1; i &lt;= 15; i++) {
+    if (i % 15 == 0) System.out.println("FizzBuzz");
+    else if (i % 3 == 0) System.out.println("Fizz");
+    else if (i % 5 == 0) System.out.println("Buzz");
+    else System.out.println(i);
+}</code></pre>
+    <p class="novoe"><code>for (начало; условие; шаг)</code>: сделать начало, потом пока условие верно, выполнять тело и шаг. <code>i++</code> значит «прибавить к i единицу». <code>if … else if … else</code> проверяет условия сверху вниз и выполняет первое верное. Сравнение на равенство пишется двумя знаками <code>==</code>.</p>
+    <p>Вывод: 1, 2, Fizz, 4, Buzz, Fizz, 7, 8, Fizz, Buzz, 11, Fizz, 13, 14, FizzBuzz. Число делится на 3 и на 5 сразу, только если делится на 15.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что этот код напечатает для i = 30, 9, 10 и 7? И что сломается, если строку про 15 поставить последней перед <code>else</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>30 → FizzBuzz, 9 → Fizz, 10 → Buzz, 7 → 7. Если проверку на 15 поставить после проверки на 3, то для 15 и 30 сработает первое верное условие <code>i % 3 == 0</code>, и выйдет Fizz. FizzBuzz не напечатается никогда.</p>
+          <p class="oshibka">Писать три отдельных <code>if</code> без <code>else</code>. Тогда для 15 напечатается и FizzBuzz, и Fizz, и Buzz, три строки вместо одной.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>for (int i = 1; i &lt;= n; i++) { … }</code></p>
+      <p><code>if … else if … else</code>: срабатывает первое верное, самое частное условие ставлю первым.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 12</div>
+    <h2>Массив и статистика по нему</h2>
+    <p>Тоже с лабы 26.09: сумма, минимум, максимум и среднее массива.</p>
+<pre><code>int[] a = {3, 8, 4, 6};
+int sum = 0;
+int min = a[0];
+int max = a[0];
+for (int x : a) {
+    sum += x;
+    if (x &lt; min) min = x;
+    if (x &gt; max) max = x;
+}
+double avg = (double) sum / a.length;
+System.out.println(sum + " " + min + " " + max + " " + avg);</code></pre>
+    <p class="novoe"><code>int[] a = {3, 8, 4, 6};</code> создаёт массив, <code>a[0]</code> первый элемент, <code>a.length</code> длина. Цикл <code>for (int x : a)</code> перебирает все элементы по очереди. <code>sum += x</code> короче, чем <code>sum = sum + x</code>.</p>
+    <p>В последней строке <code>+</code> склеивает текст: <code>sum + " " + min</code> даёт строку из числа, пробела и второго числа.</p>
+    <p>Вывод: <code>21 3 8 5.25</code>. Без <code>(double)</code> среднее вышло бы 5: <code>21 / 4</code> это деление целых из шага 3. Минимум за один проход, Θ(n), как в первом уроке. Здесь цикл сравнивает с min и сам a[0], поэтому сравнений n, а не n − 1.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает этот код для массива <code>{5, -2, 9, 0, 3}</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>15 -2 9 3.0</code>. Сумма <code>5 − 2 + 9 + 0 + 3 = 15</code>, среднее <code>15 / 5 = 3.0</code>, у <code>double</code> всегда печатается дробная часть.</p>
+          <p class="oshibka">Начать с <code>int min = 0</code>. Для этого массива ответ случайно верный, а для <code>{3, 8, 4, 6}</code> минимум будет 0, которого в массиве нет. Начальное значение берут из самого массива, <code>a[0]</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>int[] a = {…}</code>, <code>a[i]</code>, <code>a.length</code>, <code>for (int x : a)</code>.</p>
+      <p>min и max начинаю с <code>a[0]</code>. Среднее через <code>(double) sum / n</code>.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 12</div>
+    <h2>Свои функции: калькулятор</h2>
+    <p>Калькулятор с лабы: два числа и знак операции, ответ число. Оформим его отдельной функцией. В Java функции называют методами.</p>
+<pre><code>static double calc(double a, char op, double b) {
+    switch (op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return a / b;
+        default:
+            System.out.println("Не знаю операцию " + op);
+            return 0;
+    }
+}</code></pre>
+    <p class="novoe">Метод: <code>static тип_ответа имя(тип имя, …) { … }</code>. <code>return</code> отдаёт ответ и сразу выходит из метода. Если ответа нет, тип пишут <code>void</code>, как у <code>main</code>. Пишется внутри класса рядом с <code>main</code>, вызывается по имени: <code>calc(6, '/', 4)</code>.</p>
+    <p>Слово <code>static</code> значит, что метод принадлежит самому классу, и <code>main</code> может вызвать его просто по имени. Без <code>static</code> пришлось бы сначала создавать объект класса, в этом курсе так не делаем.</p>
+    <p><code>calc(6, '/', 4)</code> вернёт 1.5. <code>char</code> это один символ, он пишется в одинарных кавычках. <code>switch</code> сравнивает <code>op</code> по очереди с каждым <code>case</code> и выполняет подходящую ветку. Если не подошёл ни один, срабатывает <code>default</code>. На ноль <code>double</code> делится без ошибки: <code>calc(1, '/', 0)</code> даст <code>Infinity</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Напиши метод <code>sign</code>, который получает <code>int x</code> и возвращает −1, если x отрицательный, 0 для нуля и 1 для положительного.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code>static int sign(int x) {
+    if (x &lt; 0) return -1;
+    if (x == 0) return 0;
+    return 1;
+}</code></pre>
+          <p><code>else</code> не нужен: <code>return</code> уже вышел из метода, до следующих строк дело не дойдёт.</p>
+          <p class="oshibka">Забыть последний <code>return 1</code>. Компилятор скажет <code>missing return statement</code>: метод обещал вернуть <code>int</code>, а для положительных x ничего не вернул.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>static int f(int x) { … return …; }</code>. <code>void</code>, если ответа нет.</p>
+      <p><code>return</code> сразу выходит из метода.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 12</div>
+    <h2>Цикл while и break</h2>
+    <p><code>for</code> удобен, когда заранее известно, сколько раз повторять. Если неизвестно, берут <code>while</code>. Сколько раз 100 делится пополам, пока не станет 1?</p>
+<pre><code>int n = 100;
+int steps = 0;
+while (n &gt; 1) {
+    n = n / 2;
+    steps++;
+}
+System.out.println(steps);   // 6</code></pre>
+    <p>n проходит 100, 50, 25, 12, 6, 3, 1. Делений шесть, на единице условие <code>n &gt; 1</code> ложно, и цикл кончается. Это логарифм из первого урока.</p>
+    <p class="novoe"><code>while (условие) { … }</code> повторяет тело, пока условие верно. <code>while (true)</code> крутится бесконечно, и выйти из него можно командой <code>break</code>: она сразу прерывает цикл.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что напечатает код?
+<pre><code>int k = 1;
+while (true) {
+    if (k * k &gt; 50) break;
+    k++;
+}
+System.out.println(k);</code></pre>
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>8. При k = 7 квадрат 49, это не больше 50, k становится 8. При k = 8 квадрат 64 &gt; 50, срабатывает <code>break</code>, и k уже не растёт.</p>
+          <p class="oshibka">Ответить 7, «последнее число, у которого квадрат меньше 50». <code>break</code> стоит до <code>k++</code> и срабатывает на первом k, у которого квадрат уже больше 50.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>while (усл) { … }</code> пока верно. <code>while (true)</code> + <code>break</code> выход изнутри.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 12</div>
+    <h2>Ввод с клавиатуры: «угадай число»</h2>
+    <p>Программа загадывает число от 1 до 100, ты вводишь догадки, она отвечает «больше» или «меньше». Цикл тут из прошлого шага: <code>while (true)</code>, а <code>break</code> срабатывает, когда угадал.</p>
+<pre><code>import java.util.Random;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int secret = new Random().nextInt(100) + 1;   // от 1 до 100
+        int tries = 0;
+        while (true) {
+            int guess = in.nextInt();
+            tries++;
+            if (guess &lt; secret) System.out.println("больше");
+            else if (guess &gt; secret) System.out.println("меньше");
+            else {
+                System.out.println("угадал за " + tries);
+                break;
+            }
+        }
+    }
+}</code></pre>
+    <p class="novoe"><code>Scanner</code> читает ввод: <code>in.nextInt()</code> ждёт число с клавиатуры. <code>import</code> подключает нужные классы и пишется в самом верху файла.</p>
+    <p>Слово <code>new</code> создаёт объект. <code>new Scanner(System.in)</code> делает читалку клавиатуры, <code>new Random()</code> делает генератор случайных чисел. Больше про объекты в этом уроке знать не нужно.</p>
+    <p><code>nextInt(100)</code> даёт число от 0 до 99, плюс один, от 1 до 100. Как угадать быстрее всего? Каждый раз называть середину оставшегося отрезка, тогда любой ответ отбрасывает половину. Это бинарный поиск, и он угадает любое число не больше чем за 7 попыток: <code>2⁷ = 128 ≥ 100</code>. Пример, загадано 37: 50 → «меньше», 25 → «больше», 37 → угадал.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Загадано 90. Ты всегда называешь середину отрезка, округляя вниз: начинаешь с 50 для отрезка от 1 до 100. Выпиши все догадки.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>50 больше → отрезок 51–100, 75 больше → 76–100, 88 больше → 89–100, 94 меньше → 89–93, 91 меньше → 89–90, 89 больше → 90–90, 90 угадал. Семь попыток, это худший случай.</p>
+          <p class="oshibka">После ответа «больше» на 50 искать от 50, а не от 51. Число 50 уже проверено, его оставлять в отрезке нельзя. Иначе отрезок перестанет сужаться, и на двух последних числах поиск зациклится.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p><code>import</code> вверху файла, <code>new</code> создаёт объект.</p>
+      <p><code>Scanner in = new Scanner(System.in); in.nextInt()</code>. Угадывание серединой: не больше <code>⌈log₂ 100⌉ = 7</code> попыток.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 12</div>
+    <h2>Рекурсия: база и шаг</h2>
+    <p>Задача с лабы 3.10: сумма цифр числа, 12345 → 15. Заметим: сумма цифр 12345 это последняя цифра 5 плюс сумма цифр 1234. А сумма цифр 1234 это 4 плюс сумма цифр 123. Задача сводится к такой же, только поменьше.</p>
+<pre><code>static int digitSum(int n) {
+    if (n &lt; 10) return n;              // база: одна цифра
+    return n % 10 + digitSum(n / 10);  // шаг
+}</code></pre>
+    <p><code>n % 10</code> последняя цифра, <code>n / 10</code> число без неё, это деление целых из шага 3.</p>
+    <p class="novoe">Рекурсия: метод вызывает сам себя на задаче поменьше. У неё обязательно есть база, задача, ответ на которую известен без вызовов, и шаг, который сводит задачу к меньшей. Каждый шаг обязан приближать к базе.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Чему равен <code>digitSum(9075)</code>? Распиши цепочку вызовов.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>5 + digitSum(907)</code> → <code>7 + digitSum(90)</code> → <code>0 + digitSum(9)</code> → база 9. Итого <code>5 + 7 + 0 + 9 = 21</code>.</p>
+          <p class="oshibka">Перепутать <code>%</code> и <code>/</code>: <code>n / 10 + digitSum(n % 10)</code>. Тогда для 9075 выйдет <code>907 + digitSum(5) = 912</code>. Код работает без ошибок, но считает не то. Цифру отрезает <code>% 10</code>, она и складывается, а в рекурсию уходит остаток числа <code>/ 10</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Рекурсия = база (ответ сразу) + шаг (та же задача меньше).</p>
+      <p>Сумма цифр: база <code>n &lt; 10</code>, шаг <code>n % 10 + f(n / 10)</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-10" data-shag>
+    <div class="shag-nomer">Шаг 10 из 12</div>
+    <h2>Стек вызовов и глубина</h2>
+    <p>Что происходит при <code>digitSum(345)</code>:</p>
+<pre><code>digitSum(345)  ждёт  5 + digitSum(34)
+  digitSum(34)   ждёт  4 + digitSum(3)
+    digitSum(3) = 3           ← база
+  digitSum(34) = 4 + 3 = 7    ← сворачиваемся
+digitSum(345) = 5 + 7 = 12</code></pre>
+    <p>Пока вложенный вызов не вернул ответ, внешний ждёт, и его переменные хранятся в памяти. Эту память устроили как стек из первого шага урока про кучи: новый вызов кладётся сверху, закончивший снимается первым.</p>
+    <p class="novoe">Стек вызовов хранит все вызовы, которые ещё ждут ответа. Глубина рекурсии это сколько вызовов в нём одновременно. Рекурсия тратит память <code>O(глубина)</code>, даже если массивов нет.</p>
+    <p>Нет базы или шаг не приближает к ней, и вызовы копятся без конца. Стек не бесконечный, и Java падает с <code>StackOverflowError</code>, обычно на глубине порядка десятка тысяч вызовов, точное число зависит от размера стека. Время считается так: число вызовов умножить на работу одного. У суммы цифр вызовов столько, сколько цифр, <code>O(log₁₀ n)</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Сколько вызовов сделает <code>digitSum(1000000)</code> и какая наибольшая глубина стека? Что будет, если шаг написать <code>digitSum(n)</code> вместо <code>digitSum(n / 10)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>У миллиона 7 цифр: 1000000, 100000, 10000, 1000, 100, 10, 1. Семь вызовов, все одновременно в стеке, глубина 7. С <code>digitSum(n)</code> задача не уменьшается, вызовы копятся до <code>StackOverflowError</code>.</p>
+          <p class="oshibka">Считать глубину 6, по числу «делений на 10». Вызов с базой, <code>digitSum(1)</code>, тоже лежит в стеке. Вызовов на один больше, чем делений.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Стек вызовов: ждущие вызовы, сверху новый. Память = <code>O(глубина)</code>.</p>
+      <p>Время = число вызовов × работа одного. Нет базы → <code>StackOverflowError</code>.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-11" data-shag>
+    <div class="shag-nomer">Шаг 11 из 12</div>
+    <h2>Перебор: все правильные скобки</h2>
+    <p>Задача с лабы 3.10: вывести все правильные скобочные последовательности из n пар. Правильная значит, что каждая скобка закрыта, и закрывающая не встречается раньше своей открывающей. Для n = 2 это <code>(())</code> и <code>()()</code>, а <code>)(()</code> неправильная.</p>
+    <p>Строим строку по одному символу. На каждом месте пробуем оба варианта, но только разрешённые: открыть можно, пока открытых меньше n, закрыть можно, пока закрытых меньше, чем открытых.</p>
+<pre><code>static void gen(String s, int open, int close, int n) {
+    if (s.length() == 2 * n) {          // база: строка готова
+        System.out.println(s);
+        return;
+    }
+    if (open &lt; n) gen(s + "(", open + 1, close, n);
+    if (close &lt; open) gen(s + ")", open, close + 1, n);
+}</code></pre>
+    <p><code>s.length()</code> это длина строки s. <code>s + "("</code> даёт новую строку, к которой в конец приписана скобка.</p>
+    <p class="novoe">Перебор рекурсией: на каждом шаге ветвимся по всем разрешённым вариантам, база это готовый ответ. Правило «закрыть, только если есть что закрывать» отсекает неправильные ветки сразу, а не после построения.</p>
+    <p>Вызов <code>gen("", 0, 0, 2)</code> печатает <code>(())</code>, потом <code>()()</code>. Первой всегда идёт ветка «открыть», поэтому <code>(())</code> раньше.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Выпиши, что напечатает <code>gen("", 0, 0, 3)</code>, в том же порядке.
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>((()))</code>, <code>(()())</code>, <code>(())()</code>, <code>()(())</code>, <code>()()()</code>. Пять штук. Для n = 4 их будет 14.</p>
+          <p class="oshibka">Условие закрытия написать <code>close &lt; n</code>. Тогда пройдут строки вроде <code>())(()</code>: закрывающих не больше трёх, но в начале закрыли больше, чем открыли.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Скобки: открыть если <code>open &lt; n</code>, закрыть если <code>close &lt; open</code>. База: длина <code>2n</code>.</p>
+      <p>Перебор: ветвлюсь по разрешённым вариантам.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="shag" id="shag-12" data-shag>
+    <div class="shag-nomer">Шаг 12 из 12</div>
+    <h2>Все подмножества и откат</h2>
+    <p>Последняя задача лабы 3.10: вывести все подмножества массива <code>{1, 2, 3}</code>. Подмножество это любой набор его элементов, в том числе пустой и весь массив. Для каждого элемента два варианта: не брать или брать.</p>
+<pre><code>// вверху файла: import java.util.ArrayList; import java.util.List;
+static void subsets(int[] a, int i, List&lt;Integer&gt; cur) {
+    if (i == a.length) {             // база: про все элементы решили
+        System.out.println(cur);
+        return;
+    }
+    subsets(a, i + 1, cur);          // не берём a[i]
+    cur.add(a[i]);
+    subsets(a, i + 1, cur);          // берём a[i]
+    cur.remove(cur.size() - 1);      // откат: убрали, что добавили
+}
+// вызов: subsets(new int[]{1, 2, 3}, 0, new ArrayList&lt;&gt;());</code></pre>
+    <p><code>List&lt;Integer&gt;</code> это список целых, который умеет расти, как динамический массив из урока про кучи. В угловых скобках тип элементов, <code>Integer</code> это тот же <code>int</code>, только в таком виде его можно положить в список. <code>new ArrayList&lt;&gt;()</code> создаёт пустой такой список. <code>add</code> добавляет в конец, <code>size()</code> говорит, сколько в нём элементов, <code>remove(k)</code> убирает элемент номер k. Значит <code>remove(cur.size() - 1)</code> убирает последний. <code>new int[]{1, 2, 3}</code> создаёт массив прямо в вызове.</p>
+    <p class="novoe">Откат: после ветки «взял элемент» убрать его обратно, чтобы следующая ветка начала с того же состояния. Подмножеств у n элементов <code>2ⁿ</code>, поэтому перебор стоит <code>O(2ⁿ)</code> вызовов. Рекуррента <code>T(n) = 2T(n − 1) + 1</code>, как у Ханоя в <a href="alg-master-teorema.html#shag-2">уроке про мастер-теорему</a>.</p>
+    <p>Вывод: <code>[]</code>, <code>[3]</code>, <code>[2]</code>, <code>[2, 3]</code>, <code>[1]</code>, <code>[1, 3]</code>, <code>[1, 2]</code>, <code>[1, 2, 3]</code>. Восемь, <code>2³</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> а) Какие подмножества <code>{3, 5, 7}</code> дают в сумме 10? б) Сколько подмножеств у массива из 20 элементов? А из 40, если компьютер проверяет 10⁸ подмножеств в секунду?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>а) Только <code>{3, 7}</code>. Остальные суммы: 0, 3, 5, 7, 8, 12, 15. б) <code>2²⁰ = 1 048 576</code>, это доли секунды. <code>2⁴⁰ ≈ 1.1 · 10¹²</code>, это около 11 000 секунд, три часа. Добавили 20 элементов, а время выросло в миллион раз.</p>
+          <p class="oshibka">Забыть строку отката. Тогда добавленный элемент остаётся в <code>cur</code> навсегда, и следующие ветки печатают лишнее, например <code>[3, 2]</code> вместо <code>[2]</code>. Каждому <code>add</code> в переборе нужен свой <code>remove</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="tetrad">
+      <p>Подмножества: не беру → беру → откат <code>remove</code>. Всего <code>2ⁿ</code>.</p>
+      <p>Каждому <code>add</code> свой <code>remove</code> после ветки.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Что спросят на защите</h2>
+    <p>Зубарев принимает лабы по отчёту, и у каждого спрашивает своё. Про любую рекурсию держи наготове три ответа: где база, почему каждый вызов ближе к ней, какая сложность по времени и по памяти. Для суммы цифр: база одна цифра, число каждый раз короче на цифру, время и память <code>O(число цифр)</code>.</p>
+    <p>Задачи «Signal» с лабы 3.10 в уроке нет: её условия нет в доступных материалах. Если найдёшь её в репозитории Зубарева, принеси, разберём отдельно.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: Java и рекурсия">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач. Ответов здесь нет: напиши код или ответ в поле и отправь учителю кнопкой ниже. Он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Что напечатает код? <code>int a = 10, b = 4; System.out.println(a / b + " " + a % b + " " + (double) a / b);</code> Запись <code>int a = 10, b = 4;</code> объявляет сразу две переменные типа <code>int</code>.
+      <textarea name="z1" placeholder="…" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Напиши метод <code>static int countEven(int[] a)</code>, который считает, сколько в массиве чётных чисел. Что он вернёт для <code>{4, 7, 0, -2, 9}</code>?
+      <textarea name="z2" placeholder="static int countEven(int[] a) { … }" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Напиши рекурсивный <code>static int digitCount(int n)</code>, число цифр в n, для n ≥ 0. Где база, почему шаг приближает к ней, какая сложность?
+      <textarea name="z3" placeholder="static int digitCount(int n) { … }" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Что не так с этой функцией? Что будет при <code>f(5)</code> и при <code>f(4)</code>?
+<pre><code>static int f(int n) {
+    if (n == 0) return 0;
+    return n + f(n - 2);
+}</code></pre>
+      <textarea name="z4" placeholder="…" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Переделай <code>subsets</code> из шага 12 так, чтобы он печатал только подмножества с суммой ровно k. Подсказка: передавай текущую сумму аргументом.
+      <textarea name="z5" placeholder="static void subsetsSum(…) { … }" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Сложность рекурсии</td><td>Модуль X1.2: число вызовов × работа одного. Перебор <code>2ⁿ</code> годится только до n около 25, дальше нужен другой алгоритм.</td></tr>
+      <tr><td>Перебор с откатом</td><td>Модуль X1.7: на контесте перебор с отсечением, как в скобках, часто проходит маленькие тесты, пока не придумал лучшее.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../alg/">← Алгоритмы</a> · <a href="../povtorenie/alg.html">Повторение</a> · <a href="alg-grafy-obhody.html">Дальше: графы, BFS и DFS →</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

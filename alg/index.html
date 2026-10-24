@@ -20,21 +20,44 @@
 </header>
 <main>
   <h1>Алгоритмы <span class="tetrad-znak">✍ с тетрадью</span></h1>
-  <p>Уроков пока нет, они идут следующими. База под алгоритмы уже есть в матане: логарифмы и суммы это и есть оценка сложности.</p>
+  <p>Решаешь с тетрадью: в каждом шаге рамка «Перепиши в тетрадь», задачи считаешь на бумаге и только потом открываешь ответ. Логарифмы и суммы, на которых держится сложность, в уроке <a href="../matan/baza.html">«Матан для алгоритмов»</a>.</p>
 
   <h2>Сроки</h2>
   <ul class="gorit" data-predmet="Алгоритмы"><li><div class="kogda">…</div><div>Сроки загружаются</div></li></ul>
 
+  <h2>Пробный экзамен</h2>
+  <ul class="spisok-urokov">
+    <li><a href="probnyy-ekzamen.html"><b>Пробный экзамен</b></a><span class="tiho">Билет: 2 вопроса теории и 5 задач, как обещали преподаватели. Ответы и разбор под кнопками, плюс 14 вопросов теории. 90 минут.</span></li>
+  </ul>
+
   <h2>Уроки</h2>
   <ul class="spisok-urokov">
-    <li class="net">Уроков пока нет. Начни с базы: <a href="../matan/baza.html">Матан: логарифмы, пределы, производные, суммы</a>.</li>
+    <li data-urok-status="alg-asimptotika" data-shagov="10"><a href="../uroki/alg-asimptotika.html"><b>Асимптотика и сложность кода</b></a><span class="tiho">Лекция 17.09, первая половина. Под ПР1. Около 50 минут.</span></li>
+    <li data-urok-status="alg-master-teorema" data-shagov="9"><a href="../uroki/alg-master-teorema.html"><b>Рекурренты, мастер-теорема, нижняя граница сортировки</b></a><span class="tiho">Лекция 17.09, вторая половина. Под ПР1. Около 50 минут.</span></li>
+    <li data-urok-status="alg-lineynye-sortirovki" data-shagov="13"><a href="../uroki/alg-lineynye-sortirovki.html"><b>Сортировки за линейное время</b></a><span class="tiho">Лекция 17.09, выход за модель сравнений. Под ПР2. Около 60 минут.</span></li>
+    <li data-urok-status="alg-kuchi" data-shagov="11"><a href="../uroki/alg-kuchi.html"><b>Кучи и амортизационный анализ</b></a><span class="tiho">Лекция 24.09. Около 50 минут.</span></li>
+    <li data-urok-status="alg-rekursiya" data-shagov="12"><a href="../uroki/alg-rekursiya.html"><b>Java с нуля и рекурсия</b></a><span class="tiho">Лабы 26.09 и 3.10. Около 55 минут.</span></li>
+    <li data-urok-status="alg-grafy-obhody" data-shagov="8"><a href="../uroki/alg-grafy-obhody.html"><b>Графы: BFS, DFS и путь в лабиринте</b></a><span class="tiho">Лекция 5.10 и лаба 10.10. Под ПР3. Около 50 минут.</span></li>
+    <li data-urok-status="alg-deykstra" data-shagov="8"><a href="../uroki/alg-deykstra.html"><b>Алгоритм Дейкстры</b></a><span class="tiho">Лекция 5.10 и лаба 10.10. Под ПР3. Около 45 минут.</span></li>
   </ul>
+
+  <h2>Повторение</h2>
+  <ul class="spisok-urokov">
+    <li><a href="../povtorenie/alg.html"><b>Алгоритмы: проверь себя</b></a><span class="tiho">Правила одной таблицей и 16 вопросов по всем урокам.</span></li>
+  </ul>
+  <h2>Шпаргалка</h2>
+  <p class="tiho">Рамки «Перепиши в тетрадь» из всех уроков предмета. Шаг открывается по ссылке.</p>
+  <div data-shpargalka="../uroki/alg-asimptotika.html ../uroki/alg-master-teorema.html ../uroki/alg-lineynye-sortirovki.html ../uroki/alg-kuchi.html ../uroki/alg-rekursiya.html ../uroki/alg-grafy-obhody.html ../uroki/alg-deykstra.html"><p class="tiho">Собираю из уроков…</p></div>
 
   <section class="ml-blok">
     <h2>Где пригодится в ML</h2>
     <div class="tablica"><table>
       <tr><th>здесь</th><th>в своей программе</th></tr>
-      <tr><td>Сложность</td><td>Почему бинарный поиск это log n, а два вложенных цикла n². В своей программе это модуль про сложность и numpy.</td></tr>
+      <tr><td>Сложность</td><td>Модуль X1.2: почему бинарный поиск это log n, а два вложенных цикла n². Модуль A1: numpy заменяет циклы операцией над массивом.</td></tr>
+      <tr><td>Сортировка и бинпоиск</td><td>Модуль X1.5: откуда <code>n log n</code> у <code>sorted()</code> и почему быстрее сравнениями нельзя.</td></tr>
+      <tr><td>Линейные сортировки</td><td>Модуль A2: массив счётчиков это гистограмма и подсчёт классов, карманы это разбиение признака на интервалы.</td></tr>
+      <tr><td>Кучи и амортизация</td><td>Модули X1.3 и X1.6: <code>append</code> за <code>O(1)</code>, <code>heapq</code>, стек и очередь. Модуль A6: топ-K документов кучей.</td></tr>
+      <tr><td>Графы</td><td>Модуль X1.6: BFS на очереди. Модуль A4: нейросеть это граф вычислений, его обходят как DFS.</td></tr>
     </table></div>
     <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
     <p class="tiho">Открывается, пока включён компьютер дома.</p>

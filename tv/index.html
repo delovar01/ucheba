@@ -26,21 +26,31 @@
   <ul class="gorit" data-predmet="Теорвер"><li><div class="kogda">…</div><div>Сроки загружаются</div></li></ul>
 
   <h2>Уроки</h2>
+  <p class="tiho">Уроки идут по порядку пар: логика, множества, вероятность. Каждый следующий опирается на прошлый.</p>
   <ul class="spisok-urokov">
+    <li data-urok-status="tv-vyskazyvaniya" data-shagov="11"><a href="../uroki/tv-vyskazyvaniya.html"><b>Высказывания, таблицы истинности, законы логики</b></a><span class="tiho">Практика 8.09, лекция 14.09, практика 15.09. Около 55 минут.</span></li>
+    <li data-urok-status="tv-dnf" data-shagov="9"><a href="../uroki/tv-dnf.html"><b>ДНФ, КНФ, упрощение и контактные схемы</b></a><span class="tiho">Лекция 14.09, практика 15.09, ДЗ «комитет из трёх». Около 60 минут.</span></li>
+    <li data-urok-status="tv-mnozhestva" data-shagov="11"><a href="../uroki/tv-mnozhestva.html"><b>События как множества</b></a><span class="tiho">Лекция 21.09 и практика 22.09. Около 55 минут.</span></li>
+    <li data-urok-status="tv-sigma-algebra" data-shagov="11"><a href="../uroki/tv-sigma-algebra.html"><b>Системы множеств, алгебра и σ-алгебра</b></a><span class="tiho">Лекция 28.09 и практика 29.09. Около 60 минут.</span></li>
+    <li data-urok-status="tv-prostranstvo" data-shagov="9"><a href="../uroki/tv-prostranstvo.html"><b>Вероятностное пространство и алгебра событий</b></a><span class="tiho">Лекция 5.10 и практика 6.10. Около 60 минут.</span></li>
+    <li data-urok-status="tv-uslovnaya" data-shagov="9"><a href="../uroki/tv-uslovnaya.html"><b>Условная вероятность, полная вероятность и Байес</b></a><span class="tiho">Лекция 12.10 и практика 13.10. Около 60 минут.</span></li>
     <li data-urok-status="tv-nezavisimost" data-shagov="8"><a href="../uroki/tv-nezavisimost.html"><b>Дерево вероятностей, Байес и независимость</b></a><span class="tiho">Лекция 19.10 и все задачи практики 20.10. Около 60 минут.</span></li>
   </ul>
 
   <h2>Повторение</h2>
   <ul class="spisok-urokov">
-    <li><a href="../povtorenie/tv.html"><b>Теорвер: проверь себя</b></a><span class="tiho">Формулы одной таблицей и 10 вопросов с новыми числами.</span></li>
+    <li><a href="../povtorenie/tv.html"><b>Теорвер: проверь себя</b></a><span class="tiho">Формулы одной таблицей и 22 вопроса с новыми числами, по всем урокам.</span></li>
   </ul>
   <h2>Шпаргалка</h2>
   <p class="tiho">Рамки «Перепиши в тетрадь» из всех уроков предмета. Шаг открывается по ссылке.</p>
-  <div data-shpargalka="../uroki/tv-nezavisimost.html"><p class="tiho">Собираю из уроков…</p></div>
+  <div data-shpargalka="../uroki/tv-vyskazyvaniya.html ../uroki/tv-dnf.html ../uroki/tv-mnozhestva.html ../uroki/tv-sigma-algebra.html ../uroki/tv-prostranstvo.html ../uroki/tv-uslovnaya.html ../uroki/tv-nezavisimost.html"><p class="tiho">Собираю из уроков…</p></div>
   <section class="ml-blok">
     <h2>Где пригодится в ML</h2>
     <div class="tablica"><table>
       <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>Логика</td><td>Фильтры в pandas и условия в коде пишут связками И, ИЛИ, НЕ. Де Морган помогает переписать условие так, чтобы оно не врало.</td></tr>
+      <tr><td>Множества и события</td><td>Выборка строк по условию это событие, подмножество всех строк. Пересечение и объединение условий те же, что в уроке.</td></tr>
+      <tr><td>Вероятностное пространство</td><td>Модуль A3: accuracy это доля k / n, а вероятности классов на выходе модели подчиняются тем же аксиомам.</td></tr>
       <tr><td>Байес</td><td>Точность и полнота классификатора это условные вероятности. «Какая доля писем в папке Спам правда спам» считается тем же Байесом.</td></tr>
       <tr><td>Дерево вероятностей</td><td>Когда проверяешь модель на тестах, вопрос «насколько верить результату» решается деревом.</td></tr>
     </table></div>

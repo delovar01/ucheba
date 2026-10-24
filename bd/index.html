@@ -27,23 +27,34 @@
 
   <h2>Уроки</h2>
   <ul class="spisok-urokov">
+    <li data-urok-status="bd-er" data-shagov="12"><a href="../uroki/bd-er.html"><b>База, ключи и ER-диаграмма</b></a><span class="tiho">Лаба 9.09 и лекция 15.09. Около 60 минут.</span></li>
+    <li data-urok-status="bd-sozdanie-tablic" data-shagov="11"><a href="../uroki/bd-sozdanie-tablic.html"><b>Создание базы и таблиц</b></a><span class="tiho">Лабы 16.09 и 23.09, самостоятельная 1. Около 55 минут.</span></li>
+    <li data-urok-status="bd-filtry-join" data-shagov="10"><a href="../uroki/bd-filtry-join.html"><b>Сортировка, фильтры и JOIN</b></a><span class="tiho">Самостоятельная 2, задания 1–7. Около 50 минут.</span></li>
     <li data-urok-status="bd-left-join-group-by" data-shagov="9"><a href="../uroki/bd-left-join-group-by.html"><b>LEFT JOIN и GROUP BY</b></a><span class="tiho">Самостоятельная 2, задания 8–11. Около 50 минут.</span></li>
     <li data-urok-status="bd-case-daty" data-shagov="9"><a href="../uroki/bd-case-daty.html"><b>CASE и даты</b></a><span class="tiho">Лаба 14.10. Самостоятельная 2, задания 12, 13 и 15. Около 50 минут.</span></li>
+    <li data-urok-status="bd-distinct-top-okna" data-shagov="5"><a href="../uroki/bd-distinct-top-okna.html"><b>DISTINCT, лучший и окна</b></a><span class="tiho">Самостоятельная 2, задания 14, 16 и 17. Около 35 минут.</span></li>
+    <li data-urok-status="bd-izmenenie-dannyh" data-shagov="10"><a href="../uroki/bd-izmenenie-dannyh.html"><b>INSERT, UPDATE, DELETE</b></a><span class="tiho">Лекция 4 от 13.10, домашка 4. Около 50 минут.</span></li>
+    <li data-urok-status="bd-podzaprosy-cte" data-shagov="11"><a href="../uroki/bd-podzaprosy-cte.html"><b>Подзапросы, WITH и множества</b></a><span class="tiho">Лекции 29.09 и 13.10. Около 55 минут.</span></li>
+    <li data-urok-status="bd-stroki" data-shagov="12"><a href="../uroki/bd-stroki.html"><b>Строковые функции</b></a><span class="tiho">Лаба 21.10. Около 60 минут.</span></li>
   </ul>
 
   <h2>Повторение</h2>
   <ul class="spisok-urokov">
-    <li><a href="../povtorenie/bd.html"><b>Базы данных: проверь себя</b></a><span class="tiho">СУБД, ключи, LEFT JOIN, GROUP BY, HAVING, CASE и даты. 18 вопросов, 20 минут.</span></li>
+    <li><a href="../povtorenie/bd.html"><b>Базы данных: проверь себя</b></a><span class="tiho">СУБД, ключи, ER-диаграмма, создание таблиц, LEFT JOIN, GROUP BY, HAVING, CASE и даты, подзапросы и WITH, строки. 30 вопросов, 30 минут.</span></li>
   </ul>
   <h2>Шпаргалка</h2>
   <p class="tiho">Рамки «Главное из шага» из всех уроков предмета. Шаг открывается по ссылке.</p>
-  <div data-shpargalka="../uroki/bd-left-join-group-by.html ../uroki/bd-case-daty.html"><p class="tiho">Собираю из уроков…</p></div>
+  <div data-shpargalka="../uroki/bd-er.html ../uroki/bd-sozdanie-tablic.html ../uroki/bd-filtry-join.html ../uroki/bd-left-join-group-by.html ../uroki/bd-case-daty.html ../uroki/bd-distinct-top-okna.html ../uroki/bd-izmenenie-dannyh.html ../uroki/bd-podzaprosy-cte.html ../uroki/bd-stroki.html"><p class="tiho">Собираю из уроков…</p></div>
   <section class="ml-blok">
     <h2>Где пригодится в ML</h2>
     <div class="tablica"><table>
       <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>ER-диаграмма</td><td>Схема данных под датасет: «пользователь, событие, товар» показывает, откуда берутся строки и где склейка их размножит.</td></tr>
+      <tr><td>Создание таблиц</td><td>Логи запусков и метрики модели хранят в таблицах как твои experiments и metrics, а CHECK ловит мусор до датасета.</td></tr>
       <tr><td>LEFT JOIN и GROUP BY</td><td>В pandas это merge(how='left') и groupby. Датасеты для обучения почти всегда собирают такими запросами.</td></tr>
       <tr><td>CASE и даты</td><td>CASE делает новый признак из старых столбцов, а месяц и день недели из даты это самые частые признаки в табличных данных.</td></tr>
+      <tr><td>Подзапросы и WITH</td><td>Выборку для обучения собирают цепочкой шагов, CTE читается сверху вниз как цепочка переменных в pandas.</td></tr>
+      <tr><td>Строковые функции</td><td>Чистка текстовых признаков: TRIM, LOWER и REPLACE приводят «Москва» и « МОСКВА» к одному виду.</td></tr>
     </table></div>
     <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
     <p class="tiho">Открывается, пока включён компьютер дома.</p>
