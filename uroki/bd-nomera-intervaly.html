@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="ru" data-koren="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Интервалы дат, номера и ранги — Учёба</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('tema');if(t&&t!=='auto')document.documentElement.dataset.theme=t;})();</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-urok="bd-nomera-intervaly">
+<header class="shapka">
+  <div class="shapka-ryad">
+    <a class="domoy" href="../">← Учёба</a>
+    <span class="mesto">БД · интервалы и ранги</span>
+    <button class="knopka-tema" type="button">◐ Авто</button>
+  </div>
+</header>
+<main>
+  <h1>Интервалы дат, номера и ранги</h1>
+  <p class="tiho">Базы данных · к практике «ПР 28 окт», срок ср 4.11 00:00 · около 50 минут</p>
+
+  <p>В практике с лабы 28.10 пять заданий. Три из них ты уже умеешь: список одной строкой через <code>STRING_AGG</code> есть в уроке <a href="bd-funkcii.html">«Скалярные и агрегатные функции»</a>, кусок почты после <code>@</code> и «Иванов И.» в уроке <a href="bd-stroki.html">«Строковые функции»</a>, <code>COALESCE</code> и <code>CASE</code> там же и в уроке <a href="bd-case-daty.html">«CASE и даты»</a>. Здесь то, чего ещё не было: прибавить к дате неделю, месяц словом, номер места в рейтинге и место внутри своей группы. Девять шагов, всё на твоей базе <code>ml_tracker</code>.</p>
+  <p>Как проходить: читаешь шаг, решаешь «сделай сам» сам и только потом открываешь ответ. Если в шаге что-то непонятно, дальше не иди: сначала задай вопрос по этому шагу.</p>
+
+  <h2>Что понадобится из базы</h2>
+  <p>Исследователи: 1 Павленко Степан, 2 Щайхутдинов Азат, 3 Иванова Мария, 4 Смирнов Олег, у Олега запусков нет.</p>
+  <div class="tablica">
+    <div class="imya">experiments · запуски</div>
+    <table>
+      <tr><th>id</th><th>researcher_id</th><th>created_at</th><th>count_apoh</th><th>status</th></tr>
+      <tr><td>1</td><td>1</td><td>2026-09-20 18:00</td><td>1</td><td>done</td></tr>
+      <tr><td>2</td><td>1</td><td>2026-09-21 19:30</td><td class="null">NULL</td><td>done</td></tr>
+      <tr><td>3</td><td>2</td><td>2026-09-22 10:15</td><td>1</td><td>done</td></tr>
+      <tr><td>4</td><td>3</td><td>2026-09-23 12:00</td><td>1</td><td>done</td></tr>
+      <tr><td>5</td><td>3</td><td>2026-09-24 14:40</td><td>5</td><td>done</td></tr>
+      <tr><td>6</td><td>1</td><td>2026-10-02 21:10</td><td>3</td><td>done</td></tr>
+      <tr><td>7</td><td>2</td><td>2026-10-05 16:45</td><td>1</td><td>failed</td></tr>
+      <tr><td>8</td><td>2</td><td>2026-10-11 23:20</td><td>10</td><td>running</td></tr>
+      <tr><td>9</td><td>3</td><td>2026-10-15 09:30</td><td>1</td><td>done</td></tr>
+    </table>
+  </div>
+  <div class="tablica">
+    <div class="imya">metrics · оценки запусков</div>
+    <table>
+      <tr><th>id</th><th>experiments_id</th><th>name_metric</th><th>mean_metric</th></tr>
+      <tr><td>1</td><td>1</td><td>accuracy</td><td>0.787</td></tr>
+      <tr><td>2</td><td>1</td><td>f1</td><td>0.721</td></tr>
+      <tr><td>3</td><td>2</td><td>accuracy</td><td>0.835</td></tr>
+      <tr><td>4</td><td>2</td><td>f1</td><td>0.789</td></tr>
+      <tr><td>5</td><td>3</td><td>accuracy</td><td>0.960</td></tr>
+      <tr><td>6</td><td>3</td><td>f1</td><td>0.941</td></tr>
+      <tr><td>7</td><td>4</td><td>r2</td><td>0.812</td></tr>
+      <tr><td>8</td><td>5</td><td>accuracy</td><td>0.982</td></tr>
+      <tr><td>9</td><td>6</td><td>accuracy</td><td>0.874</td></tr>
+      <tr><td>10</td><td>6</td><td>f1</td><td>0.866</td></tr>
+      <tr><td>11</td><td>8</td><td>accuracy</td><td>0.991</td></tr>
+      <tr><td>12</td><td>9</td><td>accuracy</td><td>0.947</td></tr>
+    </table>
+  </div>
+  <p>Во всех ответах про «сегодня» считаем, что сегодня 28.10.2026. В DBeaver у тебя будет своё число, и дни выйдут другими.</p>
+
+  <!-- 1 -->
+  <section class="shag" id="shag-1" data-shag>
+    <div class="shag-nomer">Шаг 1 из 9</div>
+    <h2>INTERVAL: прибавить к дате неделю или месяц</h2>
+    <p>Через неделю после каждого запуска хотим проверить, как модель ведёт себя на новых данных. Когда это будет?</p>
+<pre><code class="sql">SELECT id, created_at,
+       created_at + INTERVAL '7 day' AS proverka
+FROM experiments;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>created_at</th><th>proverka</th></tr>
+      <tr><td>1</td><td>2026-09-20 18:00</td><td>2026-09-27 18:00</td></tr>
+      <tr><td>8</td><td>2026-10-11 23:20</td><td>2026-10-18 23:20</td></tr>
+      <tr><td>9</td><td>2026-10-15 09:30</td><td>2026-10-22 09:30</td></tr>
+    </table></div>
+    <p class="tiho">Показаны три строки из девяти.</p>
+    <p class="novoe"><code>INTERVAL 'число единица'</code> это промежуток времени, а не дата. Единицы: <code>day</code>, <code>week</code>, <code>month</code>, <code>year</code>, <code>hour</code>. Дата плюс интервал даёт дату позже, дата минус интервал даёт дату раньше. Время суток при этом сохраняется.</p>
+    <p>В примере преподавателя так же: <code>e.end_date + interval '7 day'</code> это неделя после хакатона, <code>e.end_date - interval '1 day'</code> это день до его конца.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что выйдет у запуска 9 для <code>created_at + INTERVAL '1 month'</code> и для <code>created_at - INTERVAL '1 day'</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>2026-11-15 09:30</code> и <code>2026-10-14 09:30</code>. Месяц прибавляется к номеру месяца, день остаётся 15. Время 09:30 не меняется.</p>
+          <p class="oshibka">Написать <code>created_at + 7</code> без слова <code>INTERVAL</code>. У чистой даты <code>date</code> это сработает, а у <code>created_at</code>, где хранится ещё и время, база ответит <code>operator does not exist: timestamp without time zone + integer</code>. С датой и временем прибавляют только интервал.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>дата + INTERVAL '7 day'</code> неделя позже, <code>- INTERVAL '1 day'</code> день раньше.</p>
+      <p>Единицы: day, week, month, year. Время суток сохраняется.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="shag" id="shag-2" data-shag>
+    <div class="shag-nomer">Шаг 2 из 9</div>
+    <h2>Сколько дней осталось до контрольной даты</h2>
+    <p>Через 14 дней после запуска результаты нужно разобрать. Сколько дней до разбора осталось от сегодня?</p>
+<pre><code class="sql">SELECT id,
+       (created_at + INTERVAL '14 day')::date AS razbor,
+       (created_at + INTERVAL '14 day')::date - CURRENT_DATE AS ostalos
+FROM experiments
+ORDER BY id DESC;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>razbor</th><th>ostalos</th></tr>
+      <tr><td>9</td><td>2026-10-29</td><td>1</td></tr>
+      <tr><td>8</td><td>2026-10-25</td><td>-3</td></tr>
+      <tr><td>7</td><td>2026-10-19</td><td>-9</td></tr>
+    </table></div>
+    <p class="tiho">Первые три строки из девяти, если сегодня 28.10.2026.</p>
+    <p class="novoe">Порядок действий: сначала дата плюс интервал, потом <code>::date</code> отрезает время, потом из даты вычитают <code>CURRENT_DATE</code>. Дата минус дата даёт целое число дней. Плюс значит «ещё осталось», минус значит «уже прошло».</p>
+    <p><code>::date</code> и <code>CURRENT_DATE</code> ты видел в уроке <a href="bd-funkcii.html">про функции</a>, шаги 4 и 7. Новое здесь только то, что их ставят после интервала. У запуска 8 разбор был 25.10, три дня назад, поэтому −3.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Перепиши запрос на «за 1 день до конца недели после запуска»: дата <code>created_at + 7 дней − 1 день</code> без времени и сколько до неё дней. Что выйдет у запуска 9?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT id,
+       (created_at + INTERVAL '7 day' - INTERVAL '1 day')::date AS srok,
+       (created_at + INTERVAL '7 day' - INTERVAL '1 day')::date - CURRENT_DATE AS ostalos
+FROM experiments;</code></pre>
+          <p>У запуска 9 срок 2026-10-21, осталось −7: прошла неделя.</p>
+          <p class="oshibka">Забыть <code>::date</code> и вычитать сразу: <code>created_at + INTERVAL '7 day' - CURRENT_DATE</code>. Выйдет не число, а интервал вроде <code>-5 days -14:30:00</code>, потому что в <code>created_at</code> есть время. Так написано и в примере преподавателя в строке <code>days_until_deadlane</code>: там тоже интервал. Число дней дают только две даты без времени.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>(дата + INTERVAL 'N day')::date - CURRENT_DATE</code> = сколько дней осталось.</p>
+      <p>Плюс осталось, минус прошло. Без <code>::date</code> выйдет интервал, а не число.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="shag" id="shag-3" data-shag>
+    <div class="shag-nomer">Шаг 3 из 9</div>
+    <h2>Месяц словом и правильный порядок месяцев</h2>
+    <p>Сколько запусков было в каждом месяце, и месяц хочется видеть словом.</p>
+<pre><code class="sql">SELECT TO_CHAR(created_at, 'FMMonth YYYY') AS mesyac,
+       TO_CHAR(created_at, 'YYYY-MM') AS klyuch,
+       COUNT(*) AS zapuskov
+FROM experiments
+GROUP BY TO_CHAR(created_at, 'FMMonth YYYY'),
+         TO_CHAR(created_at, 'YYYY-MM')
+ORDER BY klyuch;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>mesyac</th><th>klyuch</th><th>zapuskov</th></tr>
+      <tr><td>September 2026</td><td>2026-09</td><td>5</td></tr>
+      <tr><td>October 2026</td><td>2026-10</td><td>4</td></tr>
+    </table></div>
+    <p class="novoe">В шаблоне <code>TO_CHAR</code> слово <code>Month</code> даёт название месяца. Без приставки <code>FM</code> база добивает название пробелами до 9 букв: <code>October&nbsp;&nbsp;&nbsp;2026</code> с тремя пробелами. <code>FM</code> пробелы убирает. Приставка <code>TM</code>, то есть <code>TMMonth</code>, пишет месяц на языке базы: если в базе включён русский, выйдет «Октябрь», иначе останется английский.</p>
+    <p>Зачем второй столбец <code>klyuch</code>: текст сортируется по алфавиту, и October встал бы раньше September. Ключ <code>2026-09</code>, <code>2026-10</code> по алфавиту идёт так же, как по времени. Так сделано и в примере преподавателя со <code>sort_key</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что выйдет, если в этом запросе написать <code>ORDER BY mesyac</code> вместо <code>ORDER BY klyuch</code>? А если бы были запуски и в январе 2027?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>Сначала October 2026, потом September 2026: O раньше S по алфавиту. С январём будет ещё хуже: January 2027 встанет первым, раньше осени 2026. С <code>ORDER BY klyuch</code> порядок 2026-09, 2026-10, 2027-01 правильный.</p>
+          <p class="oshibka">Поставить в <code>GROUP BY</code> только <code>mesyac</code>, а в <code>SELECT</code> оставить <code>klyuch</code>. База ответит <code>column "experiments.created_at" must appear in the GROUP BY clause</code>: каждый столбец, который выводишь без агрегата, должен быть в <code>GROUP BY</code>. Поэтому там обе формулы.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>TO_CHAR(дата, 'FMMonth YYYY')</code> месяц словом, <code>FM</code> без пробелов.</p>
+      <p>Сортируют по ключу <code>'YYYY-MM'</code>, а не по слову.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="shag" id="shag-4" data-shag>
+    <div class="shag-nomer">Шаг 4 из 9</div>
+    <h2>ROW_NUMBER: место в рейтинге</h2>
+    <p>Рейтинг запусков по точности accuracy: у лучшего место 1.</p>
+<pre><code class="sql">SELECT ROW_NUMBER() OVER (ORDER BY mean_metric DESC) AS mesto,
+       experiments_id, mean_metric
+FROM metrics
+WHERE name_metric = 'accuracy'
+ORDER BY mesto;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>mesto</th><th>experiments_id</th><th>mean_metric</th></tr>
+      <tr><td>1</td><td>8</td><td>0.991</td></tr>
+      <tr><td>2</td><td>5</td><td>0.982</td></tr>
+      <tr><td>3</td><td>3</td><td>0.960</td></tr>
+      <tr><td>4</td><td>9</td><td>0.947</td></tr>
+      <tr><td>5</td><td>6</td><td>0.874</td></tr>
+      <tr><td>6</td><td>2</td><td>0.835</td></tr>
+      <tr><td>7</td><td>1</td><td>0.787</td></tr>
+    </table></div>
+    <p class="novoe"><code>ROW_NUMBER()</code> это оконная функция: она ставит каждой строке номер 1, 2, 3 и так далее. В каком порядке нумеровать, говорит <code>ORDER BY</code> внутри <code>OVER ( )</code>. Скобки после <code>ROW_NUMBER</code> всегда пустые.</p>
+    <p>Слово <code>OVER</code> ты видел в уроке <a href="bd-distinct-top-okna.html">«DISTINCT, лучший и окна»</a>, шаг 4: оконная функция не схлопывает строки, как <code>GROUP BY</code>, а дописывает к каждой строке свой столбец. Здесь этот столбец номер места. <code>ORDER BY mesto</code> в конце запроса только выводит строки по порядку, номера он не ставит.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Тот же рейтинг для f1. Какое место у запуска 6?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>В запросе <code>'accuracy'</code> меняется на <code>'f1'</code>. Места: 1 запуск 3 (0.941), 2 запуск 6 (0.866), 3 запуск 2 (0.789), 4 запуск 1 (0.721). У запуска 6 второе.</p>
+          <p class="oshibka">Написать <code>ROW_NUMBER() OVER ()</code> с пустыми скобками и надеяться на <code>ORDER BY</code> в конце. Номера тогда раздаются в любом порядке, в каком база прочитала строки, и место 1 может достаться худшему. Порядок нумерации задаётся только внутри <code>OVER</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ROW_NUMBER() OVER (ORDER BY x DESC)</code> номер места, лучший первый.</p>
+      <p>Порядок нумерации внутри <code>OVER</code>, а не в конце запроса.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="shag" id="shag-5" data-shag>
+    <div class="shag-nomer">Шаг 5 из 9</div>
+    <h2>PARTITION BY: своё место 1 в каждой группе</h2>
+    <p>Сравнивать f1 с accuracy нечестно. Хотим рейтинг внутри каждой метрики: у каждой свой первый.</p>
+<pre><code class="sql">SELECT name_metric,
+       ROW_NUMBER() OVER (PARTITION BY name_metric
+                          ORDER BY mean_metric DESC) AS mesto,
+       experiments_id, mean_metric
+FROM metrics
+ORDER BY name_metric, mesto;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>name_metric</th><th>mesto</th><th>experiments_id</th><th>mean_metric</th></tr>
+      <tr><td>accuracy</td><td>1</td><td>8</td><td>0.991</td></tr>
+      <tr><td>accuracy</td><td>2</td><td>5</td><td>0.982</td></tr>
+      <tr><td>accuracy</td><td>…</td><td>…</td><td>…</td></tr>
+      <tr><td>accuracy</td><td>7</td><td>1</td><td>0.787</td></tr>
+      <tr><td>f1</td><td>1</td><td>3</td><td>0.941</td></tr>
+      <tr><td>f1</td><td>2</td><td>6</td><td>0.866</td></tr>
+      <tr><td>f1</td><td>3</td><td>2</td><td>0.789</td></tr>
+      <tr><td>f1</td><td>4</td><td>1</td><td>0.721</td></tr>
+      <tr><td>r2</td><td>1</td><td>4</td><td>0.812</td></tr>
+    </table></div>
+    <p class="novoe"><code>PARTITION BY столбец</code> внутри <code>OVER</code> делит строки на группы по этому столбцу, и в каждой группе нумерация начинается с 1 заново. Это задание 5 практики, его «усложнение»: рейтинг студентов внутри каждого факультета.</p>
+    <p><code>PARTITION BY</code> с <code>MAX</code> был в уроке про окна, шаг 5. С <code>ROW_NUMBER</code> он работает так же, только в каждую строку пишется не максимум группы, а номер внутри группы.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Пронумеруй запуски каждого исследователя по времени: самый ранний его запуск номер 1. Какой номер у запуска 8?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">SELECT researcher_id, id, created_at,
+       ROW_NUMBER() OVER (PARTITION BY researcher_id
+                          ORDER BY created_at) AS nomer
+FROM experiments
+ORDER BY researcher_id, nomer;</code></pre>
+          <p>У Азата запуски 3, 7, 8, поэтому у запуска 8 номер 3. У Степана 1, 2, 6 получают 1, 2, 3, у Марии 4, 5, 9 тоже 1, 2, 3.</p>
+          <p class="oshibka">Написать <code>PARTITION BY id</code>. У каждого запуска свой <code>id</code>, группа из одной строки, и у всех номер 1. В <code>PARTITION BY</code> ставят то, внутри чего считают места, здесь <code>researcher_id</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>OVER (PARTITION BY группа ORDER BY x DESC)</code> место внутри своей группы.</p>
+      <p>В каждой группе счёт с 1 заново.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="shag" id="shag-6" data-shag>
+    <div class="shag-nomer">Шаг 6 из 9</div>
+    <h2>RANK и DENSE_RANK: что делать с ничьей</h2>
+    <p>Рейтинг запусков по числу эпох. У пяти запусков ровно по одной эпохе, это ничья.</p>
+<pre><code class="sql">SELECT id, count_apoh,
+       ROW_NUMBER() OVER (ORDER BY count_apoh DESC NULLS LAST) AS rn,
+       RANK()       OVER (ORDER BY count_apoh DESC NULLS LAST) AS rk,
+       DENSE_RANK() OVER (ORDER BY count_apoh DESC NULLS LAST) AS drk
+FROM experiments
+ORDER BY rk, id;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>count_apoh</th><th>rn</th><th>rk</th><th>drk</th></tr>
+      <tr><td>8</td><td>10</td><td>1</td><td>1</td><td>1</td></tr>
+      <tr><td>5</td><td>5</td><td>2</td><td>2</td><td>2</td></tr>
+      <tr><td>6</td><td>3</td><td>3</td><td>3</td><td>3</td></tr>
+      <tr><td>1</td><td>1</td><td>4</td><td>4</td><td>4</td></tr>
+      <tr><td>3</td><td>1</td><td>5</td><td>4</td><td>4</td></tr>
+      <tr><td>4</td><td>1</td><td>6</td><td>4</td><td>4</td></tr>
+      <tr><td>7</td><td>1</td><td>7</td><td>4</td><td>4</td></tr>
+      <tr><td>9</td><td>1</td><td>8</td><td>4</td><td>4</td></tr>
+      <tr><td>2</td><td class="null">NULL</td><td>9</td><td>9</td><td>5</td></tr>
+    </table></div>
+    <p class="novoe">При ничьей три функции ведут себя по-разному. <code>ROW_NUMBER</code> всё равно раздаёт разные номера 4, 5, 6, 7, 8, и кому какой, решает база. <code>RANK</code> даёт равным одно место 4, а следующий получает 9: места 5–8 «заняты» ничьей, как в спорте. <code>DENSE_RANK</code> тоже даёт равным 4, но следующему 5, без пропуска.</p>
+    <p>Что значит <code>NULLS LAST</code>, разберём в следующем шаге. Пока прими, что запуск 2 без числа эпох из-за него встал в самый конец.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Оценки 9.5, 9.0, 9.0, 8.0. Какие места выдадут <code>RANK</code> и <code>DENSE_RANK</code> по убыванию?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p><code>RANK</code>: 1, 2, 2, 4. <code>DENSE_RANK</code>: 1, 2, 2, 3.</p>
+          <p class="oshibka">Брать <code>ROW_NUMBER</code>, когда в задании «места» с возможной ничьей. Двое с 9.0 получат 2 и 3, и кто из них «второй», решит случай: на другой день могут поменяться. Если равные должны делить место, нужен <code>RANK</code> или <code>DENSE_RANK</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Ничья: <code>ROW_NUMBER</code> 4 5 6, <code>RANK</code> 4 4 4 → 7, <code>DENSE_RANK</code> 4 4 4 → 5.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="shag" id="shag-7" data-shag>
+    <div class="shag-nomer">Шаг 7 из 9</div>
+    <h2>NULLS LAST: пустые в конец</h2>
+    <p>Тот же рейтинг по эпохам, но без <code>NULLS LAST</code>:</p>
+<pre><code class="sql">SELECT id, count_apoh,
+       ROW_NUMBER() OVER (ORDER BY count_apoh DESC) AS rn
+FROM experiments
+ORDER BY rn;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>id</th><th>count_apoh</th><th>rn</th></tr>
+      <tr><td>2</td><td class="null">NULL</td><td>1</td></tr>
+      <tr><td>8</td><td>10</td><td>2</td></tr>
+      <tr><td>5</td><td>5</td><td>3</td></tr>
+      <tr><td>…</td><td>…</td><td>…</td></tr>
+    </table></div>
+    <p>Первое место у запуска, где число эпох вообще не записано. Это не ошибка базы, так PostgreSQL сортирует всегда.</p>
+    <p class="novoe">При сортировке по убыванию <code>DESC</code> PostgreSQL ставит <code>NULL</code> первыми, по возрастанию последними: пустое для него «больше всех». <code>NULLS LAST</code> после <code>DESC</code> отправляет пустые в конец, <code>NULLS FIRST</code> в начало. Работает и в <code>OVER</code>, и в обычном <code>ORDER BY</code>.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> В практике есть оценка проекта <code>final_score</code>, и у проекта, который не сдан, её нет. Как написать рейтинг проектов, чтобы несданные не оказались на первом месте?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">ROW_NUMBER() OVER (ORDER BY p.final_score DESC NULLS LAST) AS mesto</code></pre>
+          <p>Несданные получат последние места. Если их в рейтинге быть не должно вообще, добавь <code>WHERE p.final_score IS NOT NULL</code>.</p>
+          <p class="oshibka">Написать <code>NULLS LAST</code> в конце запроса, а внутри <code>OVER</code> оставить просто <code>DESC</code>. Строки выведутся красиво, но номер 1 уже выдан пустому: номера считаются по порядку внутри <code>OVER</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>PostgreSQL: <code>DESC</code> ставит <code>NULL</code> первыми.</p>
+      <p>Рейтинг по убыванию: <code>ORDER BY x DESC NULLS LAST</code>.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="shag" id="shag-8" data-shag>
+    <div class="shag-nomer">Шаг 8 из 9</div>
+    <h2>Только первые места: номер в WITH, отбор снаружи</h2>
+    <p>Хотим не весь рейтинг, а только лучший запуск в каждой метрике.</p>
+<pre><code class="sql">WITH reyting AS (
+  SELECT name_metric, experiments_id, mean_metric,
+         ROW_NUMBER() OVER (PARTITION BY name_metric
+                            ORDER BY mean_metric DESC) AS mesto
+  FROM metrics
+)
+SELECT name_metric, experiments_id, mean_metric
+FROM reyting
+WHERE mesto = 1;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>name_metric</th><th>experiments_id</th><th>mean_metric</th></tr>
+      <tr><td>accuracy</td><td>8</td><td>0.991</td></tr>
+      <tr><td>f1</td><td>3</td><td>0.941</td></tr>
+      <tr><td>r2</td><td>4</td><td>0.812</td></tr>
+    </table></div>
+    <p class="novoe">Отбирать по номеру места в том же запросе, где номер считается, нельзя: <code>WHERE</code> выполняется раньше оконных функций, и номера в этот момент ещё нет. Поэтому номер считают внутри <code>WITH</code>, а отбирают <code>WHERE mesto = 1</code> снаружи.</p>
+    <p><code>WITH</code> ты проходил в уроке <a href="bd-podzaprosy-cte.html">«Подзапросы и CTE»</a>: это временная таблица-черновик внутри запроса. Вместо <code>mesto = 1</code> можно написать <code>mesto &lt;= 3</code>, будет тройка лучших в каждой группе.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Самый первый запуск каждого исследователя. Возьми запрос из «сделай сам» шага 5 и оставь только строки с номером 1. Какие запуски выйдут?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+<pre><code class="sql">WITH po_poryadku AS (
+  SELECT researcher_id, id, created_at,
+         ROW_NUMBER() OVER (PARTITION BY researcher_id
+                            ORDER BY created_at) AS nomer
+  FROM experiments
+)
+SELECT researcher_id, id, created_at
+FROM po_poryadku
+WHERE nomer = 1;</code></pre>
+          <p>Запуски 1 у Степана, 3 у Азата, 4 у Марии.</p>
+          <p class="oshibka">Написать всё одним запросом: <code>SELECT …, ROW_NUMBER() OVER (…) AS nomer FROM experiments WHERE nomer = 1</code>. База ответит <code>column "nomer" does not exist</code>: на шаге <code>WHERE</code> такого столбца ещё нет. А если вписать саму функцию, <code>WHERE ROW_NUMBER() OVER (…) = 1</code>, ответ будет <code>window functions are not allowed in WHERE</code>.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p>Лучший в группе: номер в <code>WITH</code>, снаружи <code>WHERE mesto = 1</code>.</p>
+      <p>В том же запросе <code>WHERE</code> номера ещё не видит.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="shag" id="shag-9" data-shag>
+    <div class="shag-nomer">Шаг 9 из 9</div>
+    <h2>ROUND средней и CASE по ней</h2>
+    <p>Это нужно в задаче 1 практики про жюри: средняя оценка с округлением и слово «строгий» или «лояльный» по средней. У нас то же на исследователях: средняя всех оценок его запусков.</p>
+<pre><code class="sql">SELECT r.full_name,
+       ROUND(AVG(m.mean_metric)::numeric, 2) AS srednyaya,
+       CASE WHEN AVG(m.mean_metric) &lt; 0.85 THEN 'слабее'
+            ELSE 'сильнее'
+       END AS uroven
+FROM researchers r
+JOIN experiments e ON e.researcher_id = r.id
+JOIN metrics m     ON m.experiments_id = e.id
+GROUP BY r.full_name;</code></pre>
+    <div class="tablica"><table>
+      <tr><th>full_name</th><th>srednyaya</th><th>uroven</th></tr>
+      <tr><td>Павленко Степан</td><td>0.81</td><td>слабее</td></tr>
+      <tr><td>Щайхутдинов Азат</td><td>0.96</td><td>сильнее</td></tr>
+      <tr><td>Иванова Мария</td><td>0.91</td><td>сильнее</td></tr>
+    </table></div>
+    <p class="novoe"><code>ROUND(x, 2)</code> округляет до двух знаков после точки, <code>ROUND(x, 1)</code> до одного. В PostgreSQL округление до знаков работает только для типа <code>numeric</code>, поэтому перед ним стоит <code>::numeric</code>. Внутри <code>CASE</code> можно сравнивать агрегат, <code>AVG(…)</code>, как обычное число.</p>
+    <p>У Степана шесть оценок: 0.787, 0.721, 0.835, 0.789, 0.874, 0.866. Сумма 4.872, делим на 6, выходит 0.812, округляем до 0.81. Это меньше 0.85, поэтому «слабее». Порядок строк может быть другим.</p>
+
+    <div class="sam">
+      <b>Сделай сам.</b> Что вернут <code>ROUND(0.9136::numeric, 2)</code>, <code>ROUND(0.9136::numeric, 1)</code> и <code>ROUND(8.45::numeric, 1)</code>?
+      <details class="otvet"><summary><span class="pokazat">Показать ответ</span><span class="skryt">Скрыть ответ</span></summary>
+        <div class="otvet-telo">
+          <p>0.91, 0.9 и 8.5. Пятёрка на отрезанном месте округляется вверх.</p>
+          <p class="oshibka">Округлять столбец дробного типа <code>real</code> или <code>double precision</code> без <code>::numeric</code>: <code>ROUND(AVG(score), 2)</code>. Если столбец такого типа, база ответит <code>function round(double precision, integer) does not exist</code>. С <code>::numeric</code> запрос работает при любом типе столбца, поэтому его пишут всегда.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="glavnoe">
+      <p><code>ROUND(AVG(x)::numeric, 2)</code> средняя до двух знаков.</p>
+      <p>В <code>CASE WHEN AVG(x) &lt; порог</code> агрегат сравнивают как число.</p>
+    </div>
+  </section>
+
+  <section class="shag" id="posle-shagov">
+    <h2>Как это ложится на ПР 28 октября</h2>
+    <p>Сначала база. Преподаватель просит поднять свою базу из самостоятельной 1 у себя на компьютере: в DBeaver новое подключение PostgreSQL к <code>localhost</code>, пароль от учётки студента, потом открыть свой скрипт СР1 и выполнить его целиком (<code>Alt+X</code>, «выполнить скрипт»). Не выходит, тогда задания делаются по её базе «Цифровой хакатон», скрипт в файле задания.</p>
+    <div class="tablica"><table>
+      <tr><th>задание</th><th>что нужно</th><th>где в уроках</th></tr>
+      <tr><td>1 список одной строкой</td><td><code>GROUP BY</code>, <code>COUNT</code>, <code>STRING_AGG</code></td><td><a href="bd-funkcii.html">Функции</a>, шаг 9</td></tr>
+      <tr><td>2 даты и сроки</td><td><code>INTERVAL</code>, <code>::date</code>, <code>CURRENT_DATE</code>, месяц словом</td><td>этот урок, шаги 1–3, и <a href="bd-funkcii.html">Функции</a>, шаги 7–8 про <code>AGE</code></td></tr>
+      <tr><td>3 домен почты, «Иванов И.»</td><td><code>POSITION</code>, <code>SUBSTRING</code>, <code>LEFT</code>, <code>||</code></td><td><a href="bd-stroki.html">Строковые функции</a></td></tr>
+      <tr><td>4 заглушка вместо NULL и категории</td><td><code>COALESCE</code>, <code>CASE</code></td><td><a href="bd-stroki.html">Строковые функции</a>, <a href="bd-case-daty.html">CASE и даты</a>, шаги 1–3</td></tr>
+      <tr><td>5 рейтинг и рейтинг в группе</td><td><code>ROW_NUMBER</code>, <code>RANK</code>, <code>PARTITION BY</code></td><td>этот урок, шаги 4–8</td></tr>
+      <tr><td>хакатон, задачи 1–3</td><td>несколько <code>JOIN</code>, <code>STRING_AGG(DISTINCT …)</code> и <code>STRING_AGG(… ORDER BY …)</code>, <code>ROUND</code>, <code>CASE</code> по агрегату, <code>UPPER</code>, <code>SUM</code></td><td>этот урок, шаг 9, <a href="bd-funkcii.html">Функции</a>, шаг 9, <a href="bd-left-join-group-by.html">LEFT JOIN и GROUP BY</a></td></tr>
+    </table></div>
+    <p>Запросы для сдачи придумай на своих таблицах, а не копируй пример: так и написано в задании. Над каждым комментарий <code>-- Задание N. что ищем</code>.</p>
+  </section>
+
+  <section class="shag" id="samostoyatelnaya" data-zagolovok="Мини-самостоятельная: интервалы, номера и ранги">
+    <h2>Мини-самостоятельная</h2>
+    <p>Пять задач на твоей базе. Ответов здесь нет: впиши запросы в поля, запусти в DBeaver и допиши, что вышло. Отправь учителю кнопкой ниже, он проверит и разберёт, где споткнулся.</p>
+
+    <div class="zadacha">
+      <b>1.</b> Для каждого запуска: дата создания без времени, дата через 20 дней без времени и сколько дней до неё осталось от сегодня. У каких запусков число положительное?
+      <textarea name="z1" placeholder="SELECT …" aria-label="Ответ на задачу 1"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>2.</b> Сколько оценок в таблице <code>metrics</code> пришлось на каждый месяц создания запуска. Месяц словом с годом, сортировка по времени, а не по алфавиту. Подсказка: от <code>metrics</code> к <code>experiments</code>.
+      <textarea name="z2" placeholder="SELECT TO_CHAR(…" aria-label="Ответ на задачу 2"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>3.</b> Наборы данных <code>datasets</code>: номер внутри своего типа задачи <code>type_task</code> по числу строк <code>count</code>, самый большой первый. Какой номер у iris?
+      <textarea name="z3" placeholder="SELECT type_task, name, count, ROW_NUMBER() …" aria-label="Ответ на задачу 3"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>4.</b> Лучшая оценка каждого исследователя: имя, номер запуска, метрика и значение. Одна строка на человека. Подсказка: <code>WITH</code> и <code>PARTITION BY</code>.
+      <textarea name="z4" placeholder="WITH reyting AS (…" aria-label="Ответ на задачу 4"></textarea>
+    </div>
+    <div class="zadacha">
+      <b>5.</b> Для каждой метрики <code>name_metric</code>: сколько оценок, средняя с округлением до двух знаков и слово «высокая», если средняя 0.85 и выше, иначе «обычная».
+      <textarea name="z5" placeholder="SELECT name_metric, COUNT(*), ROUND(…" aria-label="Ответ на задачу 5"></textarea>
+    </div>
+
+    <p><button class="knopka kopirovat" type="button">Скопировать ответы</button><span class="soobshchenie" role="status"></span></p>
+    <p class="tiho">Ответы сохраняются на этом телефоне, можно закрыть страницу и вернуться.</p>
+  </section>
+
+  <section class="ml-blok">
+    <h2>Где пригодится в ML</h2>
+    <div class="tablica"><table>
+      <tr><th>здесь</th><th>в своей программе</th></tr>
+      <tr><td>ROW_NUMBER с PARTITION BY</td><td>Лучший запуск каждого эксперимента и «последняя запись каждого пользователя» перед обучением делаются ровно так. В pandas это <code>groupby(...).rank()</code> и <code>groupby(...).head(1)</code> после сортировки.</td></tr>
+      <tr><td>INTERVAL и даты</td><td>Делить данные на обучение и проверку по времени: всё до <code>дата − INTERVAL '30 day'</code> в обучение, последние 30 дней в проверку.</td></tr>
+    </table></div>
+    <a class="knopka" href="https://delovar.tail660719.ts.net/uchitsya/">Решать в своей программе →</a>
+    <p class="tiho">Открывается, пока включён компьютер дома.</p>
+  </section>
+
+  <div class="otmetka">
+    <p>Прошёл все шаги и решил мини-самостоятельную? Отметь урок. Отметка хранится на этом телефоне.</p>
+    <button class="knopka" type="button">Урок пройден ✓</button>
+  </div>
+
+  <p class="niz"><a href="../bd/">← БД</a> · <a href="../povtorenie/bd.html">Повторение</a> · <a href="bd-funkcii.html">Функции</a></p>
+</main>
+<script src="../assets/app.js"></script>
+</body>
+</html>

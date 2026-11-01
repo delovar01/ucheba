@@ -1,6 +1,6 @@
 // Офлайн: страницы сайта лежат в кэше телефона, KaTeX — тоже после первого открытия.
 // Меняешь любой файл — подними номер версии, иначе телефон покажет старое.
-const VERSIYA = 'ucheba-v18';
+const VERSIYA = 'ucheba-v19';
 const STRANICY = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const STRANICY = [
   './uroki/bd-podzaprosy-cte.html',
   './uroki/bd-stroki.html',
   './uroki/bd-funkcii.html',
+  './uroki/bd-nomera-intervaly.html',
   './uroki/bd-normalizaciya-view.html',
   './uroki/tv-vyskazyvaniya.html',
   './uroki/tv-dnf.html',
@@ -31,6 +32,7 @@ const STRANICY = [
   './uroki/sa-problema-mvp.html',
   './uroki/sa-er-sequence.html',
   './uroki/sa-konkurenty-prototipy.html',
+  './uroki/sa-agile-backlog.html',
   './uroki/ach-nauchnaya-kommunikaciya.html',
   './uroki/ach-apparat-issledovaniya.html',
   './uroki/ach-gost-tz.html',
