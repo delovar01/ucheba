@@ -21,7 +21,7 @@
 <main>
   <h1>Алгоритмы: проверь себя</h1>
   <p class="tiho">Лекции 17.09, 24.09, 5.10 и лабы 26.09, 3.10, 10.10. Числа в вопросах новые, не из уроков. Решай в тетради, потом открывай ответ.</p>
-  <p>Не помнишь, вернись в урок: <a href="../uroki/alg-asimptotika.html">асимптотика</a>, <a href="../uroki/alg-master-teorema.html">мастер-теорема</a>, <a href="../uroki/alg-lineynye-sortirovki.html">линейные сортировки</a>,<a href="../uroki/alg-kuchi.html">кучи</a>, <a href="../uroki/alg-rekursiya.html">Java и рекурсия</a>, <a href="../uroki/alg-grafy-obhody.html">BFS и DFS</a>, <a href="../uroki/alg-deykstra.html">Дейкстра</a>, <a href="../uroki/alg-ostov-dsu.html">остов и DSU</a>, <a href="../uroki/alg-toposort-puti.html">топосортировка и пути</a>, <a href="../uroki/alg-dinamicheskoe.html">динамическое программирование</a>.</p>
+  <p>Не помнишь, вернись в урок: <a href="../uroki/alg-asimptotika.html">асимптотика</a>, <a href="../uroki/alg-master-teorema.html">мастер-теорема</a>, <a href="../uroki/alg-lineynye-sortirovki.html">линейные сортировки</a>,<a href="../uroki/alg-kuchi.html">кучи</a>, <a href="../uroki/alg-rekursiya.html">Java и рекурсия</a>, <a href="../uroki/alg-grafy-obhody.html">BFS и DFS</a>, <a href="../uroki/alg-deykstra.html">Дейкстра</a>, <a href="../uroki/alg-ostov-dsu.html">остов и DSU</a>, <a href="../uroki/alg-toposort-puti.html">топосортировка и пути</a>, <a href="../uroki/alg-dinamicheskoe.html">динамическое программирование</a>, <a href="../uroki/alg-obuchenie-s-podkrepleniem.html">обучение с подкреплением</a>.</p>
 
   <h2>Одной страницей</h2>
   <div class="tablica"><table>
@@ -181,6 +181,16 @@
   <details class="vopros">
     <summary>27. Слияние и быстрая сортировка: время в худшем и среднем, память, устойчивость. Как у быстрой избежать худшего?</summary>
     <div><p>Слияние: <code>T(n) = 2T(n/2) + n = Θ(n log n)</code> всегда, память <code>Θ(n)</code>, устойчива при <code>&lt;=</code>. Быстрая: в среднем <code>Θ(n log n)</code>, худший <code>Θ(n²)</code>, когда опорный каждый раз крайний, например последний на отсортированном массиве. Память на стек <code>O(log n)</code> в среднем, неустойчива. Спасает случайный опорный или медиана трёх.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>28. Смысл формулы Q-learning Q ← Q + α·(r + γ·max Q(s′) − Q)?</summary>
+    <div><p>«r + γ·max Q(s′)» — новая оценка хода из только что проверенного опыта: награда сейчас плюс дисконтированное лучшее будущее. Старую ячейку подтягиваем к новой оценке на долю α, а не прыгаем в неё целиком.</p></div>
+  </details>
+
+  <details class="vopros">
+    <summary>29. Что такое ε-жадная стратегия и зачем она нужна?</summary>
+    <div><p>С вероятностью ε — случайное действие (исследование), иначе — лучшее известное (использование). Без исследования агент залипает на первом удачном варианте: в реальном запуске жадная стратегия за 1000 шагов взяла 183 выигрыша и ни разу не попробовала лучший автомат.</p></div>
   </details>
 
   <p class="niz"><a href="../alg/">← Алгоритмы</a> · <a href="./">Всё повторение</a> · <a href="../uroki/alg-asimptotika.html">Первый урок</a></p>
